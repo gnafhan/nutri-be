@@ -39,7 +39,8 @@ RUN ls -la /app && echo "Binary exists: $(test -f /app/api-server && echo YES ||
 RUN chmod +x /app/api-server
 
 # Copy environment file
-COPY .env /app/.env
+COPY .env /app/api-server/.env
+COPY . /app/api-server/
 
 # Expose port
 EXPOSE 3000
