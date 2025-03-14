@@ -32,15 +32,15 @@ RUN apk --no-cache add ca-certificates tzdata
 # Copy binary from builder stage with explicit paths
 COPY --from=builder /app/api-server /app/api-server
 
-# Debug: verify binary exists in final image
-RUN ls -la /app && echo "Binary exists: $(test -f /app/api-server && echo YES || echo NO)"
+# Copy environment file and other necessary files
+COPY .env /app/.env
+COPY src/ /app/src/
+
+# Debug: verify binary exists in final image and show files
+RUN ls -la /app && echo "Files in app directory:"
 
 # Ensure binary is executable
 RUN chmod +x /app/api-server
-
-# Copy environment file
-COPY .env /app/api-server/.env
-COPY . /app/api-server/
 
 # Expose port
 EXPOSE 3000
