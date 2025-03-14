@@ -23,6 +23,7 @@ services:
     networks:
       - nutribox-network
     restart: unless-stopped
+    command: /app/api-server
 
   postgresdb:
     image: postgres:16-alpine
