@@ -17,7 +17,7 @@ import (
 )
 
 type TokenService interface {
-	GenerateToken(userID string, expires time.Time, tokenType string) (string, error)
+	GenerateToken(user *model.User, isProductTokenVerified bool, expires time.Time, tokenType string) (string, error)
 	SaveToken(c *fiber.Ctx, token, userID, tokenType string, expires time.Time) error
 	DeleteToken(c *fiber.Ctx, tokenType string, userID string) error
 	DeleteAllToken(c *fiber.Ctx, userID string) error
@@ -43,18 +43,34 @@ func NewTokenService(db *gorm.DB, validate *validator.Validate, userService User
 	}
 }
 
-func (s *tokenService) GenerateToken(userID string, expires time.Time, tokenType string) (string, error) {
+// ✅ Generate JWT dengan `userData`
+func (s *tokenService) GenerateToken(user *model.User, isProductTokenVerified bool, expires time.Time, tokenType string) (string, error) {
 	claims := jwt.MapClaims{
-		"sub":  userID,
+		"sub":  user.ID.String(),
 		"iat":  time.Now().Unix(),
 		"exp":  expires.Unix(),
 		"type": tokenType,
+		"userData": map[string]interface{}{
+			"id":                     user.ID,
+			"name":                   user.Name,
+			"email":                  user.Email,
+			"role":                   user.Role,
+			"verified_email":         user.VerifiedEmail,
+			"birth_date":             user.BirthDate,
+			"height":                 user.Height,
+			"weight":                 user.Weight,
+			"gender":                 user.Gender,
+			"activity_level":         user.ActivityLevel,
+			"medical_history":        user.MedicalHistory,
+			"isProductTokenVerified": isProductTokenVerified,
+		},
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(config.JWTSecret))
 }
 
+// ✅ Simpan Token ke Database
 func (s *tokenService) SaveToken(c *fiber.Ctx, token, userID, tokenType string, expires time.Time) error {
 	if err := s.DeleteToken(c, tokenType, userID); err != nil {
 		return err
@@ -67,41 +83,20 @@ func (s *tokenService) SaveToken(c *fiber.Ctx, token, userID, tokenType string, 
 		Expires: expires,
 	}
 
-	result := s.DB.WithContext(c.Context()).Create(tokenDoc)
-
-	if result.Error != nil {
-		s.Log.Errorf("Failed save token: %+v", result.Error)
-	}
-
-	return result.Error
+	return s.DB.WithContext(c.Context()).Create(tokenDoc).Error
 }
 
+// ✅ Hapus Token Berdasarkan Jenisnya
 func (s *tokenService) DeleteToken(c *fiber.Ctx, tokenType string, userID string) error {
-	tokenDoc := new(model.Token)
-
-	result := s.DB.WithContext(c.Context()).
-		Where("type = ? AND user_id = ?", tokenType, userID).
-		Delete(tokenDoc)
-
-	if result.Error != nil {
-		s.Log.Errorf("Failed to delete token: %+v", result.Error)
-	}
-
-	return result.Error
+	return s.DB.WithContext(c.Context()).Where("type = ? AND user_id = ?", tokenType, userID).Delete(&model.Token{}).Error
 }
 
+// ✅ Hapus Semua Token User
 func (s *tokenService) DeleteAllToken(c *fiber.Ctx, userID string) error {
-	tokenDoc := new(model.Token)
-
-	result := s.DB.WithContext(c.Context()).Where("user_id = ?", userID).Delete(tokenDoc)
-
-	if result.Error != nil {
-		s.Log.Errorf("Failed to delete all token: %+v", result.Error)
-	}
-
-	return result.Error
+	return s.DB.WithContext(c.Context()).Where("user_id = ?", userID).Delete(&model.Token{}).Error
 }
 
+// ✅ Ambil Token Berdasarkan User ID
 func (s *tokenService) GetTokenByUserID(c *fiber.Ctx, tokenStr string) (*model.Token, error) {
 	userID, err := utils.VerifyToken(tokenStr, config.JWTSecret, config.TokenTypeRefresh)
 	if err != nil {
@@ -109,34 +104,33 @@ func (s *tokenService) GetTokenByUserID(c *fiber.Ctx, tokenStr string) (*model.T
 	}
 
 	tokenDoc := new(model.Token)
-
-	result := s.DB.WithContext(c.Context()).
-		Where("token = ? AND user_id = ?", tokenStr, userID).
-		First(tokenDoc)
-
-	if result.Error != nil {
-		s.Log.Errorf("Failed get token by user id: %+v", err)
-		return nil, result.Error
-	}
-
-	return tokenDoc, nil
+	err = s.DB.WithContext(c.Context()).Where("token = ? AND user_id = ?", tokenStr, userID).First(tokenDoc).Error
+	return tokenDoc, err
 }
 
+// ✅ Generate Access & Refresh Tokens
 func (s *tokenService) GenerateAuthTokens(c *fiber.Ctx, user *model.User) (*res.Tokens, error) {
+	// Cek apakah user memiliki Product Token yang aktif
+	var isProductTokenVerified bool
+	if err := s.DB.WithContext(c.Context()).Where("user_id = ?", user.ID).First(&model.ProductToken{}).Error; err == nil {
+		isProductTokenVerified = true
+	}
+
+	// Generate Access Token
 	accessTokenExpires := time.Now().UTC().Add(time.Minute * time.Duration(config.JWTAccessExp))
-	accessToken, err := s.GenerateToken(user.ID.String(), accessTokenExpires, config.TokenTypeAccess)
+	accessToken, err := s.GenerateToken(user, isProductTokenVerified, accessTokenExpires, config.TokenTypeAccess)
 	if err != nil {
-		s.Log.Errorf("Failed generate token: %+v", err)
 		return nil, err
 	}
 
+	// Generate Refresh Token
 	refreshTokenExpires := time.Now().UTC().Add(time.Hour * 24 * time.Duration(config.JWTRefreshExp))
-	refreshToken, err := s.GenerateToken(user.ID.String(), refreshTokenExpires, config.TokenTypeRefresh)
+	refreshToken, err := s.GenerateToken(user, isProductTokenVerified, refreshTokenExpires, config.TokenTypeRefresh)
 	if err != nil {
-		s.Log.Errorf("Failed generate token: %+v", err)
 		return nil, err
 	}
 
+	// Simpan Refresh Token ke Database
 	if err = s.SaveToken(c, refreshToken, user.ID.String(), config.TokenTypeRefresh, refreshTokenExpires); err != nil {
 		return nil, err
 	}
@@ -153,6 +147,7 @@ func (s *tokenService) GenerateAuthTokens(c *fiber.Ctx, user *model.User) (*res.
 	}, nil
 }
 
+// ✅ Generate Token Reset Password
 func (s *tokenService) GenerateResetPasswordToken(c *fiber.Ctx, req *validation.ForgotPassword) (string, error) {
 	if err := s.Validate.Struct(req); err != nil {
 		return "", err
@@ -164,27 +159,18 @@ func (s *tokenService) GenerateResetPasswordToken(c *fiber.Ctx, req *validation.
 	}
 
 	expires := time.Now().UTC().Add(time.Minute * time.Duration(config.JWTResetPasswordExp))
-	resetPasswordToken, err := s.GenerateToken(user.ID.String(), expires, config.TokenTypeResetPassword)
-	if err != nil {
-		s.Log.Errorf("Failed generate token: %+v", err)
-		return "", err
-	}
-
-	if err = s.SaveToken(c, resetPasswordToken, user.ID.String(), config.TokenTypeResetPassword, expires); err != nil {
-		return "", err
-	}
-
-	return resetPasswordToken, nil
+	return s.GenerateToken(user, false, expires, config.TokenTypeResetPassword)
 }
 
+// ✅ Generate Token Verifikasi Email
 func (s *tokenService) GenerateVerifyEmailToken(c *fiber.Ctx, user *model.User) (*string, error) {
 	expires := time.Now().UTC().Add(time.Minute * time.Duration(config.JWTVerifyEmailExp))
-	verifyEmailToken, err := s.GenerateToken(user.ID.String(), expires, config.TokenTypeVerifyEmail)
+	verifyEmailToken, err := s.GenerateToken(user, false, expires, config.TokenTypeVerifyEmail)
 	if err != nil {
-		s.Log.Errorf("Failed generate token: %+v", err)
 		return nil, err
 	}
 
+	// Simpan token di database
 	if err = s.SaveToken(c, verifyEmailToken, user.ID.String(), config.TokenTypeVerifyEmail, expires); err != nil {
 		return nil, err
 	}
