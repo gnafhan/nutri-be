@@ -23,9 +23,8 @@ type Login struct {
 }
 
 type GoogleLogin struct {
-	Name          string `json:"name" validate:"required,max=50"`
-	Email         string `json:"email" validate:"required,email,max=50"`
-	VerifiedEmail bool   `json:"verified_email" validate:"required"`
+	Name  string `json:"name" validate:"required,max=50"`
+	Email string `json:"email" validate:"required,email,max=50"`
 }
 
 type Logout struct {

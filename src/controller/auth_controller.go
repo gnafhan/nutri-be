@@ -7,12 +7,11 @@ import (
 	"app/src/service"
 	"app/src/validation"
 	"context"
-	"encoding/json"
-	"io"
-	"net/http"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
+	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/oauth2"
 )
 
 type AuthController struct {
@@ -268,64 +267,41 @@ func (a *AuthController) VerifyEmail(c *fiber.Ctx) error {
 }
 
 // @Tags         Auth
-// @Summary      Login with google
-// @Description  This route initiates the Google OAuth2 login flow. Please try this in your browser.
+// @Summary      Login with Google
+// @Description  Login user using Google OAuth2 and return authentication tokens.
+// @Accept       json
+// @Produce      json
+// @Param        id_token   query  string  true  "Google ID Token"
 // @Router       /auth/google [get]
 // @Success      200  {object}  example.GoogleLoginResponse
-func (a *AuthController) GoogleLogin(c *fiber.Ctx) error {
-	// Generate a random state
-	state := uuid.New().String()
+func (a *AuthController) Google(c *fiber.Ctx) error {
+	idToken := c.Query("id_token")
 
-	c.Cookie(&fiber.Cookie{
-		Name:   "oauth_state",
-		Value:  state,
-		MaxAge: 30,
+	if idToken == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "ID Token is required")
+	}
+
+	googleConfig := config.GoogleConfig()
+	token, err := googleConfig.TokenSource(context.Background(), &oauth2.Token{AccessToken: idToken}).Token()
+	if err != nil {
+		log.Printf("Failed to verify ID Token: %v", err)
+		return fiber.NewError(fiber.StatusUnauthorized, "Invalid ID Token")
+	}
+
+	claims := new(struct {
+		Email string `json:"email"`
+		Name  string `json:"name"`
+		jwt.RegisteredClaims
 	})
-
-	url := config.AppConfig.GoogleLoginConfig.AuthCodeURL(state)
-
-	return c.Status(fiber.StatusSeeOther).Redirect(url)
-}
-
-func (a *AuthController) GoogleCallback(c *fiber.Ctx) error {
-	state := c.Query("state")
-	storedState := c.Cookies("oauth_state")
-
-	if state != storedState {
-		return fiber.NewError(fiber.StatusUnauthorized, "States don't Match!")
-	}
-
-	code := c.Query("code")
-	googlecon := config.GoogleConfig()
-
-	token, err := googlecon.Exchange(context.Background(), code)
+	_, _, err = new(jwt.Parser).ParseUnverified(token.AccessToken, claims)
 	if err != nil {
-		return err
+		log.Printf("Failed to decode ID Token: %v", err)
+		return fiber.NewError(fiber.StatusUnauthorized, "Invalid ID Token format")
 	}
 
-	req, err := http.NewRequestWithContext(
-		c.Context(), http.MethodGet,
-		"https://www.googleapis.com/oauth2/v2/userinfo?access_token="+token.AccessToken,
-		nil,
-	)
-	if err != nil {
-		return err
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	userData, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	googleUser := new(validation.GoogleLogin)
-	if errJSON := json.Unmarshal(userData, googleUser); errJSON != nil {
-		return errJSON
+	googleUser := &validation.GoogleLogin{
+		Email: claims.Email,
+		Name:  claims.Name,
 	}
 
 	user, err := a.UserService.CreateGoogleUser(c, googleUser)
@@ -338,17 +314,10 @@ func (a *AuthController) GoogleCallback(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(fiber.StatusOK).
-		JSON(response.SuccessWithTokens{
-			Status:  "success",
-			Message: "Login successfully",
-			User:    *user,
-			Tokens:  *tokens,
-		})
-
-	// TODO: replace this url with the link to the oauth google success page of your front-end app
-	// googleLoginURL := fmt.Sprintf("http://link-to-app/google/success?access_token=%s&refresh_token=%s",
-	// 	tokens.Access.Token, tokens.Refresh.Token)
-
-	// return c.Status(fiber.StatusSeeOther).Redirect(googleLoginURL)
+	return c.Status(fiber.StatusOK).JSON(response.SuccessWithTokens{
+		Status:  "success",
+		Message: "Login successfully",
+		User:    *user,
+		Tokens:  *tokens,
+	})
 }

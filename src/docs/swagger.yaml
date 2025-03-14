@@ -579,14 +579,23 @@ paths:
       - Auth
   /auth/google:
     get:
-      description: This route initiates the Google OAuth2 login flow. Please try this
-        in your browser.
+      consumes:
+      - application/json
+      description: Login user using Google OAuth2 and return authentication tokens.
+      parameters:
+      - description: Google ID Token
+        in: query
+        name: id_token
+        required: true
+        type: string
+      produces:
+      - application/json
       responses:
         "200":
           description: OK
           schema:
             $ref: '#/definitions/example.GoogleLoginResponse'
-      summary: Login with google
+      summary: Login with Google
       tags:
       - Auth
   /auth/login:
