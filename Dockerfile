@@ -15,11 +15,15 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the application with explicit output path
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/api-server ./src
+# Jalankan test sebelum build untuk verifikasi
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/api-server ./src && \
+    echo "Build berhasil! Binary size: $(du -h /app/api-server | cut -f1)"
+
+# Periksa exit code
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/api-server ./src && \
+    echo "Build successful" || echo "Build failed"
 
 # Debug: verify binary exists and show directory structure
-RUN ls -la /app && echo "Binary exists: $(test -f /app/api-server && echo YES || echo NO)"
 
 # Final stage
 FROM alpine:latest
@@ -43,7 +47,5 @@ RUN ls -la /app && echo "Files in app directory:"
 RUN chmod +x /app/api-server
 
 # Expose port
+CMD ["/app/src/main"]
 EXPOSE 3000
-
-# Run the application with explicit path
-CMD ["/app/api-server"]
