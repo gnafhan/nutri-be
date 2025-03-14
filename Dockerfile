@@ -15,8 +15,11 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application - changed build path
 RUN CGO_ENABLED=0 GOOS=linux go build -o main ./src
+
+# Debug: verify binary exists
+RUN ls -la
 
 # Final stage
 FROM alpine:latest
@@ -28,6 +31,13 @@ RUN apk --no-cache add ca-certificates tzdata
 
 # Copy binary from builder stage
 COPY --from=builder /app/main .
+
+# Debug: verify binary exists in final image
+RUN ls -la
+
+# Ensure binary is executable
+RUN chmod +x ./main
+
 COPY .env .env
 
 # Expose port
