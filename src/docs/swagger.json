@@ -54,11 +54,26 @@
         },
         "/auth/google": {
             "get": {
-                "description": "This route initiates the Google OAuth2 login flow. Please try this in your browser.",
+                "description": "Login user using Google OAuth2 and return authentication tokens.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Login with google",
+                "summary": "Login with Google",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Google ID Token",
+                        "name": "id_token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

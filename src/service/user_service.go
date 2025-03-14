@@ -236,9 +236,8 @@ func (s *userService) CreateGoogleUser(c *fiber.Ctx, req *validation.GoogleLogin
 	if err != nil {
 		if err.Error() == "User not found" {
 			user := &model.User{
-				Name:          req.Name,
-				Email:         req.Email,
-				VerifiedEmail: req.VerifiedEmail,
+				Name:  req.Name,
+				Email: req.Email,
 			}
 
 			if createErr := s.DB.WithContext(c.Context()).Create(user).Error; createErr != nil {
@@ -252,7 +251,6 @@ func (s *userService) CreateGoogleUser(c *fiber.Ctx, req *validation.GoogleLogin
 		return nil, err
 	}
 
-	userFromDB.VerifiedEmail = req.VerifiedEmail
 	if updateErr := s.DB.WithContext(c.Context()).Save(userFromDB).Error; updateErr != nil {
 		s.Log.Errorf("Failed to update user: %+v", updateErr)
 		return nil, updateErr
