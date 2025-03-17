@@ -67,6 +67,11 @@ func (s *productTokenService) VerifyProductToken(c *fiber.Ctx, query *validation
 		return fiber.NewError(fiber.StatusUnauthorized, "User not found")
 	}
 
+	existingToken, _ := s.GetProductTokenByUserID(c, user.ID)
+	if existingToken != nil {
+		return fiber.NewError(fiber.StatusForbidden, "Can only be connected with 1 product token.")
+	}
+
 	var productToken model.ProductToken
 	if err := s.DB.WithContext(c.Context()).
 		Where("token = ? AND user_id IS NULL", query.Token).
@@ -76,8 +81,8 @@ func (s *productTokenService) VerifyProductToken(c *fiber.Ctx, query *validation
 		}
 		return fiber.ErrInternalServerError
 	}
-	now := time.Now()
 
+	now := time.Now()
 	productToken.UserID = user.ID
 	productToken.ActivatedAt = &now
 

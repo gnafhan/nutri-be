@@ -23,16 +23,18 @@ type Login struct {
 }
 
 type GoogleLogin struct {
-	Name  string `json:"name" validate:"required,max=50"`
-	Email string `json:"email" validate:"required,email,max=50"`
+	Name           string `json:"name" validate:"required,max=50"`
+	Email          string `json:"email" validate:"required,email,max=50"`
+	ProfilePicture string `json:"profile_picture"`
+	GoogleIDToken  string `json:"google_id_token"`
 }
 
 type Logout struct {
-	RefreshToken string `json:"refresh_token" validate:"required,max=255"`
+	RefreshToken string `json:"refresh_token" validate:"required,max=2550"`
 }
 
 type RefreshToken struct {
-	RefreshToken string `json:"refresh_token" validate:"required,max=255"`
+	RefreshToken string `json:"refresh_token" validate:"required,max=2550"`
 }
 
 type ForgotPassword struct {
@@ -40,5 +42,5 @@ type ForgotPassword struct {
 }
 
 type Token struct {
-	Token string `json:"token" validate:"required,max=255"`
+	Token string `json:"token" validate:"required,max=2550"`
 }

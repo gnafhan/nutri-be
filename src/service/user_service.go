@@ -236,8 +236,11 @@ func (s *userService) CreateGoogleUser(c *fiber.Ctx, req *validation.GoogleLogin
 	if err != nil {
 		if err.Error() == "User not found" {
 			user := &model.User{
-				Name:  req.Name,
-				Email: req.Email,
+				Name:           req.Name,
+				Email:          req.Email,
+				VerifiedEmail:  true,
+				ProfilePicture: req.ProfilePicture,
+				GoogleIDToken:  req.GoogleIDToken,
 			}
 
 			if createErr := s.DB.WithContext(c.Context()).Create(user).Error; createErr != nil {
