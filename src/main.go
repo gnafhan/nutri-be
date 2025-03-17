@@ -57,6 +57,8 @@ func setupFiberApp() *fiber.App {
 	app.Use(cors.New())
 	app.Use(middleware.RecoverConfig())
 
+	app.Static("/uploads", "./uploads")
+
 	return app
 }
 

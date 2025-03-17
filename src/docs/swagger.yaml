@@ -526,22 +526,6 @@ definitions:
         minLength: 8
         type: string
     type: object
-  validation.UpdateUser:
-    properties:
-      email:
-        example: fake@example.com
-        maxLength: 50
-        type: string
-      name:
-        example: fake name
-        maxLength: 50
-        type: string
-      password:
-        example: password1
-        maxLength: 20
-        minLength: 8
-        type: string
-    type: object
 host: localhost:5000
 info:
   contact: {}
@@ -807,6 +791,8 @@ paths:
           description: Invalid or already used product token
           schema:
             $ref: '#/definitions/example.FailedVerifyProductToken'
+      security:
+      - BearerAuth: []
       summary: Verify Product Token
       tags:
       - Product Token
@@ -949,20 +935,56 @@ paths:
       tags:
       - Users
     patch:
-      description: Logged in users can only update their own information. Only admins
+      consumes:
+      - multipart/form-data
+      description: Logged-in users can only update their own information. Only admins
         can update other users.
       parameters:
-      - description: User id
+      - description: User ID
         in: path
         name: id
         required: true
         type: string
-      - description: Request body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/validation.UpdateUser'
+      - description: User's name (max 50 characters)
+        in: formData
+        name: name
+        type: string
+      - description: User's email (must be valid email, max 50 characters)
+        in: formData
+        name: email
+        type: string
+      - description: Password (8-20 characters, must contain letters and numbers)
+        in: formData
+        name: password
+        type: string
+      - description: Birth date (YYYY-MM-DD format)
+        in: formData
+        name: birth_date
+        type: string
+      - description: Height in cm (0-300)
+        in: formData
+        name: height
+        type: number
+      - description: Weight in kg (0-500)
+        in: formData
+        name: weight
+        type: number
+      - description: Gender (Male or Female)
+        in: formData
+        name: gender
+        type: string
+      - description: Activity level (Light, Medium, Heavy)
+        in: formData
+        name: activity_level
+        type: string
+      - description: Medical history (max 1000 characters)
+        in: formData
+        name: medical_history
+        type: string
+      - description: Profile picture (optional)
+        in: formData
+        name: profile_picture
+        type: file
       produces:
       - application/json
       responses:
@@ -970,22 +992,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/example.UpdateUserResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/example.Unauthorized'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/example.Forbidden'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/example.NotFound'
-        "409":
-          description: Email already taken
-          schema:
-            $ref: '#/definitions/example.DuplicateEmail'
       security:
       - BearerAuth: []
       summary: Update a user

@@ -389,6 +389,11 @@ const docTemplate = `{
         },
         "/product-token/verify": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -639,7 +644,10 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Logged in users can only update their own information. Only admins can update other users.",
+                "description": "Logged-in users can only update their own information. Only admins can update other users.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -650,19 +658,70 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User id",
+                        "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Request body",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/validation.UpdateUser"
-                        }
+                        "type": "string",
+                        "description": "User's name (max 50 characters)",
+                        "name": "name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User's email (must be valid email, max 50 characters)",
+                        "name": "email",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password (8-20 characters, must contain letters and numbers)",
+                        "name": "password",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Birth date (YYYY-MM-DD format)",
+                        "name": "birth_date",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Height in cm (0-300)",
+                        "name": "height",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Weight in kg (0-500)",
+                        "name": "weight",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Gender (Male or Female)",
+                        "name": "gender",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Activity level (Light, Medium, Heavy)",
+                        "name": "activity_level",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Medical history (max 1000 characters)",
+                        "name": "medical_history",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Profile picture (optional)",
+                        "name": "profile_picture",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -670,30 +729,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/example.UpdateUserResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/example.Unauthorized"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/example.Forbidden"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found",
-                        "schema": {
-                            "$ref": "#/definitions/example.NotFound"
-                        }
-                    },
-                    "409": {
-                        "description": "Email already taken",
-                        "schema": {
-                            "$ref": "#/definitions/example.DuplicateEmail"
                         }
                     }
                 }
@@ -1433,27 +1468,6 @@ const docTemplate = `{
         "validation.UpdatePassOrVerify": {
             "type": "object",
             "properties": {
-                "password": {
-                    "type": "string",
-                    "maxLength": 20,
-                    "minLength": 8,
-                    "example": "password1"
-                }
-            }
-        },
-        "validation.UpdateUser": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "example": "fake@example.com"
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "example": "fake name"
-                },
                 "password": {
                     "type": "string",
                     "maxLength": 20,
