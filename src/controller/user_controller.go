@@ -4,9 +4,7 @@ import (
 	"app/src/model"
 	"app/src/response"
 	"app/src/service"
-	"app/src/utils"
 	"app/src/validation"
-	"fmt"
 	"math"
 
 	// "mime/multipart"
@@ -138,10 +136,6 @@ func (u *UserController) CreateUser(c *fiber.Ctx) error {
 func (u *UserController) UpdateUser(c *fiber.Ctx) error {
 	req := new(validation.UpdateUser)
 	userID := c.Params("userId")
-
-	//print all request to readable format
-	fmt.Println(req)
-	utils.Log.Info(req)
 
 	if _, err := uuid.Parse(userID); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid user ID")
