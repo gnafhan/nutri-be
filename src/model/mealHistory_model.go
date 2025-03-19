@@ -17,6 +17,7 @@ type MealHistory struct {
 	Protein   float64   `gorm:"type:decimal(6,2);not null" json:"protein"`
 	Carbs     float64   `gorm:"type:decimal(6,2);not null" json:"carbs"`
 	Fat       float64   `gorm:"type:decimal(6,2);not null" json:"fat"`
+	MealImage string    `gorm:"not null" json:"meal_image"`
 	CreatedAt time.Time `gorm:"autoCreateTime:milli" json:"-"`
 	UpdatedAt time.Time `gorm:"autoCreateTime:milli;autoUpdateTime:milli" json:"-"`
 }

@@ -4,9 +4,12 @@ import (
 	"app/src/model"
 	"app/src/response"
 	"app/src/service"
+	"app/src/utils"
 	"app/src/validation"
+	"fmt"
 	"math"
-	"mime/multipart"
+
+	// "mime/multipart"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -126,42 +129,29 @@ func (u *UserController) CreateUser(c *fiber.Ctx) error {
 // @Summary      Update a user
 // @Description  Logged-in users can only update their own information. Only admins can update other users.
 // @Security     BearerAuth
-// @Accept       multipart/form-data
+// @Accept       application/json
 // @Produce      json
 // @Param        id               path      string    true   "User ID"
-// @Param        name             formData  string    false  "User's name (max 50 characters)"
-// @Param        email            formData  string    false  "User's email (must be valid email, max 50 characters)"
-// @Param        password         formData  string    false  "Password (8-20 characters, must contain letters and numbers)"
-// @Param        birth_date       formData  string    false  "Birth date (YYYY-MM-DD format)"
-// @Param        height           formData  number    false  "Height in cm (0-300)"
-// @Param        weight           formData  number    false  "Weight in kg (0-500)"
-// @Param        gender           formData  string    false  "Gender (Male or Female)"
-// @Param        activity_level   formData  string    false  "Activity level (Light, Medium, Heavy)"
-// @Param        medical_history  formData  string    false  "Medical history (max 1000 characters)"
-// @Param        profile_picture  formData  file      false  "Profile picture (optional)"
+// @Param        request          body      validation.UpdateUser  true  "Update user data"
 // @Router       /users/{id} [patch]
 // @Success      200  {object}  example.UpdateUserResponse
 func (u *UserController) UpdateUser(c *fiber.Ctx) error {
 	req := new(validation.UpdateUser)
 	userID := c.Params("userId")
-	var profilePicture *multipart.FileHeader
-	var hasFile bool
+
+	//print all request to readable format
+	fmt.Println(req)
+	utils.Log.Info(req)
 
 	if _, err := uuid.Parse(userID); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid user ID")
 	}
 
 	if err := c.BodyParser(req); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "Invalid form data")
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
 	}
 
-	file, err := c.FormFile("profile_picture")
-	if err == nil {
-		profilePicture = file
-		hasFile = true
-	}
-
-	user, err := u.UserService.UpdateUser(c, req, userID, profilePicture, hasFile)
+	user, err := u.UserService.UpdateUser(c, req, userID)
 	if err != nil {
 		return err
 	}

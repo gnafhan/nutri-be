@@ -26,3 +26,13 @@ func init() {
 
 	Log.SetOutput(os.Stdout)
 }
+
+// LogRequestBody logs the request body with user information
+func LogRequestBody(path string, method string, body interface{}, ip string) {
+	Log.WithFields(logrus.Fields{
+		"path":   path,
+		"method": method,
+		"body":   body,
+		"ip":     ip,
+	}).Info("Request Body")
+}

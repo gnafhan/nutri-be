@@ -6,12 +6,9 @@ import (
 	"app/src/utils"
 	"app/src/validation"
 	"errors"
-	"io"
-	"mime/multipart"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
+
+	// "net/http"
+	// "strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -27,7 +24,7 @@ type UserService interface {
 	GetUserByEmail(c *fiber.Ctx, email string) (*model.User, error)
 	CreateUser(c *fiber.Ctx, req *validation.CreateUser) (*model.User, error)
 	UpdatePassOrVerify(c *fiber.Ctx, req *validation.UpdatePassOrVerify, id string) error
-	UpdateUser(c *fiber.Ctx, req *validation.UpdateUser, id string, file *multipart.FileHeader, hasFile bool) (*model.User, error)
+	UpdateUser(c *fiber.Ctx, req *validation.UpdateUser, id string) (*model.User, error)
 	DeleteUser(c *fiber.Ctx, id string) error
 	CreateGoogleUser(c *fiber.Ctx, req *validation.GoogleLogin) (*model.User, error)
 	GetUserStatistics(c *fiber.Ctx, userID string) (*response.UserStatistics, error)
@@ -141,12 +138,12 @@ func (s *userService) CreateUser(c *fiber.Ctx, req *validation.CreateUser) (*mod
 	return user, result.Error
 }
 
-func (s *userService) UpdateUser(c *fiber.Ctx, req *validation.UpdateUser, id string, file *multipart.FileHeader, hasFile bool) (*model.User, error) {
+func (s *userService) UpdateUser(c *fiber.Ctx, req *validation.UpdateUser, id string) (*model.User, error) {
 	if err := s.Validate.Struct(req); err != nil {
 		return nil, err
 	}
 
-	if req.Email == "" && req.Name == "" && req.Password == "" && !hasFile &&
+	if req.Email == "" && req.Name == "" && req.Password == "" && req.ProfilePicture == nil &&
 		req.BirthDate == nil && req.Height == nil && req.Weight == nil &&
 		req.Gender == nil && req.ActivityLevel == nil && req.MedicalHistory == nil {
 		return nil, fiber.NewError(fiber.StatusBadRequest, "No fields to update")
@@ -197,34 +194,8 @@ func (s *userService) UpdateUser(c *fiber.Ctx, req *validation.UpdateUser, id st
 	if req.MedicalHistory != nil {
 		updateBody.MedicalHistory = req.MedicalHistory
 	}
-
-	if hasFile && file != nil {
-		if err := validateImageFile(file); err != nil {
-			return nil, err
-		}
-
-		filename := uuid.New().String() + filepath.Ext(file.Filename)
-		uploadPath := "./uploads/profile-pictures/" + filename
-
-		if err := os.MkdirAll("./uploads/profile-pictures", os.ModePerm); err != nil {
-			s.Log.Errorf("Failed to create directory: %+v", err)
-			return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to upload file")
-		}
-
-		if err := c.SaveFile(file, uploadPath); err != nil {
-			s.Log.Errorf("Failed to save file: %+v", err)
-			return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to upload file")
-		}
-
-		profilePictureURL := "/uploads/profile-pictures/" + filename
-		updateBody.ProfilePicture = profilePictureURL
-
-		if currentUser.ProfilePicture != "" && !strings.Contains(currentUser.ProfilePicture, "default") {
-			oldFilePath := "." + currentUser.ProfilePicture
-			if _, err := os.Stat(oldFilePath); err == nil {
-				os.Remove(oldFilePath)
-			}
-		}
+	if req.ProfilePicture != nil {
+		updateBody.ProfilePicture = *req.ProfilePicture
 	}
 
 	if err := tx.Model(&model.User{}).Where("id = ?", id).Updates(updateBody).Error; err != nil {
@@ -281,53 +252,6 @@ func (s *userService) UpdateUser(c *fiber.Ctx, req *validation.UpdateUser, id st
 	}
 
 	return updatedUser, nil
-}
-
-func validateImageFile(file *multipart.FileHeader) error {
-	if file.Size > 5*1024*1024 {
-		return fiber.NewError(fiber.StatusBadRequest, "File too large (max 5MB)")
-	}
-
-	ext := strings.ToLower(filepath.Ext(file.Filename))
-	validExtensions := map[string]bool{
-		".jpg":  true,
-		".jpeg": true,
-		".png":  true,
-		".gif":  true,
-		".webp": true,
-	}
-
-	if !validExtensions[ext] {
-		return fiber.NewError(fiber.StatusBadRequest, "Invalid file type. Only JPG, JPEG, PNG, GIF, and WEBP are allowed")
-	}
-
-	fileHeader, err := file.Open()
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "Failed to process file")
-	}
-	defer fileHeader.Close()
-
-	buffer := make([]byte, 512)
-	_, err = fileHeader.Read(buffer)
-	if err != nil && err != io.EOF {
-		return fiber.NewError(fiber.StatusInternalServerError, "Failed to read file")
-	}
-
-	fileHeader.Seek(0, 0)
-
-	contentType := http.DetectContentType(buffer)
-	validTypes := map[string]bool{
-		"image/jpeg": true,
-		"image/png":  true,
-		"image/gif":  true,
-		"image/webp": true,
-	}
-
-	if !validTypes[contentType] {
-		return fiber.NewError(fiber.StatusBadRequest, "File content doesn't match a valid image format")
-	}
-
-	return nil
 }
 
 func (s *userService) UpdatePassOrVerify(c *fiber.Ctx, req *validation.UpdatePassOrVerify, id string) error {

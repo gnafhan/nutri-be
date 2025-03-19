@@ -22,6 +22,7 @@ type UpdateUser struct {
 	Gender         *model.GenderType    `form:"gender,omitempty" validate:"omitempty,oneof=Male Female" example:"Male"`
 	ActivityLevel  *model.ActivityLevel `form:"activity_level,omitempty" validate:"omitempty,oneof=Light Medium Heavy" example:"Medium"`
 	MedicalHistory *string              `form:"medical_history,omitempty" validate:"omitempty,max=1000" example:"No known allergies"`
+	ProfilePicture *string              `form:"profile_picture,omitempty" validate:"omitempty,url" example:"https://example.com/image.jpg"`
 }
 
 type UpdatePassOrVerify struct {

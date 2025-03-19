@@ -14,6 +14,7 @@ import (
 )
 
 func Connect(dbHost, dbName string) *gorm.DB {
+	// hihihi maap
 	dsn := fmt.Sprintf(
 		"host=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
 		dbHost, dbName, config.DBPort,

@@ -62,6 +62,7 @@ func (s *tokenService) GenerateToken(user *model.User, isProductTokenVerified bo
 			"gender":                 user.Gender,
 			"activity_level":         user.ActivityLevel,
 			"medical_history":        user.MedicalHistory,
+			"profile_picture":        user.ProfilePicture,
 			"isProductTokenVerified": isProductTokenVerified,
 		},
 	}
