@@ -1,6 +1,9 @@
 package response
 
-import "app/src/model"
+import (
+	"app/src/model"
+	"time"
+)
 
 type Common struct {
 	Status  string `json:"status"`
@@ -57,4 +60,25 @@ type ErrorDetails struct {
 	Status  string      `json:"status"`
 	Message string      `json:"message"`
 	Errors  interface{} `json:"errors"`
+}
+
+type UserStatistics struct {
+	Heights  []HeightStat  `json:"heights"`
+	Weights  []WeightStat  `json:"weights"`
+	Calories []CalorieStat `json:"calories"`
+}
+
+type HeightStat struct {
+	Height     float64   `json:"height"`
+	RecordedAt time.Time `json:"recorded_at"`
+}
+
+type WeightStat struct {
+	Weight     float64   `json:"weight"`
+	RecordedAt time.Time `json:"recorded_at"`
+}
+
+type CalorieStat struct {
+	Calories   float64   `json:"calories"`
+	RecordedAt time.Time `json:"recorded_at"`
 }

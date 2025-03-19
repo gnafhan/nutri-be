@@ -58,6 +58,15 @@ definitions:
         example: success
         type: string
     type: object
+  example.CalorieStat:
+    properties:
+      calories:
+        example: 500
+        type: number
+      recorded_at:
+        example: "2023-10-10T08:00:00Z"
+        type: string
+    type: object
   example.CreateUserResponse:
     properties:
       message:
@@ -375,6 +384,15 @@ definitions:
         example: error
         type: string
     type: object
+  example.HeightStat:
+    properties:
+      height:
+        example: 170
+        type: number
+      recorded_at:
+        example: "2023-10-10T08:00:00Z"
+        type: string
+    type: object
   example.LoginResponse:
     properties:
       message:
@@ -650,6 +668,24 @@ definitions:
         example: 65.2
         type: number
     type: object
+  example.UserStatisticsResponse:
+    properties:
+      body:
+        properties:
+          calories:
+            items:
+              $ref: '#/definitions/example.CalorieStat'
+            type: array
+          heights:
+            items:
+              $ref: '#/definitions/example.HeightStat'
+            type: array
+          weights:
+            items:
+              $ref: '#/definitions/example.WeightStat'
+            type: array
+        type: object
+    type: object
   example.UsersWeightHeightHistory:
     properties:
       height:
@@ -685,6 +721,15 @@ definitions:
       status:
         example: success
         type: string
+    type: object
+  example.WeightStat:
+    properties:
+      recorded_at:
+        example: "2023-10-10T08:00:00Z"
+        type: string
+      weight:
+        example: 50
+        type: number
     type: object
   model.ActivityLevel:
     enum:
@@ -1510,6 +1555,39 @@ paths:
       security:
       - BearerAuth: []
       summary: Update a user
+      tags:
+      - Users
+  /users/{id}/statistics:
+    get:
+      description: Get user's weight, height, and calorie statistics.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.UserStatisticsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Get user statistics
       tags:
       - Users
   /weight-height:

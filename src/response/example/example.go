@@ -231,3 +231,26 @@ type DeleteWeightHeightResponse struct {
 	Status  string `json:"status" example:"success"`
 	Message string `json:"message" example:"Weight and height record deleted successfully"`
 }
+
+type UserStatisticsResponse struct {
+	Body struct {
+		Heights  []HeightStat  `json:"heights"`
+		Weights  []WeightStat  `json:"weights"`
+		Calories []CalorieStat `json:"calories"`
+	}
+}
+
+type HeightStat struct {
+	Height     float64   `json:"height" example:"170"`
+	RecordedAt time.Time `json:"recorded_at" example:"2023-10-10T08:00:00Z"`
+}
+
+type WeightStat struct {
+	Weight     float64   `json:"weight" example:"50"`
+	RecordedAt time.Time `json:"recorded_at" example:"2023-10-10T08:00:00Z"`
+}
+
+type CalorieStat struct {
+	Calories   float64   `json:"calories" example:"500"`
+	RecordedAt time.Time `json:"recorded_at" example:"2023-10-10T08:00:00Z"`
+}

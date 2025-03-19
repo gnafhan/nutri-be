@@ -1077,6 +1077,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/{id}/statistics": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get user's weight, height, and calorie statistics.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user statistics",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.UserStatisticsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            }
+        },
         "/weight-height": {
             "get": {
                 "security": [
@@ -1396,6 +1448,19 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "example": "success"
+                }
+            }
+        },
+        "example.CalorieStat": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "type": "number",
+                    "example": 500
+                },
+                "recorded_at": {
+                    "type": "string",
+                    "example": "2023-10-10T08:00:00Z"
                 }
             }
         },
@@ -1850,6 +1915,19 @@ const docTemplate = `{
                 }
             }
         },
+        "example.HeightStat": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "example": 170
+                },
+                "recorded_at": {
+                    "type": "string",
+                    "example": "2023-10-10T08:00:00Z"
+                }
+            }
+        },
         "example.LoginResponse": {
             "type": "object",
             "properties": {
@@ -2243,6 +2321,34 @@ const docTemplate = `{
                 }
             }
         },
+        "example.UserStatisticsResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "calories": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/example.CalorieStat"
+                            }
+                        },
+                        "heights": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/example.HeightStat"
+                            }
+                        },
+                        "weights": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/example.WeightStat"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "example.UsersWeightHeightHistory": {
             "type": "object",
             "properties": {
@@ -2291,6 +2397,19 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "example": "success"
+                }
+            }
+        },
+        "example.WeightStat": {
+            "type": "object",
+            "properties": {
+                "recorded_at": {
+                    "type": "string",
+                    "example": "2023-10-10T08:00:00Z"
+                },
+                "weight": {
+                    "type": "number",
+                    "example": 50
                 }
             }
         },

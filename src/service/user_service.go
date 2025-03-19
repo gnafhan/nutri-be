@@ -2,6 +2,7 @@ package service
 
 import (
 	"app/src/model"
+	"app/src/response"
 	"app/src/utils"
 	"app/src/validation"
 	"errors"
@@ -29,6 +30,7 @@ type UserService interface {
 	UpdateUser(c *fiber.Ctx, req *validation.UpdateUser, id string, file *multipart.FileHeader, hasFile bool) (*model.User, error)
 	DeleteUser(c *fiber.Ctx, id string) error
 	CreateGoogleUser(c *fiber.Ctx, req *validation.GoogleLogin) (*model.User, error)
+	GetUserStatistics(c *fiber.Ctx, userID string) (*response.UserStatistics, error)
 }
 
 type userService struct {
@@ -412,4 +414,80 @@ func (s *userService) CreateGoogleUser(c *fiber.Ctx, req *validation.GoogleLogin
 	}
 
 	return userFromDB, nil
+}
+
+func (s *userService) GetUserStatistics(c *fiber.Ctx, userID string) (*response.UserStatistics, error) {
+	var heightRecords []struct {
+		Height     float64   `json:"height"`
+		RecordedAt time.Time `json:"recorded_at"`
+	}
+	if err := s.DB.WithContext(c.Context()).
+		Model(&model.UsersWeightHeightHistory{}).
+		Where("user_id = ?", userID).
+		Order("recorded_at asc").
+		Select("height, recorded_at").
+		Find(&heightRecords).Error; err != nil {
+		s.Log.Errorf("Failed to get height statistics: %+v", err)
+		return nil, err
+	}
+
+	heights := make([]response.HeightStat, len(heightRecords))
+	for i, record := range heightRecords {
+		heights[i] = response.HeightStat{
+			Height:     record.Height,
+			RecordedAt: record.RecordedAt,
+		}
+	}
+
+	var weightRecords []struct {
+		Weight     float64   `json:"weight"`
+		RecordedAt time.Time `json:"recorded_at"`
+	}
+	if err := s.DB.WithContext(c.Context()).
+		Model(&model.UsersWeightHeightHistory{}).
+		Where("user_id = ?", userID).
+		Order("recorded_at asc").
+		Select("weight, recorded_at").
+		Find(&weightRecords).Error; err != nil {
+		s.Log.Errorf("Failed to get weight statistics: %+v", err)
+		return nil, err
+	}
+
+	weights := make([]response.WeightStat, len(weightRecords))
+	for i, record := range weightRecords {
+		weights[i] = response.WeightStat{
+			Weight:     record.Weight,
+			RecordedAt: record.RecordedAt,
+		}
+	}
+
+	var calorieRecords []struct {
+		Calories   float64   `json:"calories"`
+		RecordedAt time.Time `json:"recorded_at"`
+	}
+	if err := s.DB.WithContext(c.Context()).
+		Model(&model.MealHistory{}).
+		Where("user_id = ?", userID).
+		Order("meal_time asc").
+		Select("calories, meal_time as recorded_at").
+		Find(&calorieRecords).Error; err != nil {
+		s.Log.Errorf("Failed to get calorie statistics: %+v", err)
+		return nil, err
+	}
+
+	calories := make([]response.CalorieStat, len(calorieRecords))
+	for i, record := range calorieRecords {
+		calories[i] = response.CalorieStat{
+			Calories:   record.Calories,
+			RecordedAt: record.RecordedAt,
+		}
+	}
+
+	statistics := &response.UserStatistics{
+		Heights:  heights,
+		Weights:  weights,
+		Calories: calories,
+	}
+
+	return statistics, nil
 }

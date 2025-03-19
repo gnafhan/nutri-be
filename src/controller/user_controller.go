@@ -206,3 +206,29 @@ func (u *UserController) DeleteUser(c *fiber.Ctx) error {
 			Message: "Delete user successfully",
 		})
 }
+
+// @Tags         Users
+// @Summary      Get user statistics
+// @Description  Get user's weight, height, and calorie statistics.
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id  path  string  true  "User ID"
+// @Router       /users/{id}/statistics [get]
+// @Success      200  {object}  example.UserStatisticsResponse
+// @Failure      401  {object}  example.Unauthorized  "Unauthorized"
+// @Failure      403  {object}  example.Forbidden  "Forbidden"
+// @Failure      404  {object}  example.NotFound  "Not found"
+func (u *UserController) GetUserStatistics(c *fiber.Ctx) error {
+	userID := c.Params("userId")
+
+	if _, err := uuid.Parse(userID); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid user ID")
+	}
+
+	statistics, err := u.UserService.GetUserStatistics(c, userID)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(statistics)
+}
