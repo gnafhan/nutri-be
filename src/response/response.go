@@ -24,6 +24,18 @@ type SuccessWithMealScanDetail struct {
 	MealScanDetail model.MealHistoryDetail `json:"meal_history_scan_detail"`
 }
 
+type SuccessWithWeightHeight struct {
+	Status  string                         `json:"status" example:"success"`
+	Message string                         `json:"message" example:"Operation completed successfully"`
+	Data    model.UsersWeightHeightHistory `json:"data"`
+}
+
+type SuccessWithWeightHeightList struct {
+	Status  string                           `json:"status" example:"success"`
+	Message string                           `json:"message" example:"Operation completed successfully"`
+	Data    []model.UsersWeightHeightHistory `json:"data"`
+}
+
 type SuccessWithTokens struct {
 	Status  string     `json:"status"`
 	Message string     `json:"message"`

@@ -182,3 +182,52 @@ type MealHistory struct {
 	Carbs    float64   `json:"carbs" example:"45.3"`
 	Fat      float64   `json:"fat" example:"10.1"`
 }
+
+type UsersWeightHeightHistory struct {
+	ID         string    `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	UserID     string    `json:"user_id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Weight     float64   `json:"weight" example:"50.5"`
+	Height     float64   `json:"height" example:"180.8"`
+	RecordedAt time.Time `json:"recorded_at" example:"2023-10-01T12:00:00Z"`
+}
+
+type AddWeightHeightResponse struct {
+	Status  string                   `json:"status" example:"success"`
+	Message string                   `json:"message" example:"Weight and height record added successfully"`
+	Data    UsersWeightHeightHistory `json:"data"`
+}
+
+type GetAllWeightHeightResponse struct {
+	Status  string                     `json:"status" example:"success"`
+	Message string                     `json:"message" example:"Weight and height records fetched successfully"`
+	Data    []UsersWeightHeightHistory `json:"data"`
+}
+
+type GetWeightHeightResponse struct {
+	Status  string                   `json:"status" example:"success"`
+	Message string                   `json:"message" example:"Weight and height records fetched successfully"`
+	Data    UsersWeightHeightHistory `json:"data"`
+}
+
+type UpdateWeightHeightResponse struct {
+	Status  string                   `json:"status" example:"success"`
+	Message string                   `json:"message" example:"Weight and height record updated successfully"`
+	Data    UsersWeightHeightHistory `json:"data"`
+}
+
+type AddWeightHeightRequest struct {
+	Weight     float64    `json:"weight,omitempty" example:"70.5"`
+	Height     float64    `json:"height,omitempty" example:"175.0"`
+	RecordedAt *time.Time `json:"recorded_at,omitempty" example:"2023-10-10T12:00:00Z"`
+}
+
+type UpdateWeightHeightRequest struct {
+	Weight     float64    `json:"weight,omitempty" example:"70.5"`
+	Height     float64    `json:"height,omitempty" example:"175.0"`
+	RecordedAt *time.Time `json:"recorded_at,omitempty" example:"2023-10-10T12:00:00Z"`
+}
+
+type DeleteWeightHeightResponse struct {
+	Status  string `json:"status" example:"success"`
+	Message string `json:"message" example:"Weight and height record deleted successfully"`
+}

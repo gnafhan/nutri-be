@@ -7,6 +7,7 @@ import (
 	"app/src/utils"
 	"app/src/validation"
 	"errors"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -56,7 +57,6 @@ func (s *authService) Register(c *fiber.Ctx, req *validation.Register) (*model.U
 	}
 
 	user := &model.User{
-		ID:             uuid.New(),
 		Name:           req.Name,
 		Email:          req.Email,
 		Password:       hashedPassword,
@@ -68,15 +68,43 @@ func (s *authService) Register(c *fiber.Ctx, req *validation.Register) (*model.U
 		MedicalHistory: &req.MedicalHistory,
 	}
 
-	result := s.DB.WithContext(c.Context()).Create(user)
+	// Mulai transaksi database
+	tx := s.DB.WithContext(c.Context()).Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
-	if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
-		return nil, fiber.NewError(fiber.StatusConflict, "Email already taken")
+	// Simpan user
+	if err := tx.Create(user).Error; err != nil {
+		tx.Rollback()
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return nil, fiber.NewError(fiber.StatusConflict, "Email already taken")
+		}
+		s.Log.Errorf("Failed to create user: %+v", err)
+		return nil, err
 	}
 
-	if result.Error != nil {
-		s.Log.Errorf("Failed to create user: %+v", result.Error)
-		return nil, result.Error
+	userWeightHeight := &model.UsersWeightHeightHistory{
+		ID:         uuid.New(),
+		UserID:     user.ID,
+		Weight:     req.Weight,
+		Height:     req.Height,
+		RecordedAt: time.Now(),
+	}
+
+	// Simpan userWeightHeight
+	if err := tx.Create(userWeightHeight).Error; err != nil {
+		tx.Rollback()
+		s.Log.Errorf("Failed to add weight height to database: %+v", err)
+		return nil, err
+	}
+
+	// Commit transaksi
+	if err := tx.Commit().Error; err != nil {
+		s.Log.Errorf("Failed to commit transaction: %+v", err)
+		return nil, err
 	}
 
 	return user, nil

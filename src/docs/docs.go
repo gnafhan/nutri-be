@@ -1076,6 +1076,244 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/weight-height": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can fetch their own weight and height records.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Get all weight and height records",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.GetAllWeightHeightResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can add a new weight and height record.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Add a new weight and height record",
+                "parameters": [
+                    {
+                        "description": "Weight and height data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.AddWeightHeightRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/example.AddWeightHeightResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    }
+                }
+            }
+        },
+        "/weight-height/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can fetch their own weight and height record.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Get a weight height",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Record id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.GetWeightHeightResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can update their own weight and height records.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Update a weight and height record",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Record ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Weight and height data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.UpdateWeightHeightRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.UpdateWeightHeightResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can delete their own weight and height records.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Delete a weight and height record",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Record ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.DeleteWeightHeightResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1128,6 +1366,39 @@ const docTemplate = `{
                 }
             }
         },
+        "example.AddWeightHeightRequest": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "example": 175
+                },
+                "recorded_at": {
+                    "type": "string",
+                    "example": "2023-10-10T12:00:00Z"
+                },
+                "weight": {
+                    "type": "number",
+                    "example": 70.5
+                }
+            }
+        },
+        "example.AddWeightHeightResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/example.UsersWeightHeightHistory"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height record added successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "example.CreateUserResponse": {
             "type": "object",
             "properties": {
@@ -1163,6 +1434,19 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "Delete user successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "example.DeleteWeightHeightResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height record deleted successfully"
                 },
                 "status": {
                     "type": "string",
@@ -1331,6 +1615,25 @@ const docTemplate = `{
                 }
             }
         },
+        "example.GetAllWeightHeightResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/example.UsersWeightHeightHistory"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height records fetched successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "example.GetMealResponse": {
             "type": "object",
             "properties": {
@@ -1376,6 +1679,22 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/example.User"
+                }
+            }
+        },
+        "example.GetWeightHeightResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/example.UsersWeightHeightHistory"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height records fetched successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
                 }
             }
         },
@@ -1842,6 +2161,39 @@ const docTemplate = `{
                 }
             }
         },
+        "example.UpdateWeightHeightRequest": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "example": 175
+                },
+                "recorded_at": {
+                    "type": "string",
+                    "example": "2023-10-10T12:00:00Z"
+                },
+                "weight": {
+                    "type": "number",
+                    "example": 70.5
+                }
+            }
+        },
+        "example.UpdateWeightHeightResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/example.UsersWeightHeightHistory"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height record updated successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "example.User": {
             "type": "object",
             "properties": {
@@ -1888,6 +2240,31 @@ const docTemplate = `{
                 "weight": {
                     "type": "number",
                     "example": 65.2
+                }
+            }
+        },
+        "example.UsersWeightHeightHistory": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "example": 180.8
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "recorded_at": {
+                    "type": "string",
+                    "example": "2023-10-01T12:00:00Z"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "weight": {
+                    "type": "number",
+                    "example": 50.5
                 }
             }
         },

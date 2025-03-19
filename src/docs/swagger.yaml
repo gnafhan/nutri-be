@@ -35,6 +35,29 @@ definitions:
         example: success
         type: string
     type: object
+  example.AddWeightHeightRequest:
+    properties:
+      height:
+        example: 175
+        type: number
+      recorded_at:
+        example: "2023-10-10T12:00:00Z"
+        type: string
+      weight:
+        example: 70.5
+        type: number
+    type: object
+  example.AddWeightHeightResponse:
+    properties:
+      data:
+        $ref: '#/definitions/example.UsersWeightHeightHistory'
+      message:
+        example: Weight and height record added successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
   example.CreateUserResponse:
     properties:
       message:
@@ -59,6 +82,15 @@ definitions:
     properties:
       message:
         example: Delete user successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+  example.DeleteWeightHeightResponse:
+    properties:
+      message:
+        example: Weight and height record deleted successfully
         type: string
       status:
         example: success
@@ -177,6 +209,19 @@ definitions:
         example: 1
         type: integer
     type: object
+  example.GetAllWeightHeightResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/example.UsersWeightHeightHistory'
+        type: array
+      message:
+        example: Weight and height records fetched successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
   example.GetMealResponse:
     properties:
       meal:
@@ -209,6 +254,17 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/example.User'
+    type: object
+  example.GetWeightHeightResponse:
+    properties:
+      data:
+        $ref: '#/definitions/example.UsersWeightHeightHistory'
+      message:
+        example: Weight and height records fetched successfully
+        type: string
+      status:
+        example: success
+        type: string
     type: object
   example.GoogleLoginResponse:
     properties:
@@ -535,6 +591,29 @@ definitions:
       user:
         $ref: '#/definitions/example.User'
     type: object
+  example.UpdateWeightHeightRequest:
+    properties:
+      height:
+        example: 175
+        type: number
+      recorded_at:
+        example: "2023-10-10T12:00:00Z"
+        type: string
+      weight:
+        example: 70.5
+        type: number
+    type: object
+  example.UpdateWeightHeightResponse:
+    properties:
+      data:
+        $ref: '#/definitions/example.UsersWeightHeightHistory'
+      message:
+        example: Weight and height record updated successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
   example.User:
     properties:
       activity_level:
@@ -569,6 +648,24 @@ definitions:
         type: boolean
       weight:
         example: 65.2
+        type: number
+    type: object
+  example.UsersWeightHeightHistory:
+    properties:
+      height:
+        example: 180.8
+        type: number
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      recorded_at:
+        example: "2023-10-01T12:00:00Z"
+        type: string
+      user_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      weight:
+        example: 50.5
         type: number
     type: object
   example.VerifyEmailResponse:
@@ -1415,6 +1512,157 @@ paths:
       summary: Update a user
       tags:
       - Users
+  /weight-height:
+    get:
+      description: Logged in users can fetch their own weight and height records.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.GetAllWeightHeightResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+      security:
+      - BearerAuth: []
+      summary: Get all weight and height records
+      tags:
+      - Weight Height Record
+    post:
+      consumes:
+      - application/json
+      description: Logged in users can add a new weight and height record.
+      parameters:
+      - description: Weight and height data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.AddWeightHeightRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/example.AddWeightHeightResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+      security:
+      - BearerAuth: []
+      summary: Add a new weight and height record
+      tags:
+      - Weight Height Record
+  /weight-height/{id}:
+    delete:
+      description: Logged in users can delete their own weight and height records.
+      parameters:
+      - description: Record ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.DeleteWeightHeightResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Delete a weight and height record
+      tags:
+      - Weight Height Record
+    get:
+      description: Logged in users can fetch their own weight and height record.
+      parameters:
+      - description: Record id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.GetWeightHeightResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Get a weight height
+      tags:
+      - Weight Height Record
+    put:
+      consumes:
+      - application/json
+      description: Logged in users can update their own weight and height records.
+      parameters:
+      - description: Record ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Weight and height data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.UpdateWeightHeightRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.UpdateWeightHeightResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Update a weight and height record
+      tags:
+      - Weight Height Record
 securityDefinitions:
   BearerAuth:
     description: 'Example Value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'

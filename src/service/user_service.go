@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -154,6 +155,13 @@ func (s *userService) UpdateUser(c *fiber.Ctx, req *validation.UpdateUser, id st
 		return nil, err
 	}
 
+	tx := s.DB.WithContext(c.Context()).Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	updateBody := &model.User{}
 
 	if req.Name != "" {
@@ -194,7 +202,6 @@ func (s *userService) UpdateUser(c *fiber.Ctx, req *validation.UpdateUser, id st
 		}
 
 		filename := uuid.New().String() + filepath.Ext(file.Filename)
-
 		uploadPath := "./uploads/profile-pictures/" + filename
 
 		if err := os.MkdirAll("./uploads/profile-pictures", os.ModePerm); err != nil {
@@ -218,19 +225,52 @@ func (s *userService) UpdateUser(c *fiber.Ctx, req *validation.UpdateUser, id st
 		}
 	}
 
-	result := s.DB.WithContext(c.Context()).Model(&model.User{}).Where("id = ?", id).Updates(updateBody)
-
-	if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
-		return nil, fiber.NewError(fiber.StatusConflict, "Email is already in use")
+	if err := tx.Model(&model.User{}).Where("id = ?", id).Updates(updateBody).Error; err != nil {
+		tx.Rollback()
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return nil, fiber.NewError(fiber.StatusConflict, "Email is already in use")
+		}
+		s.Log.Errorf("Failed to update user: %+v", err)
+		return nil, err
 	}
 
-	if result.RowsAffected == 0 {
-		return nil, fiber.NewError(fiber.StatusNotFound, "User not found")
+	if req.Weight != nil || req.Height != nil {
+		weight := currentUser.Weight
+		if req.Weight != nil {
+			weight = req.Weight
+		}
+
+		height := currentUser.Height
+		if req.Height != nil {
+			height = req.Height
+		}
+
+		userWeightHeight := &model.UsersWeightHeightHistory{
+			ID:         uuid.New(),
+			UserID:     currentUser.ID,
+			Weight:     *weight,
+			Height:     *height,
+			RecordedAt: time.Now(),
+		}
+
+		if err := tx.Create(userWeightHeight).Error; err != nil {
+			tx.Rollback()
+			s.Log.Errorf("Failed to add weight height to database: %+v", err)
+			return nil, err
+		}
+
+		if err := tx.Model(&model.User{}).
+			Where("id = ?", currentUser.ID).
+			Updates(map[string]interface{}{"weight": *weight, "height": *height}).Error; err != nil {
+			tx.Rollback()
+			s.Log.Errorf("Failed to update user's weight and height: %+v", err)
+			return nil, err
+		}
 	}
 
-	if result.Error != nil {
-		s.Log.Errorf("Failed to update user: %+v", result.Error)
-		return nil, result.Error
+	if err := tx.Commit().Error; err != nil {
+		s.Log.Errorf("Failed to commit transaction: %+v", err)
+		return nil, err
 	}
 
 	updatedUser, err := s.GetUserByID(c, id)
