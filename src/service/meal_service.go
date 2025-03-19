@@ -22,6 +22,12 @@ import (
 
 type MealService interface {
 	ScanMeal(c *fiber.Ctx, imageFile *multipart.FileHeader, userID uuid.UUID) (*MealScanResponse, error)
+	GetMeals(c *fiber.Ctx) ([]model.MealHistory, int64, error)
+	GetMealByID(c *fiber.Ctx, id string) (*model.MealHistory, error)
+	GetMealScanDetailByID(c *fiber.Ctx, id string) (*model.MealHistoryDetail, error)
+	AddMeal(c *fiber.Ctx, meal *model.MealHistory) (*model.MealHistory, error)
+	UpdateMeal(c *fiber.Ctx, id string, meal *model.MealHistory) (*model.MealHistory, error)
+	DeleteMeal(c *fiber.Ctx, id string) error
 }
 
 type mealService struct {
@@ -240,4 +246,188 @@ func (s *mealService) saveMealHistory(userID uuid.UUID, foods [][]string, totalN
 	}
 
 	return s.DB.Create(&mealDetail).Error
+}
+
+func (s *mealService) GetMeals(c *fiber.Ctx) ([]model.MealHistory, int64, error) {
+	user, ok := c.Locals("user").(*model.User)
+	if !ok || user == nil {
+		return nil, 0, fiber.NewError(fiber.StatusUnauthorized, "User data not found in context")
+	}
+
+	userID := user.ID
+
+	page := c.QueryInt("page", 1)
+	limit := c.QueryInt("limit", 10)
+	offset := (page - 1) * limit
+
+	var meals []model.MealHistory
+	var totalResults int64
+
+	if err := s.DB.WithContext(c.Context()).
+		Model(&model.MealHistory{}).
+		Where("user_id = ?", userID).
+		Count(&totalResults).Error; err != nil {
+		s.Log.Errorf("Failed to count meals: %+v", err)
+		return nil, 0, err
+	}
+
+	if err := s.DB.WithContext(c.Context()).
+		Where("user_id = ?", userID).
+		Order("meal_time DESC").
+		Offset(offset).
+		Limit(limit).
+		Find(&meals).Error; err != nil {
+		s.Log.Errorf("Failed to get meals: %+v", err)
+		return nil, 0, err
+	}
+
+	return meals, totalResults, nil
+}
+
+func (s *mealService) GetMealByID(c *fiber.Ctx, id string) (*model.MealHistory, error) {
+	meal := new(model.MealHistory)
+
+	result := s.DB.WithContext(c.Context()).First(meal, "id = ?", id)
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, fiber.NewError(fiber.StatusNotFound, "Meal not found")
+	}
+
+	if result.Error != nil {
+		s.Log.Errorf("Failed get meal by id: %+v", result.Error)
+	}
+
+	user, ok := c.Locals("user").(*model.User)
+	if !ok || user == nil {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "User data not found in context")
+	}
+
+	userID := user.ID
+
+	if meal.UserID != userID {
+		return nil, fiber.NewError(fiber.StatusForbidden, "You don't have permission to access this resource")
+	}
+
+	return meal, result.Error
+}
+
+func (s *mealService) GetMealScanDetailByID(c *fiber.Ctx, id string) (*model.MealHistoryDetail, error) {
+	meal := new(model.MealHistory)
+
+	result := s.DB.WithContext(c.Context()).First(meal, "id = ?", id)
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, fiber.NewError(fiber.StatusNotFound, "Meal not found")
+	}
+
+	if result.Error != nil {
+		s.Log.Errorf("Failed get meal by id: %+v", result.Error)
+	}
+
+	mealScanDetail := new(model.MealHistoryDetail)
+
+	resultScanDetail := s.DB.WithContext(c.Context()).First(mealScanDetail, "meal_history_id = ?", id)
+
+	user, ok := c.Locals("user").(*model.User)
+	if !ok || user == nil {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "User data not found in context")
+	}
+
+	if errors.Is(resultScanDetail.Error, gorm.ErrRecordNotFound) {
+		return nil, fiber.NewError(fiber.StatusNotFound, "Meal not found")
+	}
+
+	if resultScanDetail.Error != nil {
+		s.Log.Errorf("Failed get meal by id: %+v", resultScanDetail.Error)
+	}
+
+	userID := user.ID
+
+	if meal.UserID != userID {
+		return nil, fiber.NewError(fiber.StatusForbidden, "You don't have permission to access this resource")
+	}
+
+	return mealScanDetail, result.Error
+}
+
+func (s *mealService) AddMeal(c *fiber.Ctx, meal *model.MealHistory) (*model.MealHistory, error) {
+	user, ok := c.Locals("user").(*model.User)
+	if !ok || user == nil {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "User data not found in context")
+	}
+
+	meal.ID = uuid.New()
+	meal.UserID = user.ID
+	meal.CreatedAt = time.Now()
+	meal.UpdatedAt = time.Now()
+
+	if err := s.DB.WithContext(c.Context()).Create(meal).Error; err != nil {
+		s.Log.Errorf("Failed to add meal: %+v", err)
+		return nil, err
+	}
+
+	return meal, nil
+}
+
+func (s *mealService) UpdateMeal(c *fiber.Ctx, id string, meal *model.MealHistory) (*model.MealHistory, error) {
+	user, ok := c.Locals("user").(*model.User)
+	if !ok || user == nil {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "User data not found in context")
+	}
+
+	existingMeal := new(model.MealHistory)
+	if err := s.DB.WithContext(c.Context()).First(existingMeal, "id = ?", id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fiber.NewError(fiber.StatusNotFound, "Meal not found")
+		}
+		s.Log.Errorf("Failed to find meal: %+v", err)
+		return nil, err
+	}
+
+	if existingMeal.UserID != user.ID {
+		return nil, fiber.NewError(fiber.StatusForbidden, "You don't have permission to update this meal")
+	}
+
+	existingMeal.Title = meal.Title
+	existingMeal.MealTime = meal.MealTime
+	existingMeal.Label = meal.Label
+	existingMeal.Calories = meal.Calories
+	existingMeal.Protein = meal.Protein
+	existingMeal.Carbs = meal.Carbs
+	existingMeal.Fat = meal.Fat
+	existingMeal.UpdatedAt = time.Now()
+
+	if err := s.DB.WithContext(c.Context()).Save(existingMeal).Error; err != nil {
+		s.Log.Errorf("Failed to update meal: %+v", err)
+		return nil, err
+	}
+
+	return existingMeal, nil
+}
+
+func (s *mealService) DeleteMeal(c *fiber.Ctx, id string) error {
+	user, ok := c.Locals("user").(*model.User)
+	if !ok || user == nil {
+		return fiber.NewError(fiber.StatusUnauthorized, "User data not found in context")
+	}
+
+	meal := new(model.MealHistory)
+	if err := s.DB.WithContext(c.Context()).First(meal, "id = ?", id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fiber.NewError(fiber.StatusNotFound, "Meal not found")
+		}
+		s.Log.Errorf("Failed to find meal: %+v", err)
+		return err
+	}
+
+	if meal.UserID != user.ID {
+		return fiber.NewError(fiber.StatusForbidden, "You don't have permission to delete this meal")
+	}
+
+	if err := s.DB.WithContext(c.Context()).Delete(meal).Error; err != nil {
+		s.Log.Errorf("Failed to delete meal: %+v", err)
+		return err
+	}
+
+	return nil
 }

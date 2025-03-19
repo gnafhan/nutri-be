@@ -13,6 +13,17 @@ type SuccessWithUser struct {
 	User    model.User `json:"user"`
 }
 
+type SuccessWithMeal struct {
+	Status  string            `json:"status"`
+	Message string            `json:"message"`
+	Meal    model.MealHistory `json:"meal_history"`
+}
+type SuccessWithMealScanDetail struct {
+	Status         string                  `json:"status"`
+	Message        string                  `json:"message"`
+	MealScanDetail model.MealHistoryDetail `json:"meal_history_scan_detail"`
+}
+
 type SuccessWithTokens struct {
 	Status  string     `json:"status"`
 	Message string     `json:"message"`
