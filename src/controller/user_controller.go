@@ -6,6 +6,7 @@ import (
 	"app/src/service"
 	"app/src/validation"
 	"math"
+	"mime/multipart"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -123,30 +124,44 @@ func (u *UserController) CreateUser(c *fiber.Ctx) error {
 
 // @Tags         Users
 // @Summary      Update a user
-// @Description  Logged in users can only update their own information. Only admins can update other users.
-// @Security BearerAuth
+// @Description  Logged-in users can only update their own information. Only admins can update other users.
+// @Security     BearerAuth
+// @Accept       multipart/form-data
 // @Produce      json
-// @Param        id  path  string  true  "User id"
-// @Param        request  body  validation.UpdateUser  true  "Request body"
+// @Param        id               path      string    true   "User ID"
+// @Param        name             formData  string    false  "User's name (max 50 characters)"
+// @Param        email            formData  string    false  "User's email (must be valid email, max 50 characters)"
+// @Param        password         formData  string    false  "Password (8-20 characters, must contain letters and numbers)"
+// @Param        birth_date       formData  string    false  "Birth date (YYYY-MM-DD format)"
+// @Param        height           formData  number    false  "Height in cm (0-300)"
+// @Param        weight           formData  number    false  "Weight in kg (0-500)"
+// @Param        gender           formData  string    false  "Gender (Male or Female)"
+// @Param        activity_level   formData  string    false  "Activity level (Light, Medium, Heavy)"
+// @Param        medical_history  formData  string    false  "Medical history (max 1000 characters)"
+// @Param        profile_picture  formData  file      false  "Profile picture (optional)"
 // @Router       /users/{id} [patch]
 // @Success      200  {object}  example.UpdateUserResponse
-// @Failure      401  {object}  example.Unauthorized  "Unauthorized"
-// @Failure      403  {object}  example.Forbidden  "Forbidden"
-// @Failure      404  {object}  example.NotFound  "Not found"
-// @Failure      409  {object}  example.DuplicateEmail  "Email already taken"
 func (u *UserController) UpdateUser(c *fiber.Ctx) error {
 	req := new(validation.UpdateUser)
 	userID := c.Params("userId")
+	var profilePicture *multipart.FileHeader
+	var hasFile bool
 
 	if _, err := uuid.Parse(userID); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid user ID")
 	}
 
 	if err := c.BodyParser(req); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid form data")
 	}
 
-	user, err := u.UserService.UpdateUser(c, req, userID)
+	file, err := c.FormFile("profile_picture")
+	if err == nil {
+		profilePicture = file
+		hasFile = true
+	}
+
+	user, err := u.UserService.UpdateUser(c, req, userID, profilePicture, hasFile)
 	if err != nil {
 		return err
 	}
@@ -190,4 +205,30 @@ func (u *UserController) DeleteUser(c *fiber.Ctx) error {
 			Status:  "success",
 			Message: "Delete user successfully",
 		})
+}
+
+// @Tags         Users
+// @Summary      Get user statistics
+// @Description  Get user's weight, height, and calorie statistics.
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id  path  string  true  "User ID"
+// @Router       /users/{id}/statistics [get]
+// @Success      200  {object}  example.UserStatisticsResponse
+// @Failure      401  {object}  example.Unauthorized  "Unauthorized"
+// @Failure      403  {object}  example.Forbidden  "Forbidden"
+// @Failure      404  {object}  example.NotFound  "Not found"
+func (u *UserController) GetUserStatistics(c *fiber.Ctx) error {
+	userID := c.Params("userId")
+
+	if _, err := uuid.Parse(userID); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid user ID")
+	}
+
+	statistics, err := u.UserService.GetUserStatistics(c, userID)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(statistics)
 }

@@ -1,6 +1,9 @@
 package response
 
-import "app/src/model"
+import (
+	"app/src/model"
+	"time"
+)
 
 type Common struct {
 	Status  string `json:"status"`
@@ -11,6 +14,29 @@ type SuccessWithUser struct {
 	Status  string     `json:"status"`
 	Message string     `json:"message"`
 	User    model.User `json:"user"`
+}
+
+type SuccessWithMeal struct {
+	Status  string            `json:"status"`
+	Message string            `json:"message"`
+	Meal    model.MealHistory `json:"meal_history"`
+}
+type SuccessWithMealScanDetail struct {
+	Status         string                  `json:"status"`
+	Message        string                  `json:"message"`
+	MealScanDetail model.MealHistoryDetail `json:"meal_history_scan_detail"`
+}
+
+type SuccessWithWeightHeight struct {
+	Status  string                         `json:"status" example:"success"`
+	Message string                         `json:"message" example:"Operation completed successfully"`
+	Data    model.UsersWeightHeightHistory `json:"data"`
+}
+
+type SuccessWithWeightHeightList struct {
+	Status  string                           `json:"status" example:"success"`
+	Message string                           `json:"message" example:"Operation completed successfully"`
+	Data    []model.UsersWeightHeightHistory `json:"data"`
 }
 
 type SuccessWithTokens struct {
@@ -34,4 +60,25 @@ type ErrorDetails struct {
 	Status  string      `json:"status"`
 	Message string      `json:"message"`
 	Errors  interface{} `json:"errors"`
+}
+
+type UserStatistics struct {
+	Heights  []HeightStat  `json:"heights"`
+	Weights  []WeightStat  `json:"weights"`
+	Calories []CalorieStat `json:"calories"`
+}
+
+type HeightStat struct {
+	Height     float64   `json:"height"`
+	RecordedAt time.Time `json:"recorded_at"`
+}
+
+type WeightStat struct {
+	Weight     float64   `json:"weight"`
+	RecordedAt time.Time `json:"recorded_at"`
+}
+
+type CalorieStat struct {
+	Calories   float64   `json:"calories"`
+	RecordedAt time.Time `json:"recorded_at"`
 }

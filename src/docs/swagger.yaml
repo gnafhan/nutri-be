@@ -1,5 +1,72 @@
 basePath: /v1
 definitions:
+  example.AddMealRequest:
+    properties:
+      calories:
+        example: 500
+        type: number
+      carbs:
+        example: 60
+        type: number
+      fat:
+        example: 15
+        type: number
+      label:
+        example: Lunch
+        type: string
+      meal_time:
+        example: "2023-10-10T12:00:00Z"
+        type: string
+      protein:
+        example: 20
+        type: number
+      title:
+        example: Nasi Goreng
+        type: string
+    type: object
+  example.AddMealResponse:
+    properties:
+      meal:
+        $ref: '#/definitions/example.MealHistory'
+      message:
+        example: Meal added successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+  example.AddWeightHeightRequest:
+    properties:
+      height:
+        example: 175
+        type: number
+      recorded_at:
+        example: "2023-10-10T12:00:00Z"
+        type: string
+      weight:
+        example: 70.5
+        type: number
+    type: object
+  example.AddWeightHeightResponse:
+    properties:
+      data:
+        $ref: '#/definitions/example.UsersWeightHeightHistory'
+      message:
+        example: Weight and height record added successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+  example.CalorieStat:
+    properties:
+      calories:
+        example: 500
+        type: number
+      recorded_at:
+        example: "2023-10-10T08:00:00Z"
+        type: string
+    type: object
   example.CreateUserResponse:
     properties:
       message:
@@ -11,10 +78,28 @@ definitions:
       user:
         $ref: '#/definitions/example.User'
     type: object
+  example.DeleteMealResponse:
+    properties:
+      message:
+        example: Meal deleted successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
   example.DeleteUserResponse:
     properties:
       message:
         example: Delete user successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+  example.DeleteWeightHeightResponse:
+    properties:
+      message:
+        example: Weight and height record deleted successfully
         type: string
       status:
         example: success
@@ -83,6 +168,31 @@ definitions:
         example: success
         type: string
     type: object
+  example.GetAllMealsResponse:
+    properties:
+      limit:
+        example: 10
+        type: integer
+      message:
+        example: Get all meals successfully
+        type: string
+      page:
+        example: 1
+        type: integer
+      results:
+        items:
+          $ref: '#/definitions/example.MealHistory'
+        type: array
+      status:
+        example: success
+        type: string
+      total_pages:
+        example: 5
+        type: integer
+      total_results:
+        example: 50
+        type: integer
+    type: object
   example.GetAllUserResponse:
     properties:
       limit:
@@ -108,6 +218,41 @@ definitions:
         example: 1
         type: integer
     type: object
+  example.GetAllWeightHeightResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/example.UsersWeightHeightHistory'
+        type: array
+      message:
+        example: Weight and height records fetched successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+  example.GetMealResponse:
+    properties:
+      meal:
+        $ref: '#/definitions/example.MealHistory'
+      message:
+        example: Get meal successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+  example.GetMealScanDetailResponse:
+    properties:
+      meal_scan_detail:
+        $ref: '#/definitions/example.MealScanResponse'
+      message:
+        example: Get meal's scan detail successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
   example.GetUserResponse:
     properties:
       message:
@@ -118,6 +263,17 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/example.User'
+    type: object
+  example.GetWeightHeightResponse:
+    properties:
+      data:
+        $ref: '#/definitions/example.UsersWeightHeightHistory'
+      message:
+        example: Weight and height records fetched successfully
+        type: string
+      status:
+        example: success
+        type: string
     type: object
   example.GoogleLoginResponse:
     properties:
@@ -228,6 +384,15 @@ definitions:
         example: error
         type: string
     type: object
+  example.HeightStat:
+    properties:
+      height:
+        example: 170
+        type: number
+      recorded_at:
+        example: "2023-10-10T08:00:00Z"
+        type: string
+    type: object
   example.LoginResponse:
     properties:
       message:
@@ -250,6 +415,55 @@ definitions:
         example: success
         type: string
     type: object
+  example.MealHistory:
+    properties:
+      calories:
+        example: 250.5
+        type: number
+      carbs:
+        example: 45.3
+        type: number
+      fat:
+        example: 10.1
+        type: number
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      label:
+        example: Lunch
+        type: string
+      meal_time:
+        example: "2023-10-01T12:00:00Z"
+        type: string
+      protein:
+        example: 30.2
+        type: number
+      title:
+        example: Scanned Meal
+        type: string
+      user_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    type: object
+  example.MealScanResponse:
+    properties:
+      foods:
+        example:
+        - chicken
+        - rice
+        - salad
+        items:
+          type: string
+        type: array
+      message:
+        example: Meal scanned successfully
+        type: string
+      nutrient:
+        $ref: '#/definitions/example.Nutrient'
+      status:
+        example: success
+        type: string
+    type: object
   example.NotFound:
     properties:
       message:
@@ -257,6 +471,26 @@ definitions:
         type: string
       status:
         example: error
+        type: string
+    type: object
+  example.Nutrient:
+    properties:
+      calories:
+        $ref: '#/definitions/example.NutrientDetail'
+      carbs:
+        $ref: '#/definitions/example.NutrientDetail'
+      fat:
+        $ref: '#/definitions/example.NutrientDetail'
+      protein:
+        $ref: '#/definitions/example.NutrientDetail'
+    type: object
+  example.NutrientDetail:
+    properties:
+      quantity:
+        example: 250.5
+        type: number
+      unit:
+        example: kcal
         type: string
     type: object
   example.RefreshToken:
@@ -329,6 +563,41 @@ definitions:
         example: error
         type: string
     type: object
+  example.UpdateMealRequest:
+    properties:
+      calories:
+        example: 550
+        type: number
+      carbs:
+        example: 65
+        type: number
+      fat:
+        example: 18
+        type: number
+      label:
+        example: Dinner
+        type: string
+      meal_time:
+        example: "2023-10-10T12:30:00Z"
+        type: string
+      protein:
+        example: 25
+        type: number
+      title:
+        example: Nasi Goreng Spesial
+        type: string
+    type: object
+  example.UpdateMealResponse:
+    properties:
+      meal:
+        $ref: '#/definitions/example.MealHistory'
+      message:
+        example: Meal updated successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
   example.UpdateUserResponse:
     properties:
       message:
@@ -339,6 +608,29 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/example.User'
+    type: object
+  example.UpdateWeightHeightRequest:
+    properties:
+      height:
+        example: 175
+        type: number
+      recorded_at:
+        example: "2023-10-10T12:00:00Z"
+        type: string
+      weight:
+        example: 70.5
+        type: number
+    type: object
+  example.UpdateWeightHeightResponse:
+    properties:
+      data:
+        $ref: '#/definitions/example.UsersWeightHeightHistory'
+      message:
+        example: Weight and height record updated successfully
+        type: string
+      status:
+        example: success
+        type: string
     type: object
   example.User:
     properties:
@@ -376,6 +668,42 @@ definitions:
         example: 65.2
         type: number
     type: object
+  example.UserStatisticsResponse:
+    properties:
+      body:
+        properties:
+          calories:
+            items:
+              $ref: '#/definitions/example.CalorieStat'
+            type: array
+          heights:
+            items:
+              $ref: '#/definitions/example.HeightStat'
+            type: array
+          weights:
+            items:
+              $ref: '#/definitions/example.WeightStat'
+            type: array
+        type: object
+    type: object
+  example.UsersWeightHeightHistory:
+    properties:
+      height:
+        example: 180.8
+        type: number
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      recorded_at:
+        example: "2023-10-01T12:00:00Z"
+        type: string
+      user_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      weight:
+        example: 50.5
+        type: number
+    type: object
   example.VerifyEmailResponse:
     properties:
       message:
@@ -393,6 +721,15 @@ definitions:
       status:
         example: success
         type: string
+    type: object
+  example.WeightStat:
+    properties:
+      recorded_at:
+        example: "2023-10-10T08:00:00Z"
+        type: string
+      weight:
+        example: 50
+        type: number
     type: object
   model.ActivityLevel:
     enum:
@@ -520,22 +857,6 @@ definitions:
     type: object
   validation.UpdatePassOrVerify:
     properties:
-      password:
-        example: password1
-        maxLength: 20
-        minLength: 8
-        type: string
-    type: object
-  validation.UpdateUser:
-    properties:
-      email:
-        example: fake@example.com
-        maxLength: 50
-        type: string
-      name:
-        example: fake name
-        maxLength: 50
-        type: string
       password:
         example: password1
         maxLength: 20
@@ -788,6 +1109,229 @@ paths:
       summary: Health Check
       tags:
       - Health
+  /meals:
+    get:
+      description: Logged in users can fetch only their own meals information.
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Maximum number of meals per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.GetAllMealsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+      security:
+      - BearerAuth: []
+      summary: Get a user's meals
+      tags:
+      - Meals
+    post:
+      consumes:
+      - application/json
+      description: Logged in users can add a new meal.
+      parameters:
+      - description: Meal data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.AddMealRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/example.AddMealResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+      security:
+      - BearerAuth: []
+      summary: Add a new meal
+      tags:
+      - Meals
+  /meals/{id}:
+    delete:
+      description: Logged in users can delete their own meal. Only admins can delete
+        other user's meal.
+      parameters:
+      - description: Meal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.DeleteMealResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Delete a meal
+      tags:
+      - Meals
+    get:
+      description: Logged in users can fetch only their own meal detail information.
+        Only admins can fetch other user's meal.
+      parameters:
+      - description: Meal id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.GetMealResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Get a meal
+      tags:
+      - Meals
+    put:
+      consumes:
+      - application/json
+      description: Logged in users can update their own meal. Only admins can update
+        other user's meal.
+      parameters:
+      - description: Meal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Meal data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.UpdateMealRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.UpdateMealResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Update a meal
+      tags:
+      - Meals
+  /meals/{id}/scan-detail:
+    get:
+      description: Logged in users can fetch only their own meal's scan detail detail
+        information. Only admins can fetch other user's meal's scan detail.
+      parameters:
+      - description: Meal id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.GetMealScanDetailResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Get a meal's scan detail
+      tags:
+      - Meals
+  /meals/scan:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Only users who already logged in and had product token verified
+        can scan a meal an get the nutritions
+      parameters:
+      - description: Meal's image
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.MealScanResponse'
+      security:
+      - BearerAuth: []
+      summary: Scan a meal
+      tags:
+      - Meals
   /product-token/verify:
     post:
       parameters:
@@ -807,6 +1351,8 @@ paths:
           description: Invalid or already used product token
           schema:
             $ref: '#/definitions/example.FailedVerifyProductToken'
+      security:
+      - BearerAuth: []
       summary: Verify Product Token
       tags:
       - Product Token
@@ -949,20 +1495,56 @@ paths:
       tags:
       - Users
     patch:
-      description: Logged in users can only update their own information. Only admins
+      consumes:
+      - multipart/form-data
+      description: Logged-in users can only update their own information. Only admins
         can update other users.
       parameters:
-      - description: User id
+      - description: User ID
         in: path
         name: id
         required: true
         type: string
-      - description: Request body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/validation.UpdateUser'
+      - description: User's name (max 50 characters)
+        in: formData
+        name: name
+        type: string
+      - description: User's email (must be valid email, max 50 characters)
+        in: formData
+        name: email
+        type: string
+      - description: Password (8-20 characters, must contain letters and numbers)
+        in: formData
+        name: password
+        type: string
+      - description: Birth date (YYYY-MM-DD format)
+        in: formData
+        name: birth_date
+        type: string
+      - description: Height in cm (0-300)
+        in: formData
+        name: height
+        type: number
+      - description: Weight in kg (0-500)
+        in: formData
+        name: weight
+        type: number
+      - description: Gender (Male or Female)
+        in: formData
+        name: gender
+        type: string
+      - description: Activity level (Light, Medium, Heavy)
+        in: formData
+        name: activity_level
+        type: string
+      - description: Medical history (max 1000 characters)
+        in: formData
+        name: medical_history
+        type: string
+      - description: Profile picture (optional)
+        in: formData
+        name: profile_picture
+        type: file
       produces:
       - application/json
       responses:
@@ -970,6 +1552,27 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/example.UpdateUserResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a user
+      tags:
+      - Users
+  /users/{id}/statistics:
+    get:
+      description: Get user's weight, height, and calorie statistics.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.UserStatisticsResponse'
         "401":
           description: Unauthorized
           schema:
@@ -982,15 +1585,162 @@ paths:
           description: Not found
           schema:
             $ref: '#/definitions/example.NotFound'
-        "409":
-          description: Email already taken
-          schema:
-            $ref: '#/definitions/example.DuplicateEmail'
       security:
       - BearerAuth: []
-      summary: Update a user
+      summary: Get user statistics
       tags:
       - Users
+  /weight-height:
+    get:
+      description: Logged in users can fetch their own weight and height records.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.GetAllWeightHeightResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+      security:
+      - BearerAuth: []
+      summary: Get all weight and height records
+      tags:
+      - Weight Height Record
+    post:
+      consumes:
+      - application/json
+      description: Logged in users can add a new weight and height record.
+      parameters:
+      - description: Weight and height data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.AddWeightHeightRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/example.AddWeightHeightResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+      security:
+      - BearerAuth: []
+      summary: Add a new weight and height record
+      tags:
+      - Weight Height Record
+  /weight-height/{id}:
+    delete:
+      description: Logged in users can delete their own weight and height records.
+      parameters:
+      - description: Record ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.DeleteWeightHeightResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Delete a weight and height record
+      tags:
+      - Weight Height Record
+    get:
+      description: Logged in users can fetch their own weight and height record.
+      parameters:
+      - description: Record id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.GetWeightHeightResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Get a weight height
+      tags:
+      - Weight Height Record
+    put:
+      consumes:
+      - application/json
+      description: Logged in users can update their own weight and height records.
+      parameters:
+      - description: Record ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Weight and height data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.UpdateWeightHeightRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.UpdateWeightHeightResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Update a weight and height record
+      tags:
+      - Weight Height Record
 securityDefinitions:
   BearerAuth:
     description: 'Example Value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'

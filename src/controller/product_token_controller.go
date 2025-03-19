@@ -24,6 +24,7 @@ func NewProductTokenController(
 // @Summary      Verify Product Token
 // @Produce      json
 // @Param        token   query  string  true  "The product token"
+// @Security     BearerAuth
 // @Router       /product-token/verify [post]
 // @Success      200  {object}  example.VerifyProductTokenResponse
 // @Failure      404  {object}  example.FailedVerifyProductToken  "Invalid or already used product token"

@@ -387,8 +387,356 @@ const docTemplate = `{
                 }
             }
         },
+        "/meals": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can fetch only their own meals information.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Meals"
+                ],
+                "summary": "Get a user's meals",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Maximum number of meals per page",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.GetAllMealsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can add a new meal.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Meals"
+                ],
+                "summary": "Add a new meal",
+                "parameters": [
+                    {
+                        "description": "Meal data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.AddMealRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/example.AddMealResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    }
+                }
+            }
+        },
+        "/meals/scan": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Only users who already logged in and had product token verified can scan a meal an get the nutritions",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Meals"
+                ],
+                "summary": "Scan a meal",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Meal's image",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.MealScanResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/meals/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can fetch only their own meal detail information. Only admins can fetch other user's meal.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Meals"
+                ],
+                "summary": "Get a meal",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Meal id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.GetMealResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can update their own meal. Only admins can update other user's meal.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Meals"
+                ],
+                "summary": "Update a meal",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Meal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Meal data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.UpdateMealRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.UpdateMealResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can delete their own meal. Only admins can delete other user's meal.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Meals"
+                ],
+                "summary": "Delete a meal",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Meal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.DeleteMealResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            }
+        },
+        "/meals/{id}/scan-detail": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can fetch only their own meal's scan detail detail information. Only admins can fetch other user's meal's scan detail.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Meals"
+                ],
+                "summary": "Get a meal's scan detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Meal id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.GetMealScanDetailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            }
+        },
         "/product-token/verify": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -639,7 +987,10 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Logged in users can only update their own information. Only admins can update other users.",
+                "description": "Logged-in users can only update their own information. Only admins can update other users.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -650,19 +1001,70 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User id",
+                        "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Request body",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/validation.UpdateUser"
-                        }
+                        "type": "string",
+                        "description": "User's name (max 50 characters)",
+                        "name": "name",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User's email (must be valid email, max 50 characters)",
+                        "name": "email",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password (8-20 characters, must contain letters and numbers)",
+                        "name": "password",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Birth date (YYYY-MM-DD format)",
+                        "name": "birth_date",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Height in cm (0-300)",
+                        "name": "height",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Weight in kg (0-500)",
+                        "name": "weight",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Gender (Male or Female)",
+                        "name": "gender",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Activity level (Light, Medium, Heavy)",
+                        "name": "activity_level",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Medical history (max 1000 characters)",
+                        "name": "medical_history",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Profile picture (optional)",
+                        "name": "profile_picture",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -670,6 +1072,40 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/example.UpdateUserResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}/statistics": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get user's weight, height, and calorie statistics.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user statistics",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.UserStatisticsResponse"
                         }
                     },
                     "401": {
@@ -689,11 +1125,243 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/example.NotFound"
                         }
-                    },
-                    "409": {
-                        "description": "Email already taken",
+                    }
+                }
+            }
+        },
+        "/weight-height": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can fetch their own weight and height records.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Get all weight and height records",
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/example.DuplicateEmail"
+                            "$ref": "#/definitions/example.GetAllWeightHeightResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can add a new weight and height record.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Add a new weight and height record",
+                "parameters": [
+                    {
+                        "description": "Weight and height data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.AddWeightHeightRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/example.AddWeightHeightResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    }
+                }
+            }
+        },
+        "/weight-height/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can fetch their own weight and height record.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Get a weight height",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Record id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.GetWeightHeightResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can update their own weight and height records.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Update a weight and height record",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Record ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Weight and height data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.UpdateWeightHeightRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.UpdateWeightHeightResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can delete their own weight and height records.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Delete a weight and height record",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Record ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.DeleteWeightHeightResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
                         }
                     }
                 }
@@ -701,6 +1369,101 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "example.AddMealRequest": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "type": "number",
+                    "example": 500
+                },
+                "carbs": {
+                    "type": "number",
+                    "example": 60
+                },
+                "fat": {
+                    "type": "number",
+                    "example": 15
+                },
+                "label": {
+                    "type": "string",
+                    "example": "Lunch"
+                },
+                "meal_time": {
+                    "type": "string",
+                    "example": "2023-10-10T12:00:00Z"
+                },
+                "protein": {
+                    "type": "number",
+                    "example": 20
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Nasi Goreng"
+                }
+            }
+        },
+        "example.AddMealResponse": {
+            "type": "object",
+            "properties": {
+                "meal": {
+                    "$ref": "#/definitions/example.MealHistory"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Meal added successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "example.AddWeightHeightRequest": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "example": 175
+                },
+                "recorded_at": {
+                    "type": "string",
+                    "example": "2023-10-10T12:00:00Z"
+                },
+                "weight": {
+                    "type": "number",
+                    "example": 70.5
+                }
+            }
+        },
+        "example.AddWeightHeightResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/example.UsersWeightHeightHistory"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height record added successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "example.CalorieStat": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "type": "number",
+                    "example": 500
+                },
+                "recorded_at": {
+                    "type": "string",
+                    "example": "2023-10-10T08:00:00Z"
+                }
+            }
+        },
         "example.CreateUserResponse": {
             "type": "object",
             "properties": {
@@ -717,12 +1480,38 @@ const docTemplate = `{
                 }
             }
         },
+        "example.DeleteMealResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Meal deleted successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "example.DeleteUserResponse": {
             "type": "object",
             "properties": {
                 "message": {
                     "type": "string",
                     "example": "Delete user successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "example.DeleteWeightHeightResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height record deleted successfully"
                 },
                 "status": {
                     "type": "string",
@@ -821,6 +1610,41 @@ const docTemplate = `{
                 }
             }
         },
+        "example.GetAllMealsResponse": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Get all meals successfully"
+                },
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/example.MealHistory"
+                    }
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "total_pages": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "total_results": {
+                    "type": "integer",
+                    "example": 50
+                }
+            }
+        },
         "example.GetAllUserResponse": {
             "type": "object",
             "properties": {
@@ -856,6 +1680,57 @@ const docTemplate = `{
                 }
             }
         },
+        "example.GetAllWeightHeightResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/example.UsersWeightHeightHistory"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height records fetched successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "example.GetMealResponse": {
+            "type": "object",
+            "properties": {
+                "meal": {
+                    "$ref": "#/definitions/example.MealHistory"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Get meal successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "example.GetMealScanDetailResponse": {
+            "type": "object",
+            "properties": {
+                "meal_scan_detail": {
+                    "$ref": "#/definitions/example.MealScanResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Get meal's scan detail successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "example.GetUserResponse": {
             "type": "object",
             "properties": {
@@ -869,6 +1744,22 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/example.User"
+                }
+            }
+        },
+        "example.GetWeightHeightResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/example.UsersWeightHeightHistory"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height records fetched successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
                 }
             }
         },
@@ -1024,6 +1915,19 @@ const docTemplate = `{
                 }
             }
         },
+        "example.HeightStat": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "example": 170
+                },
+                "recorded_at": {
+                    "type": "string",
+                    "example": "2023-10-10T08:00:00Z"
+                }
+            }
+        },
         "example.LoginResponse": {
             "type": "object",
             "properties": {
@@ -1056,6 +1960,74 @@ const docTemplate = `{
                 }
             }
         },
+        "example.MealHistory": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "type": "number",
+                    "example": 250.5
+                },
+                "carbs": {
+                    "type": "number",
+                    "example": 45.3
+                },
+                "fat": {
+                    "type": "number",
+                    "example": 10.1
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "label": {
+                    "type": "string",
+                    "example": "Lunch"
+                },
+                "meal_time": {
+                    "type": "string",
+                    "example": "2023-10-01T12:00:00Z"
+                },
+                "protein": {
+                    "type": "number",
+                    "example": 30.2
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Scanned Meal"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                }
+            }
+        },
+        "example.MealScanResponse": {
+            "type": "object",
+            "properties": {
+                "foods": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "chicken",
+                        "rice",
+                        "salad"
+                    ]
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Meal scanned successfully"
+                },
+                "nutrient": {
+                    "$ref": "#/definitions/example.Nutrient"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "example.NotFound": {
             "type": "object",
             "properties": {
@@ -1066,6 +2038,36 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "example": "error"
+                }
+            }
+        },
+        "example.Nutrient": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "$ref": "#/definitions/example.NutrientDetail"
+                },
+                "carbs": {
+                    "$ref": "#/definitions/example.NutrientDetail"
+                },
+                "fat": {
+                    "$ref": "#/definitions/example.NutrientDetail"
+                },
+                "protein": {
+                    "$ref": "#/definitions/example.NutrientDetail"
+                }
+            }
+        },
+        "example.NutrientDetail": {
+            "type": "object",
+            "properties": {
+                "quantity": {
+                    "type": "number",
+                    "example": 250.5
+                },
+                "unit": {
+                    "type": "string",
+                    "example": "kcal"
                 }
             }
         },
@@ -1172,6 +2174,55 @@ const docTemplate = `{
                 }
             }
         },
+        "example.UpdateMealRequest": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "type": "number",
+                    "example": 550
+                },
+                "carbs": {
+                    "type": "number",
+                    "example": 65
+                },
+                "fat": {
+                    "type": "number",
+                    "example": 18
+                },
+                "label": {
+                    "type": "string",
+                    "example": "Dinner"
+                },
+                "meal_time": {
+                    "type": "string",
+                    "example": "2023-10-10T12:30:00Z"
+                },
+                "protein": {
+                    "type": "number",
+                    "example": 25
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Nasi Goreng Spesial"
+                }
+            }
+        },
+        "example.UpdateMealResponse": {
+            "type": "object",
+            "properties": {
+                "meal": {
+                    "$ref": "#/definitions/example.MealHistory"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Meal updated successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "example.UpdateUserResponse": {
             "type": "object",
             "properties": {
@@ -1185,6 +2236,39 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/example.User"
+                }
+            }
+        },
+        "example.UpdateWeightHeightRequest": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "example": 175
+                },
+                "recorded_at": {
+                    "type": "string",
+                    "example": "2023-10-10T12:00:00Z"
+                },
+                "weight": {
+                    "type": "number",
+                    "example": 70.5
+                }
+            }
+        },
+        "example.UpdateWeightHeightResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/example.UsersWeightHeightHistory"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height record updated successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
                 }
             }
         },
@@ -1237,6 +2321,59 @@ const docTemplate = `{
                 }
             }
         },
+        "example.UserStatisticsResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "calories": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/example.CalorieStat"
+                            }
+                        },
+                        "heights": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/example.HeightStat"
+                            }
+                        },
+                        "weights": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/example.WeightStat"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "example.UsersWeightHeightHistory": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "example": 180.8
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "recorded_at": {
+                    "type": "string",
+                    "example": "2023-10-01T12:00:00Z"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "weight": {
+                    "type": "number",
+                    "example": 50.5
+                }
+            }
+        },
         "example.VerifyEmailResponse": {
             "type": "object",
             "properties": {
@@ -1260,6 +2397,19 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "example": "success"
+                }
+            }
+        },
+        "example.WeightStat": {
+            "type": "object",
+            "properties": {
+                "recorded_at": {
+                    "type": "string",
+                    "example": "2023-10-10T08:00:00Z"
+                },
+                "weight": {
+                    "type": "number",
+                    "example": 50
                 }
             }
         },
@@ -1433,27 +2583,6 @@ const docTemplate = `{
         "validation.UpdatePassOrVerify": {
             "type": "object",
             "properties": {
-                "password": {
-                    "type": "string",
-                    "maxLength": 20,
-                    "minLength": 8,
-                    "example": "password1"
-                }
-            }
-        },
-        "validation.UpdateUser": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "example": "fake@example.com"
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "example": "fake name"
-                },
                 "password": {
                     "type": "string",
                     "maxLength": 20,

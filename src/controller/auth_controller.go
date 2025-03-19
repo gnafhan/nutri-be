@@ -289,8 +289,9 @@ func (a *AuthController) Google(c *fiber.Ctx) error {
 	}
 
 	claims := new(struct {
-		Email string `json:"email"`
-		Name  string `json:"name"`
+		Email          string `json:"email"`
+		Name           string `json:"name"`
+		ProfilePicture string `json:"picture"`
 		jwt.RegisteredClaims
 	})
 	_, _, err = new(jwt.Parser).ParseUnverified(token.AccessToken, claims)
@@ -299,9 +300,12 @@ func (a *AuthController) Google(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusUnauthorized, "Invalid ID Token format")
 	}
 
+	// Simpan data pengguna Google
 	googleUser := &validation.GoogleLogin{
-		Email: claims.Email,
-		Name:  claims.Name,
+		Email:          claims.Email,
+		Name:           claims.Name,
+		ProfilePicture: claims.ProfilePicture,
+		GoogleIDToken:  idToken,
 	}
 
 	user, err := a.UserService.CreateGoogleUser(c, googleUser)

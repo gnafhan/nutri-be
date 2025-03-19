@@ -5,6 +5,7 @@ import (
 	"app/src/service"
 	"app/src/utils"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -46,12 +47,13 @@ func Auth(userService service.UserService, productTokenService service.ProductTo
 			return fiber.ErrInternalServerError
 		}
 
-		expDuration, err := time.ParseDuration(expDays + "h")
+		expDaysInt, err := strconv.Atoi(expDays)
 		if err != nil {
-			fmt.Println("Error parsing duration:", err)
+			fmt.Println("Error parsing PRODUCT_TOKEN_EXP_DAYS:", err)
 			return fiber.ErrInternalServerError
 		}
 
+		expDuration := time.Duration(expDaysInt) * 24 * time.Hour
 		expirationTime := productToken.ActivatedAt.Add(expDuration)
 		if time.Now().After(expirationTime) {
 			if err := productTokenService.DeleteProductToken(c, productToken.ID); err != nil {

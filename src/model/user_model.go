@@ -26,6 +26,8 @@ type User struct {
 	Password       string         `gorm:"not null" json:"-"`
 	Role           string         `gorm:"default:user;not null" json:"role"`
 	VerifiedEmail  bool           `gorm:"default:false;not null" json:"verified_email"`
+	ProfilePicture string         `gorm:"default:null" json:"profile_picture"`
+	GoogleIDToken  string         `gorm:"default:null" json:"google_id_token"`
 	BirthDate      *time.Time     `gorm:"default:null" json:"birth_date"`
 	Height         *float64       `gorm:"type:decimal(5,2);default:null" json:"height"`
 	Weight         *float64       `gorm:"type:decimal(5,2);default:null" json:"weight"`
