@@ -730,6 +730,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/meals/{mealId}/scan-detail": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can add a new meal's scan detail.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Meals"
+                ],
+                "summary": "Add a new meal's scan detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Meal ID",
+                        "name": "mealId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Meal's scan detail data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.AddMealScanDetailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/example.AddMealScanDetailResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            }
+        },
         "/product-token/verify": {
             "post": {
                 "security": [
@@ -989,7 +1047,7 @@ const docTemplate = `{
                 ],
                 "description": "Logged-in users can only update their own information. Only admins can update other users.",
                 "consumes": [
-                    "multipart/form-data"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -1007,64 +1065,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "User's name (max 50 characters)",
-                        "name": "name",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "User's email (must be valid email, max 50 characters)",
-                        "name": "email",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Password (8-20 characters, must contain letters and numbers)",
-                        "name": "password",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Birth date (YYYY-MM-DD format)",
-                        "name": "birth_date",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "number",
-                        "description": "Height in cm (0-300)",
-                        "name": "height",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "number",
-                        "description": "Weight in kg (0-500)",
-                        "name": "weight",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Gender (Male or Female)",
-                        "name": "gender",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Activity level (Light, Medium, Heavy)",
-                        "name": "activity_level",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Medical history (max 1000 characters)",
-                        "name": "medical_history",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "file",
-                        "description": "Profile picture (optional)",
-                        "name": "profile_picture",
-                        "in": "formData"
+                        "description": "Update user data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validation.UpdateUser"
+                        }
                     }
                 ],
                 "responses": {
@@ -1411,6 +1418,32 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "Meal added successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "example.AddMealScanDetailRequest": {
+            "type": "object",
+            "properties": {
+                "api_result": {
+                    "type": "string",
+                    "example": "{...}"
+                },
+                "meal_history_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                }
+            }
+        },
+        "example.AddMealScanDetailResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Meal scan detail added successfully"
                 },
                 "status": {
                     "type": "string",
@@ -2588,6 +2621,76 @@ const docTemplate = `{
                     "maxLength": 20,
                     "minLength": 8,
                     "example": "password1"
+                }
+            }
+        },
+        "validation.UpdateUser": {
+            "type": "object",
+            "properties": {
+                "activity_level": {
+                    "enum": [
+                        "Light",
+                        "Medium",
+                        "Heavy"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.ActivityLevel"
+                        }
+                    ],
+                    "example": "Medium"
+                },
+                "birth_date": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "example": "fake@example.com"
+                },
+                "gender": {
+                    "enum": [
+                        "Male",
+                        "Female"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.GenderType"
+                        }
+                    ],
+                    "example": "Male"
+                },
+                "height": {
+                    "type": "number",
+                    "maximum": 300,
+                    "minimum": 0,
+                    "example": 175.5
+                },
+                "medical_history": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "example": "No known allergies"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "example": "fake name"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 8,
+                    "example": "password1"
+                },
+                "profile_picture": {
+                    "type": "string",
+                    "example": "https://example.com/image.jpg"
+                },
+                "weight": {
+                    "type": "number",
+                    "maximum": 500,
+                    "minimum": 0,
+                    "example": 70.3
                 }
             }
         }

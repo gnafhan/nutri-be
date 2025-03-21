@@ -25,6 +25,7 @@ type MealService interface {
 	GetMeals(c *fiber.Ctx) ([]model.MealHistory, int64, error)
 	GetMealByID(c *fiber.Ctx, id string) (*model.MealHistory, error)
 	GetMealScanDetailByID(c *fiber.Ctx, id string) (*model.MealHistoryDetail, error)
+	AddMealScanDetail(c *fiber.Ctx, mealId string, meal *model.MealHistoryDetail) (*model.MealHistoryDetail, error)
 	AddMeal(c *fiber.Ctx, meal *model.MealHistory) (*model.MealHistory, error)
 	UpdateMeal(c *fiber.Ctx, id string, meal *model.MealHistory) (*model.MealHistory, error)
 	DeleteMeal(c *fiber.Ctx, id string) error
@@ -430,4 +431,18 @@ func (s *mealService) DeleteMeal(c *fiber.Ctx, id string) error {
 	}
 
 	return nil
+}
+
+func (s *mealService) AddMealScanDetail(c *fiber.Ctx, mealId string, meal *model.MealHistoryDetail) (*model.MealHistoryDetail, error) {
+	meal.ID = uuid.New()
+	meal.MealHistoryID = uuid.MustParse(mealId)
+	meal.CreatedAt = time.Now()
+	meal.UpdatedAt = time.Now()
+
+	if err := s.DB.WithContext(c.Context()).Create(meal).Error; err != nil {
+		s.Log.Errorf("Failed to add meal scan detail: %+v", err)
+		return nil, err
+	}
+
+	return meal, nil
 }

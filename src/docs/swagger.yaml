@@ -35,6 +35,24 @@ definitions:
         example: success
         type: string
     type: object
+  example.AddMealScanDetailRequest:
+    properties:
+      api_result:
+        example: '{...}'
+        type: string
+      meal_history_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    type: object
+  example.AddMealScanDetailResponse:
+    properties:
+      message:
+        example: Meal scan detail added successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
   example.AddWeightHeightRequest:
     properties:
       height:
@@ -863,6 +881,56 @@ definitions:
         minLength: 8
         type: string
     type: object
+  validation.UpdateUser:
+    properties:
+      activity_level:
+        allOf:
+        - $ref: '#/definitions/model.ActivityLevel'
+        enum:
+        - Light
+        - Medium
+        - Heavy
+        example: Medium
+      birth_date:
+        type: string
+      email:
+        example: fake@example.com
+        maxLength: 50
+        type: string
+      gender:
+        allOf:
+        - $ref: '#/definitions/model.GenderType'
+        enum:
+        - Male
+        - Female
+        example: Male
+      height:
+        example: 175.5
+        maximum: 300
+        minimum: 0
+        type: number
+      medical_history:
+        example: No known allergies
+        maxLength: 1000
+        type: string
+      name:
+        example: fake name
+        maxLength: 50
+        type: string
+      password:
+        example: password1
+        maxLength: 20
+        minLength: 8
+        type: string
+      profile_picture:
+        example: https://example.com/image.jpg
+        type: string
+      weight:
+        example: 70.3
+        maximum: 500
+        minimum: 0
+        type: number
+    type: object
 host: localhost:5000
 info:
   contact: {}
@@ -1308,6 +1376,43 @@ paths:
       summary: Get a meal's scan detail
       tags:
       - Meals
+  /meals/{mealId}/scan-detail:
+    post:
+      consumes:
+      - application/json
+      description: Logged in users can add a new meal's scan detail.
+      parameters:
+      - description: Meal ID
+        in: path
+        name: mealId
+        required: true
+        type: string
+      - description: Meal's scan detail data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.AddMealScanDetailRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/example.AddMealScanDetailResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Add a new meal's scan detail
+      tags:
+      - Meals
   /meals/scan:
     post:
       consumes:
@@ -1496,7 +1601,7 @@ paths:
       - Users
     patch:
       consumes:
-      - multipart/form-data
+      - application/json
       description: Logged-in users can only update their own information. Only admins
         can update other users.
       parameters:
@@ -1505,46 +1610,12 @@ paths:
         name: id
         required: true
         type: string
-      - description: User's name (max 50 characters)
-        in: formData
-        name: name
-        type: string
-      - description: User's email (must be valid email, max 50 characters)
-        in: formData
-        name: email
-        type: string
-      - description: Password (8-20 characters, must contain letters and numbers)
-        in: formData
-        name: password
-        type: string
-      - description: Birth date (YYYY-MM-DD format)
-        in: formData
-        name: birth_date
-        type: string
-      - description: Height in cm (0-300)
-        in: formData
-        name: height
-        type: number
-      - description: Weight in kg (0-500)
-        in: formData
-        name: weight
-        type: number
-      - description: Gender (Male or Female)
-        in: formData
-        name: gender
-        type: string
-      - description: Activity level (Light, Medium, Heavy)
-        in: formData
-        name: activity_level
-        type: string
-      - description: Medical history (max 1000 characters)
-        in: formData
-        name: medical_history
-        type: string
-      - description: Profile picture (optional)
-        in: formData
-        name: profile_picture
-        type: file
+      - description: Update user data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/validation.UpdateUser'
       produces:
       - application/json
       responses:

@@ -147,6 +147,48 @@ func (mc *MealController) GetMealScanDetailByID(c *fiber.Ctx) error {
 }
 
 // @Tags         Meals
+// @Summary      Add a new meal's scan detail
+// @Description  Logged in users can add a new meal's scan detail.
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        mealId   path      string                      true  "Meal ID"
+// @Param        request  body      example.AddMealScanDetailRequest  true  "Meal's scan detail data"
+// @Router       /meals/{mealId}/scan-detail [post]
+// @Success      201  {object}  example.AddMealScanDetailResponse
+// @Failure      401  {object}  example.Unauthorized  "Unauthorized"
+// @Failure      404  {object}  example.NotFound  "Not found"
+func (mc *MealController) AddMealScanDetail(c *fiber.Ctx) error {
+	mealId := c.Params("mealId")
+
+	if _, err := uuid.Parse(mealId); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid meal ID")
+	}
+
+	var request model.MealHistoryDetail
+	if err := c.BodyParser(&request); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(response.Common{
+			Status:  "error",
+			Message: "Invalid request body",
+		})
+	}
+
+	mealScanDetail, err := mc.MealService.AddMealScanDetail(c, mealId, &request)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.Common{
+			Status:  "error",
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(response.SuccessWithMealScanDetail{
+		Status:         "success",
+		Message:        "Meal's scan detail added successfully",
+		MealScanDetail: *mealScanDetail,
+	})
+}
+
+// @Tags         Meals
 // @Summary      Add a new meal
 // @Description  Logged in users can add a new meal.
 // @Security     BearerAuth

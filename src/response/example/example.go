@@ -254,3 +254,13 @@ type CalorieStat struct {
 	Calories   float64   `json:"calories" example:"500"`
 	RecordedAt time.Time `json:"recorded_at" example:"2023-10-10T08:00:00Z"`
 }
+
+type AddMealScanDetailRequest struct {
+	MealHistoryId string `json:"meal_history_id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	ApiResult     string `json:"api_result" example:"{...}"`
+}
+
+type AddMealScanDetailResponse struct {
+	Status  string `json:"status" example:"success"`
+	Message string `json:"message" example:"Meal scan detail added successfully"`
+}

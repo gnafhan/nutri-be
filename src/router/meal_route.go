@@ -20,4 +20,5 @@ func MealRoutes(v1 fiber.Router, u service.UserService, p service.ProductTokenSe
 	meal.Put("/:mealId", m.Auth(u, p), mealController.UpdateMeal)
 	meal.Delete("/:mealId", m.Auth(u, p), mealController.DeleteMeal)
 	meal.Get("/:mealId/scan-detail", m.Auth(u, p), mealController.GetMealScanDetailByID)
+	meal.Post("/:mealId/scan-detail", m.Auth(u, p), mealController.AddMealScanDetail)
 }

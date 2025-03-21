@@ -70,5 +70,6 @@ func SeedProductTokens(db *gorm.DB) {
 func RunSeeder(db *gorm.DB) {
 	log.Println("🚀 Running database seeder...")
 	SeedProductTokens(db)
+	SeedMeals(db)
 	log.Println("🎉 Database seeding completed!")
 }
