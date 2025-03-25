@@ -12,6 +12,274 @@
     "host": "localhost:5000",
     "basePath": "/v1",
     "paths": {
+        "/article-categories": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all article categories",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Article Categories"
+                ],
+                "summary": "Get all article categories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithArticleCategoryList"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create new article category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Article Categories"
+                ],
+                "summary": "Create new article category",
+                "parameters": [
+                    {
+                        "description": "Category data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.CreateArticleCategoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithArticleCategory"
+                        }
+                    }
+                }
+            }
+        },
+        "/article-categories/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete article category",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Article Categories"
+                ],
+                "summary": "Delete article category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Common"
+                        }
+                    }
+                }
+            }
+        },
+        "/articles": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all articles",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Articles"
+                ],
+                "summary": "Get all articles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithArticleList"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create new article",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Articles"
+                ],
+                "summary": "Create new article",
+                "parameters": [
+                    {
+                        "description": "Article data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.CreateArticleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithArticle"
+                        }
+                    }
+                }
+            }
+        },
+        "/articles/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get article by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Articles"
+                ],
+                "summary": "Get article by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Article ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithArticle"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update article",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Articles"
+                ],
+                "summary": "Update article",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Article ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Article data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.UpdateArticleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithArticle"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete article",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Articles"
+                ],
+                "summary": "Delete article",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Article ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Common"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/forgot-password": {
             "post": {
                 "description": "An email will be sent to reset password.",
@@ -1203,6 +1471,244 @@
                 }
             }
         },
+        "/weight-height/target": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can fetch their own weight and height target records.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Get all weight and height target records",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.GetAllWeightHeightTargetResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can add a new weight and height target record.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Add a new weight and height target record",
+                "parameters": [
+                    {
+                        "description": "Weight and height target data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.AddWeightHeightTargetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/example.AddWeightHeightTargetResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    }
+                }
+            }
+        },
+        "/weight-height/target/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can fetch their own weight and height target record.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Get a weight height target",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Record id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.GetWeightHeightTargetResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can update their own weight and height target records.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Update a weight and height target record",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Record ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Weight and height target data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.UpdateWeightHeightTargetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.UpdateWeightHeightTargetResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can delete their own weight and height target records.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Weight Height Record"
+                ],
+                "summary": "Delete a weight and height target record",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Record ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.DeleteWeightHeightTargetResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/example.Forbidden"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/example.NotFound"
+                        }
+                    }
+                }
+            }
+        },
         "/weight-height/{id}": {
             "get": {
                 "security": [
@@ -1477,6 +1983,39 @@
                 }
             }
         },
+        "example.AddWeightHeightTargetRequest": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "example": 175
+                },
+                "target_date": {
+                    "type": "string",
+                    "example": "2023-10-10T12:00:00Z"
+                },
+                "weight": {
+                    "type": "number",
+                    "example": 70.5
+                }
+            }
+        },
+        "example.AddWeightHeightTargetResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/example.UsersWeightHeightTarget"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height target record added successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "example.CalorieStat": {
             "type": "object",
             "properties": {
@@ -1487,6 +2026,44 @@
                 "recorded_at": {
                     "type": "string",
                     "example": "2023-10-10T08:00:00Z"
+                }
+            }
+        },
+        "example.CreateArticleCategoryRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "Technology"
+                }
+            }
+        },
+        "example.CreateArticleRequest": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "content": {
+                    "type": "string",
+                    "example": "This is the content of my article"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "https://example.com/image.jpg"
+                },
+                "published_at": {
+                    "type": "string",
+                    "example": "2023-10-10T12:00:00Z"
+                },
+                "slug": {
+                    "type": "string",
+                    "example": "my-first-article"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "My First Article"
                 }
             }
         },
@@ -1538,6 +2115,19 @@
                 "message": {
                     "type": "string",
                     "example": "Weight and height record deleted successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "example.DeleteWeightHeightTargetResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height target record deleted successfully"
                 },
                 "status": {
                     "type": "string",
@@ -1725,6 +2315,25 @@
                 }
             }
         },
+        "example.GetAllWeightHeightTargetResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/example.UsersWeightHeightTarget"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height target records fetched successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "example.GetMealResponse": {
             "type": "object",
             "properties": {
@@ -1782,6 +2391,22 @@
                 "message": {
                     "type": "string",
                     "example": "Weight and height records fetched successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "example.GetWeightHeightTargetResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/example.UsersWeightHeightTarget"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height target records fetched successfully"
                 },
                 "status": {
                     "type": "string",
@@ -2200,6 +2825,35 @@
                 }
             }
         },
+        "example.UpdateArticleRequest": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "content": {
+                    "type": "string",
+                    "example": "Updated content of my article"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "https://example.com/new-image.jpg"
+                },
+                "published_at": {
+                    "type": "string",
+                    "example": "2023-10-11T12:00:00Z"
+                },
+                "slug": {
+                    "type": "string",
+                    "example": "updated-article-slug"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Updated Article Title"
+                }
+            }
+        },
         "example.UpdateMealRequest": {
             "type": "object",
             "properties": {
@@ -2291,6 +2945,39 @@
                 "message": {
                     "type": "string",
                     "example": "Weight and height record updated successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "example.UpdateWeightHeightTargetRequest": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "example": 175
+                },
+                "target_date": {
+                    "type": "string",
+                    "example": "2023-10-10T12:00:00Z"
+                },
+                "weight": {
+                    "type": "number",
+                    "example": 70.5
+                }
+            }
+        },
+        "example.UpdateWeightHeightTargetResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/example.UsersWeightHeightTarget"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Weight and height record target updated successfully"
                 },
                 "status": {
                     "type": "string",
@@ -2400,6 +3087,31 @@
                 }
             }
         },
+        "example.UsersWeightHeightTarget": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "number",
+                    "example": 180.8
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "target_date": {
+                    "type": "string",
+                    "example": "2023-10-01T12:00:00Z"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "weight": {
+                    "type": "number",
+                    "example": 50.5
+                }
+            }
+        },
         "example.VerifyEmailResponse": {
             "type": "object",
             "properties": {
@@ -2452,6 +3164,49 @@
                 "Heavy"
             ]
         },
+        "model.Article": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "published_at": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ArticleCategory": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "model.GenderType": {
             "type": "string",
             "enum": [
@@ -2462,6 +3217,79 @@
                 "Male",
                 "Female"
             ]
+        },
+        "response.Common": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.SuccessWithArticle": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/model.Article"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.SuccessWithArticleCategory": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/model.ArticleCategory"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.SuccessWithArticleCategoryList": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ArticleCategory"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.SuccessWithArticleList": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Article"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
         },
         "validation.CreateUser": {
             "type": "object",

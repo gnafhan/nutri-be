@@ -232,6 +232,55 @@ type DeleteWeightHeightResponse struct {
 	Message string `json:"message" example:"Weight and height record deleted successfully"`
 }
 
+type UsersWeightHeightTarget struct {
+	ID         string    `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	UserID     string    `json:"user_id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Weight     float64   `json:"weight" example:"50.5"`
+	Height     float64   `json:"height" example:"180.8"`
+	TargetDate time.Time `json:"target_date" example:"2023-10-01T12:00:00Z"`
+}
+
+type AddWeightHeightTargetResponse struct {
+	Status  string                  `json:"status" example:"success"`
+	Message string                  `json:"message" example:"Weight and height target record added successfully"`
+	Data    UsersWeightHeightTarget `json:"data"`
+}
+
+type GetAllWeightHeightTargetResponse struct {
+	Status  string                    `json:"status" example:"success"`
+	Message string                    `json:"message" example:"Weight and height target records fetched successfully"`
+	Data    []UsersWeightHeightTarget `json:"data"`
+}
+
+type GetWeightHeightTargetResponse struct {
+	Status  string                  `json:"status" example:"success"`
+	Message string                  `json:"message" example:"Weight and height target records fetched successfully"`
+	Data    UsersWeightHeightTarget `json:"data"`
+}
+
+type UpdateWeightHeightTargetResponse struct {
+	Status  string                  `json:"status" example:"success"`
+	Message string                  `json:"message" example:"Weight and height record target updated successfully"`
+	Data    UsersWeightHeightTarget `json:"data"`
+}
+
+type AddWeightHeightTargetRequest struct {
+	Weight     float64    `json:"weight,omitempty" example:"70.5"`
+	Height     float64    `json:"height,omitempty" example:"175.0"`
+	TargetDate *time.Time `json:"target_date,omitempty" example:"2023-10-10T12:00:00Z"`
+}
+
+type UpdateWeightHeightTargetRequest struct {
+	Weight     float64    `json:"weight,omitempty" example:"70.5"`
+	Height     float64    `json:"height,omitempty" example:"175.0"`
+	TargetDate *time.Time `json:"target_date,omitempty" example:"2023-10-10T12:00:00Z"`
+}
+
+type DeleteWeightHeightTargetResponse struct {
+	Status  string `json:"status" example:"success"`
+	Message string `json:"message" example:"Weight and height target record deleted successfully"`
+}
+
 type UserStatisticsResponse struct {
 	Body struct {
 		Heights  []HeightStat  `json:"heights"`
@@ -263,4 +312,44 @@ type AddMealScanDetailRequest struct {
 type AddMealScanDetailResponse struct {
 	Status  string `json:"status" example:"success"`
 	Message string `json:"message" example:"Meal scan detail added successfully"`
+}
+
+type CreateArticleRequest struct {
+	Title       string     `json:"title" example:"My First Article"`
+	CategoryID  *string    `json:"category_id,omitempty" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Slug        string     `json:"slug" example:"my-first-article"`
+	Image       *string    `json:"image,omitempty" example:"https://example.com/image.jpg"`
+	Content     string     `json:"content" example:"This is the content of my article"`
+	PublishedAt *time.Time `json:"published_at,omitempty" example:"2023-10-10T12:00:00Z"`
+}
+
+type UpdateArticleRequest struct {
+	Title       string     `json:"title,omitempty" example:"Updated Article Title"`
+	CategoryID  *string    `json:"category_id,omitempty" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Slug        string     `json:"slug,omitempty" example:"updated-article-slug"`
+	Image       *string    `json:"image,omitempty" example:"https://example.com/new-image.jpg"`
+	Content     string     `json:"content,omitempty" example:"Updated content of my article"`
+	PublishedAt *time.Time `json:"published_at,omitempty" example:"2023-10-11T12:00:00Z"`
+}
+
+type CreateArticleCategoryRequest struct {
+	Name string `json:"name" example:"Technology"`
+}
+
+type ArticleResponse struct {
+	ID          string     `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	UserID      string     `json:"user_id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Title       string     `json:"title" example:"My First Article"`
+	CategoryID  *string    `json:"category_id,omitempty" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Slug        string     `json:"slug" example:"my-first-article"`
+	Image       *string    `json:"image,omitempty" example:"https://example.com/image.jpg"`
+	Content     string     `json:"content" example:"This is the content of my article"`
+	PublishedAt *time.Time `json:"published_at,omitempty" example:"2023-10-10T12:00:00Z"`
+}
+
+type ArticleCategoryResponse struct {
+	ID        string    `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	UserID    string    `json:"user_id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Name      string    `json:"name" example:"Technology"`
+	CreatedAt time.Time `json:"created_at" example:"2023-10-10T12:00:00Z"`
 }

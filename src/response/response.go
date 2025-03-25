@@ -33,10 +33,22 @@ type SuccessWithWeightHeight struct {
 	Data    model.UsersWeightHeightHistory `json:"data"`
 }
 
+type SuccessWithWeightHeightTarget struct {
+	Status  string                        `json:"status" example:"success"`
+	Message string                        `json:"message" example:"Operation completed successfully"`
+	Data    model.UsersWeightHeightTarget `json:"data"`
+}
+
 type SuccessWithWeightHeightList struct {
 	Status  string                           `json:"status" example:"success"`
 	Message string                           `json:"message" example:"Operation completed successfully"`
 	Data    []model.UsersWeightHeightHistory `json:"data"`
+}
+
+type SuccessWithWeightHeightTargetList struct {
+	Status  string                          `json:"status" example:"success"`
+	Message string                          `json:"message" example:"Operation completed successfully"`
+	Data    []model.UsersWeightHeightTarget `json:"data"`
 }
 
 type SuccessWithTokens struct {
@@ -81,4 +93,28 @@ type WeightStat struct {
 type CalorieStat struct {
 	Calories   float64   `json:"calories"`
 	RecordedAt time.Time `json:"recorded_at"`
+}
+
+type SuccessWithArticle struct {
+	Status  string        `json:"status"`
+	Message string        `json:"message"`
+	Data    model.Article `json:"data"`
+}
+
+type SuccessWithArticleList struct {
+	Status  string          `json:"status"`
+	Message string          `json:"message"`
+	Data    []model.Article `json:"data"`
+}
+
+type SuccessWithArticleCategory struct {
+	Status  string                `json:"status"`
+	Message string                `json:"message"`
+	Data    model.ArticleCategory `json:"data"`
+}
+
+type SuccessWithArticleCategoryList struct {
+	Status  string                  `json:"status"`
+	Message string                  `json:"message"`
+	Data    []model.ArticleCategory `json:"data"`
 }

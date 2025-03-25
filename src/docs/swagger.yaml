@@ -76,6 +76,29 @@ definitions:
         example: success
         type: string
     type: object
+  example.AddWeightHeightTargetRequest:
+    properties:
+      height:
+        example: 175
+        type: number
+      target_date:
+        example: "2023-10-10T12:00:00Z"
+        type: string
+      weight:
+        example: 70.5
+        type: number
+    type: object
+  example.AddWeightHeightTargetResponse:
+    properties:
+      data:
+        $ref: '#/definitions/example.UsersWeightHeightTarget'
+      message:
+        example: Weight and height target record added successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
   example.CalorieStat:
     properties:
       calories:
@@ -83,6 +106,33 @@ definitions:
         type: number
       recorded_at:
         example: "2023-10-10T08:00:00Z"
+        type: string
+    type: object
+  example.CreateArticleCategoryRequest:
+    properties:
+      name:
+        example: Technology
+        type: string
+    type: object
+  example.CreateArticleRequest:
+    properties:
+      category_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      content:
+        example: This is the content of my article
+        type: string
+      image:
+        example: https://example.com/image.jpg
+        type: string
+      published_at:
+        example: "2023-10-10T12:00:00Z"
+        type: string
+      slug:
+        example: my-first-article
+        type: string
+      title:
+        example: My First Article
         type: string
     type: object
   example.CreateUserResponse:
@@ -118,6 +168,15 @@ definitions:
     properties:
       message:
         example: Weight and height record deleted successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+  example.DeleteWeightHeightTargetResponse:
+    properties:
+      message:
+        example: Weight and height target record deleted successfully
         type: string
       status:
         example: success
@@ -249,6 +308,19 @@ definitions:
         example: success
         type: string
     type: object
+  example.GetAllWeightHeightTargetResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/example.UsersWeightHeightTarget'
+        type: array
+      message:
+        example: Weight and height target records fetched successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
   example.GetMealResponse:
     properties:
       meal:
@@ -288,6 +360,17 @@ definitions:
         $ref: '#/definitions/example.UsersWeightHeightHistory'
       message:
         example: Weight and height records fetched successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+  example.GetWeightHeightTargetResponse:
+    properties:
+      data:
+        $ref: '#/definitions/example.UsersWeightHeightTarget'
+      message:
+        example: Weight and height target records fetched successfully
         type: string
       status:
         example: success
@@ -581,6 +664,27 @@ definitions:
         example: error
         type: string
     type: object
+  example.UpdateArticleRequest:
+    properties:
+      category_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      content:
+        example: Updated content of my article
+        type: string
+      image:
+        example: https://example.com/new-image.jpg
+        type: string
+      published_at:
+        example: "2023-10-11T12:00:00Z"
+        type: string
+      slug:
+        example: updated-article-slug
+        type: string
+      title:
+        example: Updated Article Title
+        type: string
+    type: object
   example.UpdateMealRequest:
     properties:
       calories:
@@ -645,6 +749,29 @@ definitions:
         $ref: '#/definitions/example.UsersWeightHeightHistory'
       message:
         example: Weight and height record updated successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+  example.UpdateWeightHeightTargetRequest:
+    properties:
+      height:
+        example: 175
+        type: number
+      target_date:
+        example: "2023-10-10T12:00:00Z"
+        type: string
+      weight:
+        example: 70.5
+        type: number
+    type: object
+  example.UpdateWeightHeightTargetResponse:
+    properties:
+      data:
+        $ref: '#/definitions/example.UsersWeightHeightTarget'
+      message:
+        example: Weight and height record target updated successfully
         type: string
       status:
         example: success
@@ -722,6 +849,24 @@ definitions:
         example: 50.5
         type: number
     type: object
+  example.UsersWeightHeightTarget:
+    properties:
+      height:
+        example: 180.8
+        type: number
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      target_date:
+        example: "2023-10-01T12:00:00Z"
+        type: string
+      user_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      weight:
+        example: 50.5
+        type: number
+    type: object
   example.VerifyEmailResponse:
     properties:
       message:
@@ -759,6 +904,34 @@ definitions:
     - Light
     - Medium
     - Heavy
+  model.Article:
+    properties:
+      category_id:
+        type: string
+      content:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      published_at:
+        type: string
+      slug:
+        type: string
+      title:
+        type: string
+      user_id:
+        type: string
+    type: object
+  model.ArticleCategory:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      user_id:
+        type: string
+    type: object
   model.GenderType:
     enum:
     - Male
@@ -767,6 +940,53 @@ definitions:
     x-enum-varnames:
     - Male
     - Female
+  response.Common:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.SuccessWithArticle:
+    properties:
+      data:
+        $ref: '#/definitions/model.Article'
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.SuccessWithArticleCategory:
+    properties:
+      data:
+        $ref: '#/definitions/model.ArticleCategory'
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.SuccessWithArticleCategoryList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.ArticleCategory'
+        type: array
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.SuccessWithArticleList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.Article'
+        type: array
+      message:
+        type: string
+      status:
+        type: string
+    type: object
   validation.CreateUser:
     properties:
       email:
@@ -940,6 +1160,172 @@ info:
   title: Nutribox API documentation
   version: 1.0.0
 paths:
+  /article-categories:
+    get:
+      description: Get all article categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithArticleCategoryList'
+      security:
+      - BearerAuth: []
+      summary: Get all article categories
+      tags:
+      - Article Categories
+    post:
+      consumes:
+      - application/json
+      description: Create new article category
+      parameters:
+      - description: Category data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.CreateArticleCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessWithArticleCategory'
+      security:
+      - BearerAuth: []
+      summary: Create new article category
+      tags:
+      - Article Categories
+  /article-categories/{id}:
+    delete:
+      description: Delete article category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Common'
+      security:
+      - BearerAuth: []
+      summary: Delete article category
+      tags:
+      - Article Categories
+  /articles:
+    get:
+      description: Get all articles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithArticleList'
+      security:
+      - BearerAuth: []
+      summary: Get all articles
+      tags:
+      - Articles
+    post:
+      consumes:
+      - application/json
+      description: Create new article
+      parameters:
+      - description: Article data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.CreateArticleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessWithArticle'
+      security:
+      - BearerAuth: []
+      summary: Create new article
+      tags:
+      - Articles
+  /articles/{id}:
+    delete:
+      description: Delete article
+      parameters:
+      - description: Article ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Common'
+      security:
+      - BearerAuth: []
+      summary: Delete article
+      tags:
+      - Articles
+    get:
+      description: Get article by ID
+      parameters:
+      - description: Article ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithArticle'
+      security:
+      - BearerAuth: []
+      summary: Get article by ID
+      tags:
+      - Articles
+    put:
+      consumes:
+      - application/json
+      description: Update article
+      parameters:
+      - description: Article ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Article data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.UpdateArticleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithArticle'
+      security:
+      - BearerAuth: []
+      summary: Update article
+      tags:
+      - Articles
   /auth/forgot-password:
     post:
       consumes:
@@ -1810,6 +2196,157 @@ paths:
       security:
       - BearerAuth: []
       summary: Update a weight and height record
+      tags:
+      - Weight Height Record
+  /weight-height/target:
+    get:
+      description: Logged in users can fetch their own weight and height target records.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.GetAllWeightHeightTargetResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+      security:
+      - BearerAuth: []
+      summary: Get all weight and height target records
+      tags:
+      - Weight Height Record
+    post:
+      consumes:
+      - application/json
+      description: Logged in users can add a new weight and height target record.
+      parameters:
+      - description: Weight and height target data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.AddWeightHeightTargetRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/example.AddWeightHeightTargetResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+      security:
+      - BearerAuth: []
+      summary: Add a new weight and height target record
+      tags:
+      - Weight Height Record
+  /weight-height/target/{id}:
+    delete:
+      description: Logged in users can delete their own weight and height target records.
+      parameters:
+      - description: Record ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.DeleteWeightHeightTargetResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Delete a weight and height target record
+      tags:
+      - Weight Height Record
+    get:
+      description: Logged in users can fetch their own weight and height target record.
+      parameters:
+      - description: Record id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.GetWeightHeightTargetResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Get a weight height target
+      tags:
+      - Weight Height Record
+    put:
+      consumes:
+      - application/json
+      description: Logged in users can update their own weight and height target records.
+      parameters:
+      - description: Record ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Weight and height target data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.UpdateWeightHeightTargetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.UpdateWeightHeightTargetResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/example.Forbidden'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/example.NotFound'
+      security:
+      - BearerAuth: []
+      summary: Update a weight and height target record
       tags:
       - Weight Height Record
 securityDefinitions:
