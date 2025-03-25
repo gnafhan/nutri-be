@@ -135,6 +135,30 @@ definitions:
         example: My First Article
         type: string
     type: object
+  example.CreateRecipeRequest:
+    properties:
+      description:
+        example: Nasi goreng dengan bumbu rahasia
+        type: string
+      image:
+        example: https://example.com/nasi-goreng.jpg
+        type: string
+      ingredients:
+        example: Nasi, telur, bawang, kecap
+        type: string
+      instructions:
+        example: 1. Tumis bawang...
+        type: string
+      label:
+        example: Main Course
+        type: string
+      name:
+        example: Nasi Goreng Spesial
+        type: string
+      slug:
+        example: nasi-goreng-spesial
+        type: string
+    type: object
   example.CreateUserResponse:
     properties:
       message:
@@ -720,6 +744,30 @@ definitions:
         example: success
         type: string
     type: object
+  example.UpdateRecipeRequest:
+    properties:
+      description:
+        example: Nasi goreng dengan bumbu premium
+        type: string
+      image:
+        example: https://example.com/nasi-goreng-premium.jpg
+        type: string
+      ingredients:
+        example: Nasi, telur, bawang, kecap, ayam
+        type: string
+      instructions:
+        example: 1. Tumis bawang... 2. Masukkan ayam...
+        type: string
+      label:
+        example: Special Menu
+        type: string
+      name:
+        example: Nasi Goreng Premium
+        type: string
+      slug:
+        example: nasi-goreng-premium
+        type: string
+    type: object
   example.UpdateUserResponse:
     properties:
       message:
@@ -940,6 +988,27 @@ definitions:
     x-enum-varnames:
     - Male
     - Female
+  model.Recipe:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      ingredients:
+        type: string
+      instructions:
+        type: string
+      label:
+        type: string
+      name:
+        type: string
+      slug:
+        type: string
+      user_id:
+        type: string
+    type: object
   response.Common:
     properties:
       message:
@@ -981,6 +1050,26 @@ definitions:
       data:
         items:
           $ref: '#/definitions/model.Article'
+        type: array
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.SuccessWithRecipe:
+    properties:
+      data:
+        $ref: '#/definitions/model.Recipe'
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.SuccessWithRecipeList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.Recipe'
         type: array
       message:
         type: string
@@ -1847,6 +1936,113 @@ paths:
       summary: Verify Product Token
       tags:
       - Product Token
+  /recipes:
+    get:
+      description: Get all recipes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithRecipeList'
+      security:
+      - BearerAuth: []
+      summary: Get all recipes
+      tags:
+      - Recipes
+    post:
+      consumes:
+      - application/json
+      description: Create new recipe
+      parameters:
+      - description: Recipe data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.CreateRecipeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessWithRecipe'
+      security:
+      - BearerAuth: []
+      summary: Create new recipe
+      tags:
+      - Recipes
+  /recipes/{id}:
+    delete:
+      description: Delete recipe
+      parameters:
+      - description: Recipe ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Common'
+      security:
+      - BearerAuth: []
+      summary: Delete recipe
+      tags:
+      - Recipes
+    get:
+      description: Get recipe by ID
+      parameters:
+      - description: Recipe ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithRecipe'
+      security:
+      - BearerAuth: []
+      summary: Get recipe by ID
+      tags:
+      - Recipes
+    put:
+      consumes:
+      - application/json
+      description: Update recipe
+      parameters:
+      - description: Recipe ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Recipe data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.UpdateRecipeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithRecipe'
+      security:
+      - BearerAuth: []
+      summary: Update recipe
+      tags:
+      - Recipes
   /users:
     get:
       description: Only admins can retrieve all users.

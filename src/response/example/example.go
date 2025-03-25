@@ -353,3 +353,36 @@ type ArticleCategoryResponse struct {
 	Name      string    `json:"name" example:"Technology"`
 	CreatedAt time.Time `json:"created_at" example:"2023-10-10T12:00:00Z"`
 }
+
+type CreateRecipeRequest struct {
+	Name         string  `json:"name" example:"Nasi Goreng Spesial"`
+	Slug         string  `json:"slug" example:"nasi-goreng-spesial"`
+	Image        *string `json:"image,omitempty" example:"https://example.com/nasi-goreng.jpg"`
+	Description  string  `json:"description" example:"Nasi goreng dengan bumbu rahasia"`
+	Ingredients  string  `json:"ingredients" example:"Nasi, telur, bawang, kecap"`
+	Instructions string  `json:"instructions" example:"1. Tumis bawang..."`
+	Label        *string `json:"label,omitempty" example:"Main Course"`
+}
+
+type UpdateRecipeRequest struct {
+	Name         string  `json:"name,omitempty" example:"Nasi Goreng Premium"`
+	Slug         string  `json:"slug,omitempty" example:"nasi-goreng-premium"`
+	Image        *string `json:"image,omitempty" example:"https://example.com/nasi-goreng-premium.jpg"`
+	Description  string  `json:"description,omitempty" example:"Nasi goreng dengan bumbu premium"`
+	Ingredients  string  `json:"ingredients,omitempty" example:"Nasi, telur, bawang, kecap, ayam"`
+	Instructions string  `json:"instructions,omitempty" example:"1. Tumis bawang... 2. Masukkan ayam..."`
+	Label        *string `json:"label,omitempty" example:"Special Menu"`
+}
+
+type RecipeResponse struct {
+	ID           string    `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	UserID       string    `json:"user_id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Name         string    `json:"name" example:"Nasi Goreng Spesial"`
+	Slug         string    `json:"slug" example:"nasi-goreng-spesial"`
+	Image        *string   `json:"image,omitempty" example:"https://example.com/nasi-goreng.jpg"`
+	Description  string    `json:"description" example:"Nasi goreng dengan bumbu rahasia"`
+	Ingredients  string    `json:"ingredients" example:"Nasi, telur, bawang, kecap"`
+	Instructions string    `json:"instructions" example:"1. Tumis bawang..."`
+	Label        *string   `json:"label,omitempty" example:"Main Course"`
+	CreatedAt    time.Time `json:"created_at" example:"2023-10-10T12:00:00Z"`
+}

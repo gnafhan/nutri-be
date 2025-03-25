@@ -118,3 +118,15 @@ type SuccessWithArticleCategoryList struct {
 	Message string                  `json:"message"`
 	Data    []model.ArticleCategory `json:"data"`
 }
+
+type SuccessWithRecipe struct {
+	Status  string       `json:"status"`
+	Message string       `json:"message"`
+	Data    model.Recipe `json:"data"`
+}
+
+type SuccessWithRecipeList struct {
+	Status  string         `json:"status"`
+	Message string         `json:"message"`
+	Data    []model.Recipe `json:"data"`
+}

@@ -1088,6 +1088,178 @@
                 }
             }
         },
+        "/recipes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all recipes",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Recipes"
+                ],
+                "summary": "Get all recipes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithRecipeList"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create new recipe",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Recipes"
+                ],
+                "summary": "Create new recipe",
+                "parameters": [
+                    {
+                        "description": "Recipe data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.CreateRecipeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithRecipe"
+                        }
+                    }
+                }
+            }
+        },
+        "/recipes/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get recipe by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Recipes"
+                ],
+                "summary": "Get recipe by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recipe ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithRecipe"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update recipe",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Recipes"
+                ],
+                "summary": "Update recipe",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recipe ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Recipe data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.UpdateRecipeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithRecipe"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete recipe",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Recipes"
+                ],
+                "summary": "Delete recipe",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recipe ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Common"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "security": [
@@ -2067,6 +2239,39 @@
                 }
             }
         },
+        "example.CreateRecipeRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Nasi goreng dengan bumbu rahasia"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "https://example.com/nasi-goreng.jpg"
+                },
+                "ingredients": {
+                    "type": "string",
+                    "example": "Nasi, telur, bawang, kecap"
+                },
+                "instructions": {
+                    "type": "string",
+                    "example": "1. Tumis bawang..."
+                },
+                "label": {
+                    "type": "string",
+                    "example": "Main Course"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Nasi Goreng Spesial"
+                },
+                "slug": {
+                    "type": "string",
+                    "example": "nasi-goreng-spesial"
+                }
+            }
+        },
         "example.CreateUserResponse": {
             "type": "object",
             "properties": {
@@ -2903,6 +3108,39 @@
                 }
             }
         },
+        "example.UpdateRecipeRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Nasi goreng dengan bumbu premium"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "https://example.com/nasi-goreng-premium.jpg"
+                },
+                "ingredients": {
+                    "type": "string",
+                    "example": "Nasi, telur, bawang, kecap, ayam"
+                },
+                "instructions": {
+                    "type": "string",
+                    "example": "1. Tumis bawang... 2. Masukkan ayam..."
+                },
+                "label": {
+                    "type": "string",
+                    "example": "Special Menu"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Nasi Goreng Premium"
+                },
+                "slug": {
+                    "type": "string",
+                    "example": "nasi-goreng-premium"
+                }
+            }
+        },
         "example.UpdateUserResponse": {
             "type": "object",
             "properties": {
@@ -3218,6 +3456,38 @@
                 "Female"
             ]
         },
+        "model.Recipe": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "ingredients": {
+                    "type": "string"
+                },
+                "instructions": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "response.Common": {
             "type": "object",
             "properties": {
@@ -3281,6 +3551,37 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.Article"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.SuccessWithRecipe": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/model.Recipe"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.SuccessWithRecipeList": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Recipe"
                     }
                 },
                 "message": {

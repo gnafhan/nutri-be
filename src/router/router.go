@@ -21,6 +21,7 @@ func Routes(app *fiber.App, db *gorm.DB) {
 	mealService := service.NewMealService(db, config.LogMealApiKey, config.LogMealBaseUrl)
 	uwhService := service.NewUsersWeightHeightService(db)
 	articleService := service.NewArticlesService(db)
+	recipesService := service.NewRecipesService(db)
 
 	v1 := app.Group("/v1")
 
@@ -31,6 +32,7 @@ func Routes(app *fiber.App, db *gorm.DB) {
 	MealRoutes(v1, userService, productTokenService, mealService)
 	UsersWeightHeightRoutes(v1, userService, productTokenService, uwhService)
 	ArticleRoutes(v1, userService, productTokenService, articleService)
+	RecipeRoutes(v1, userService, productTokenService, recipesService)
 	// TODO: add another routes here...
 
 	if !config.IsProd {
