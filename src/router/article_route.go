@@ -13,13 +13,13 @@ func ArticleRoutes(v1 fiber.Router, u service.UserService, p service.ProductToke
 
 	articles := v1.Group("/articles")
 	articles.Get("/", m.Auth(u, p), articleController.GetArticles)
-	articles.Post("/", m.Auth(u, p), articleController.CreateArticle)
+	articles.Post("/", m.Auth(u, p, "manageUsers"), articleController.CreateArticle)
 	articles.Get("/:id", m.Auth(u, p), articleController.GetArticleByID)
-	articles.Put("/:id", m.Auth(u, p), articleController.UpdateArticle)
-	articles.Delete("/:id", m.Auth(u, p), articleController.DeleteArticle)
+	articles.Put("/:id", m.Auth(u, p, "manageUsers"), articleController.UpdateArticle)
+	articles.Delete("/:id", m.Auth(u, p, "manageUsers"), articleController.DeleteArticle)
 
 	categories := v1.Group("/article-categories")
 	categories.Get("/", m.Auth(u, p), articleController.GetArticleCategories)
-	categories.Post("/", m.Auth(u, p), articleController.CreateArticleCategory)
-	categories.Delete("/:id", m.Auth(u, p), articleController.DeleteArticleCategory)
+	categories.Post("/", m.Auth(u, p, "manageUsers"), articleController.CreateArticleCategory)
+	categories.Delete("/:id", m.Auth(u, p, "manageUsers"), articleController.DeleteArticleCategory)
 }
