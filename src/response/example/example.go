@@ -233,11 +233,14 @@ type DeleteWeightHeightResponse struct {
 }
 
 type UsersWeightHeightTarget struct {
-	ID         string    `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
-	UserID     string    `json:"user_id" example:"550e8400-e29b-41d4-a716-446655440000"`
-	Weight     float64   `json:"weight" example:"50.5"`
-	Height     float64   `json:"height" example:"180.8"`
-	TargetDate time.Time `json:"target_date" example:"2023-10-01T12:00:00Z"`
+	ID            string    `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	UserID        string    `json:"user_id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Weight        float64   `json:"weight" example:"50.5"`
+	Height        float64   `json:"height" example:"180.8"`
+	WeightHistory float64   `json:"weight_history" example:"50.5"`
+	HeightHistory float64   `json:"height_history" example:"180.8"`
+	TargetDate    time.Time `json:"target_date" example:"2023-10-01T12:00:00Z"`
+	RecordDate    time.Time `json:"record_date" example:"2023-10-01T12:00:00Z"`
 }
 
 type AddWeightHeightTargetResponse struct {
@@ -337,14 +340,17 @@ type CreateArticleCategoryRequest struct {
 }
 
 type ArticleResponse struct {
-	ID          string     `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
-	UserID      string     `json:"user_id" example:"550e8400-e29b-41d4-a716-446655440000"`
-	Title       string     `json:"title" example:"My First Article"`
-	CategoryID  *string    `json:"category_id,omitempty" example:"550e8400-e29b-41d4-a716-446655440000"`
-	Slug        string     `json:"slug" example:"my-first-article"`
-	Image       *string    `json:"image,omitempty" example:"https://example.com/image.jpg"`
-	Content     string     `json:"content" example:"This is the content of my article"`
-	PublishedAt *time.Time `json:"published_at,omitempty" example:"2023-10-10T12:00:00Z"`
+	ID           string     `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	UserID       string     `json:"user_id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Title        string     `json:"title" example:"My First Article"`
+	CategoryID   *string    `json:"category_id,omitempty" example:"550e8400-e29b-41d4-a716-446655440000"`
+	CategoryName string     `json:"category_name,omitempty" example:"Technology"`
+	Slug         string     `json:"slug" example:"my-first-article"`
+	Image        *string    `json:"image,omitempty" example:"https://example.com/image.jpg"`
+	Content      string     `json:"content" example:"This is the content of my article"`
+	PublishedAt  *time.Time `json:"published_at,omitempty" example:"2023-10-10T12:00:00Z"`
+	CreatedAt    time.Time  `json:"created_at" example:"2023-10-10T12:00:00Z"`
+	UpdatedAt    time.Time  `json:"updated_at" example:"2023-10-10T12:00:00Z"`
 }
 
 type ArticleCategoryResponse struct {
@@ -362,6 +368,7 @@ type CreateRecipeRequest struct {
 	Ingredients  string  `json:"ingredients" example:"Nasi, telur, bawang, kecap"`
 	Instructions string  `json:"instructions" example:"1. Tumis bawang..."`
 	Label        *string `json:"label,omitempty" example:"Main Course"`
+	Day          string  `json:"day" example:"monday"`
 }
 
 type UpdateRecipeRequest struct {
@@ -372,6 +379,7 @@ type UpdateRecipeRequest struct {
 	Ingredients  string  `json:"ingredients,omitempty" example:"Nasi, telur, bawang, kecap, ayam"`
 	Instructions string  `json:"instructions,omitempty" example:"1. Tumis bawang... 2. Masukkan ayam..."`
 	Label        *string `json:"label,omitempty" example:"Special Menu"`
+	Day          string  `json:"day,omitempty" example:"tuesday"`
 }
 
 type RecipeResponse struct {
@@ -385,4 +393,5 @@ type RecipeResponse struct {
 	Instructions string    `json:"instructions" example:"1. Tumis bawang..."`
 	Label        *string   `json:"label,omitempty" example:"Main Course"`
 	CreatedAt    time.Time `json:"created_at" example:"2023-10-10T12:00:00Z"`
+	Day          string    `json:"day" example:"monday"`
 }

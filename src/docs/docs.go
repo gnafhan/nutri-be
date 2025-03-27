@@ -2249,6 +2249,10 @@ const docTemplate = `{
         "example.CreateRecipeRequest": {
             "type": "object",
             "properties": {
+                "day": {
+                    "type": "string",
+                    "example": "monday"
+                },
                 "description": {
                     "type": "string",
                     "example": "Nasi goreng dengan bumbu rahasia"
@@ -3118,6 +3122,10 @@ const docTemplate = `{
         "example.UpdateRecipeRequest": {
             "type": "object",
             "properties": {
+                "day": {
+                    "type": "string",
+                    "example": "tuesday"
+                },
                 "description": {
                     "type": "string",
                     "example": "Nasi goreng dengan bumbu premium"
@@ -3339,9 +3347,17 @@ const docTemplate = `{
                     "type": "number",
                     "example": 180.8
                 },
+                "height_history": {
+                    "type": "number",
+                    "example": 180.8
+                },
                 "id": {
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "record_date": {
+                    "type": "string",
+                    "example": "2023-10-01T12:00:00Z"
                 },
                 "target_date": {
                     "type": "string",
@@ -3352,6 +3368,10 @@ const docTemplate = `{
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
                 "weight": {
+                    "type": "number",
+                    "example": 50.5
+                },
+                "weight_history": {
                     "type": "number",
                     "example": 50.5
                 }
@@ -3409,13 +3429,33 @@ const docTemplate = `{
                 "Heavy"
             ]
         },
-        "model.Article": {
+        "model.ArticleCategory": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ArticleResponse": {
             "type": "object",
             "properties": {
                 "category_id": {
                     "type": "string"
                 },
+                "category_name": {
+                    "type": "string"
+                },
                 "content": {
+                    "type": "string"
+                },
+                "created_at": {
                     "type": "string"
                 },
                 "id": {
@@ -3433,18 +3473,7 @@ const docTemplate = `{
                 "title": {
                     "type": "string"
                 },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.ArticleCategory": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
+                "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
@@ -3466,6 +3495,9 @@ const docTemplate = `{
         "model.Recipe": {
             "type": "object",
             "properties": {
+                "day": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -3510,7 +3542,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/model.Article"
+                    "$ref": "#/definitions/model.ArticleResponse"
                 },
                 "message": {
                     "type": "string"
@@ -3557,7 +3589,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Article"
+                        "$ref": "#/definitions/model.ArticleResponse"
                     }
                 },
                 "message": {

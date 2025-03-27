@@ -137,6 +137,9 @@ definitions:
     type: object
   example.CreateRecipeRequest:
     properties:
+      day:
+        example: monday
+        type: string
       description:
         example: Nasi goreng dengan bumbu rahasia
         type: string
@@ -746,6 +749,9 @@ definitions:
     type: object
   example.UpdateRecipeRequest:
     properties:
+      day:
+        example: tuesday
+        type: string
       description:
         example: Nasi goreng dengan bumbu premium
         type: string
@@ -902,8 +908,14 @@ definitions:
       height:
         example: 180.8
         type: number
+      height_history:
+        example: 180.8
+        type: number
       id:
         example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      record_date:
+        example: "2023-10-01T12:00:00Z"
         type: string
       target_date:
         example: "2023-10-01T12:00:00Z"
@@ -912,6 +924,9 @@ definitions:
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
       weight:
+        example: 50.5
+        type: number
+      weight_history:
         example: 50.5
         type: number
     type: object
@@ -952,11 +967,24 @@ definitions:
     - Light
     - Medium
     - Heavy
-  model.Article:
+  model.ArticleCategory:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      user_id:
+        type: string
+    type: object
+  model.ArticleResponse:
     properties:
       category_id:
         type: string
+      category_name:
+        type: string
       content:
+        type: string
+      created_at:
         type: string
       id:
         type: string
@@ -968,14 +996,7 @@ definitions:
         type: string
       title:
         type: string
-      user_id:
-        type: string
-    type: object
-  model.ArticleCategory:
-    properties:
-      id:
-        type: string
-      name:
+      updated_at:
         type: string
       user_id:
         type: string
@@ -990,6 +1011,8 @@ definitions:
     - Female
   model.Recipe:
     properties:
+      day:
+        type: string
       description:
         type: string
       id:
@@ -1019,7 +1042,7 @@ definitions:
   response.SuccessWithArticle:
     properties:
       data:
-        $ref: '#/definitions/model.Article'
+        $ref: '#/definitions/model.ArticleResponse'
       message:
         type: string
       status:
@@ -1049,7 +1072,7 @@ definitions:
     properties:
       data:
         items:
-          $ref: '#/definitions/model.Article'
+          $ref: '#/definitions/model.ArticleResponse'
         type: array
       message:
         type: string

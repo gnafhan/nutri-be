@@ -17,6 +17,7 @@ type Recipe struct {
 	Ingredients  string    `gorm:"type:text;not null" json:"ingredients"`
 	Instructions string    `gorm:"type:text;not null" json:"instructions"`
 	Label        *string   `json:"label,omitempty"`
+	Day          string    `gorm:"type:varchar(10);not null;check(day IN ('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'))" json:"day"`
 	CreatedAt    time.Time `gorm:"autoCreateTime:milli" json:"-"`
 	UpdatedAt    time.Time `gorm:"autoCreateTime:milli;autoUpdateTime:milli" json:"-"`
 }

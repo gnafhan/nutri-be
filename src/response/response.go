@@ -96,15 +96,15 @@ type CalorieStat struct {
 }
 
 type SuccessWithArticle struct {
-	Status  string        `json:"status"`
-	Message string        `json:"message"`
-	Data    model.Article `json:"data"`
+	Status  string                `json:"status"`
+	Message string                `json:"message"`
+	Data    model.ArticleResponse `json:"data"`
 }
 
 type SuccessWithArticleList struct {
-	Status  string          `json:"status"`
-	Message string          `json:"message"`
-	Data    []model.Article `json:"data"`
+	Status  string                  `json:"status"`
+	Message string                  `json:"message"`
+	Data    []model.ArticleResponse `json:"data"`
 }
 
 type SuccessWithArticleCategory struct {
@@ -129,4 +129,8 @@ type SuccessWithRecipeList struct {
 	Status  string         `json:"status"`
 	Message string         `json:"message"`
 	Data    []model.Recipe `json:"data"`
+}
+
+type Recipe struct {
+	Day string `json:"day" example:"monday"`
 }

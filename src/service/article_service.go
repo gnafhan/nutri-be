@@ -12,8 +12,8 @@ import (
 type ArticlesService interface {
 	// Article methods
 	CreateArticle(ctx *fiber.Ctx, article *model.Article) (*model.Article, error)
-	GetArticles(ctx *fiber.Ctx) ([]model.Article, error)
-	GetArticleByID(ctx *fiber.Ctx, articleID string) (*model.Article, error)
+	GetArticles(ctx *fiber.Ctx) ([]model.ArticleResponse, error)
+	GetArticleByID(ctx *fiber.Ctx, articleID string) (*model.ArticleResponse, error)
 	UpdateArticle(ctx *fiber.Ctx, articleID string, article *model.Article) (*model.Article, error)
 	DeleteArticle(ctx *fiber.Ctx, articleID string) error
 
@@ -43,20 +43,47 @@ func (s *articlesService) CreateArticle(ctx *fiber.Ctx, article *model.Article) 
 	return article, nil
 }
 
-func (s *articlesService) GetArticles(ctx *fiber.Ctx) ([]model.Article, error) {
+func (s *articlesService) GetArticles(ctx *fiber.Ctx) ([]model.ArticleResponse, error) {
 	var articles []model.Article
 	if err := s.DB.WithContext(ctx.Context()).
+		Preload("Category"). // Preload the Category relationship
 		Order("created_at DESC").
 		Find(&articles).Error; err != nil {
 		s.Log.Errorf("Failed to get articles: %+v", err)
 		return nil, err
 	}
-	return articles, nil
+
+	// Transform to response with category name
+	var responses []model.ArticleResponse
+	for _, article := range articles {
+		response := model.ArticleResponse{
+			ID:          article.ID,
+			UserID:      article.UserID,
+			Title:       article.Title,
+			CategoryID:  article.CategoryID,
+			Slug:        article.Slug,
+			Image:       article.Image,
+			Content:     article.Content,
+			PublishedAt: article.PublishedAt,
+			CreatedAt:   article.CreatedAt,
+			UpdatedAt:   article.UpdatedAt,
+		}
+
+		// Add category name if category exists and was preloaded
+		if article.Category != nil {
+			response.CategoryName = article.Category.Name
+		}
+
+		responses = append(responses, response)
+	}
+
+	return responses, nil
 }
 
-func (s *articlesService) GetArticleByID(ctx *fiber.Ctx, articleID string) (*model.Article, error) {
+func (s *articlesService) GetArticleByID(ctx *fiber.Ctx, articleID string) (*model.ArticleResponse, error) {
 	var article model.Article
 	if err := s.DB.WithContext(ctx.Context()).
+		Preload("Category"). // Preload the Category relationship
 		Where("id = ?", articleID).
 		First(&article).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -65,7 +92,27 @@ func (s *articlesService) GetArticleByID(ctx *fiber.Ctx, articleID string) (*mod
 		s.Log.Errorf("Failed to get article: %+v", err)
 		return nil, err
 	}
-	return &article, nil
+
+	// Create response with article data
+	response := model.ArticleResponse{
+		ID:          article.ID,
+		UserID:      article.UserID,
+		Title:       article.Title,
+		CategoryID:  article.CategoryID,
+		Slug:        article.Slug,
+		Image:       article.Image,
+		Content:     article.Content,
+		PublishedAt: article.PublishedAt,
+		CreatedAt:   article.CreatedAt,
+		UpdatedAt:   article.UpdatedAt,
+	}
+
+	// Add category name if category exists and was preloaded
+	if article.Category != nil {
+		response.CategoryName = article.Category.Name
+	}
+
+	return &response, nil
 }
 
 func (s *articlesService) UpdateArticle(ctx *fiber.Ctx, articleID string, article *model.Article) (*model.Article, error) {

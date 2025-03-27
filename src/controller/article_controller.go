@@ -46,10 +46,16 @@ func (c *ArticleController) CreateArticle(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	// After creating the article, fetch it with category info
+	articleResponse, err := c.ArticleService.GetArticleByID(ctx, article.ID.String())
+	if err != nil {
+		return err
+	}
+
 	return ctx.Status(fiber.StatusCreated).JSON(response.SuccessWithArticle{
 		Status:  "success",
 		Message: "Article created successfully",
-		Data:    *article,
+		Data:    *articleResponse,
 	})
 }
 
@@ -69,7 +75,7 @@ func (c *ArticleController) GetArticles(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(response.SuccessWithArticleList{
 		Status:  "success",
 		Message: "Articles fetched successfully",
-		Data:    articles,
+		Data:    articles, // No conversion needed, already ArticleResponse
 	})
 }
 
@@ -133,7 +139,12 @@ func (c *ArticleController) UpdateArticle(ctx *fiber.Ctx) error {
 	user := ctx.Locals("user").(*model.User)
 	request.UserID = user.ID
 
-	article, err := c.ArticleService.UpdateArticle(ctx, articleID, &request)
+	if _, err := c.ArticleService.UpdateArticle(ctx, articleID, &request); err != nil {
+		return err
+	}
+
+	// After updating, fetch the article with category info
+	articleResponse, err := c.ArticleService.GetArticleByID(ctx, articleID)
 	if err != nil {
 		return err
 	}
@@ -141,7 +152,7 @@ func (c *ArticleController) UpdateArticle(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(response.SuccessWithArticle{
 		Status:  "success",
 		Message: "Article updated successfully",
-		Data:    *article,
+		Data:    *articleResponse,
 	})
 }
 
@@ -243,7 +254,6 @@ func (c *ArticleController) DeleteArticleCategory(ctx *fiber.Ctx) error {
 			Message: "Invalid category ID",
 		})
 	}
-
 	if err := c.ArticleService.DeleteArticleCategory(ctx, categoryID); err != nil {
 		return err
 	}

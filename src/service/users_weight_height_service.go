@@ -179,7 +179,21 @@ func (s *usersWeightHeightService) updateUserHeightWeight(ctx *fiber.Ctx, userID
 
 func (s *usersWeightHeightService) AddWeightHeightTarget(ctx *fiber.Ctx, record *model.UsersWeightHeightTarget) (*model.UsersWeightHeightTarget, error) {
 	if record.TargetDate.IsZero() {
-		record.TargetDate = time.Now()
+		record.TargetDate = time.Now().Add(time.Hour * 24)
+	}
+
+	record.RecordDate = time.Now()
+
+	userService := NewUserService(s.DB, nil)
+	user, err := userService.GetUserByID(ctx, record.UserID.String())
+	if err != nil {
+		s.Log.Errorf("Failed to get user information: %+v", err)
+		return nil, err
+	}
+
+	if user.Weight != nil && user.Height != nil {
+		record.WeightHistory = *user.Weight
+		record.HeightHistory = *user.Height
 	}
 
 	if err := s.DB.WithContext(ctx.Context()).Create(record).Error; err != nil {

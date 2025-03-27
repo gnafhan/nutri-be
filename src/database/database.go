@@ -2,10 +2,12 @@ package database
 
 import (
 	"app/src/config"
+	"app/src/database/migrations"
 	"app/src/database/seeders"
 	"app/src/model"
 	"app/src/utils"
 	"fmt"
+	"log"
 	"time"
 
 	"gorm.io/driver/postgres"
@@ -16,8 +18,8 @@ import (
 func Connect(dbHost, dbName string) *gorm.DB {
 	// hihihi maap
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
-		dbHost, config.DBUser, config.DBPassword, dbName, config.DBPort,
+		"host=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
+		dbHost, dbName, config.DBPort,
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
@@ -34,25 +36,7 @@ func Connect(dbHost, dbName string) *gorm.DB {
 		utils.Log.Errorf("Failed to enable uuid-ossp extension: %+v", err)
 	}
 
-	// AutoMigrate untuk membuat tabel berdasarkan model
-	err = db.AutoMigrate(
-		&model.User{},
-		&model.Token{},
-		&model.Article{},
-		&model.ArticleCategory{},
-		&model.MealHistory{},
-		&model.MealHistoryDetail{},
-		&model.ProductToken{},
-		&model.Recipe{},
-		&model.UsersStar{},
-		&model.UsersWeightHeightHistory{},
-		&model.UsersWeightHeightTarget{},
-	)
-	if err != nil {
-		utils.Log.Errorf("Failed to auto-migrate database: %+v", err)
-	}
-
-	seeders.RunSeeder(db)
+	MigrateAndSeed(db)
 
 	sqlDB, errDB := db.DB()
 	if errDB != nil {
@@ -65,4 +49,31 @@ func Connect(dbHost, dbName string) *gorm.DB {
 	sqlDB.SetConnMaxLifetime(60 * time.Minute)
 
 	return db
+}
+
+func MigrateAndSeed(db *gorm.DB) {
+	// Run custom migrations
+	if err := migrations.CreateEnumDay(db); err != nil {
+		log.Fatalf("Failed to create enum type: %v", err)
+	}
+
+	// Run auto-migrations
+	if err := db.AutoMigrate(
+		&model.User{},
+		&model.Token{},
+		&model.Article{},
+		&model.ArticleCategory{},
+		&model.MealHistory{},
+		&model.MealHistoryDetail{},
+		&model.ProductToken{},
+		&model.Recipe{},
+		&model.UsersStar{},
+		&model.UsersWeightHeightHistory{},
+		&model.UsersWeightHeightTarget{},
+	); err != nil {
+		log.Fatalf("Failed to auto-migrate database: %v", err)
+	}
+
+	// Run seeders
+	seeders.RunSeeder(db)
 }
