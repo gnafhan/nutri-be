@@ -19,7 +19,7 @@ services:
       - DB_USER=${DB_USER:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-thisisasamplepassword}
       - DB_NAME=${DB_NAME:-nutriboxdb}
-      - DB_PORT=5432
+      - DB_PORT=5433
     volumes:
       - ./uploads:/app/uploads
     networks:
@@ -34,7 +34,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD:-thisisasamplepassword}
       - POSTGRES_DB=${DB_NAME:-nutriboxdb}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
