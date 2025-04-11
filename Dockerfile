@@ -1,25 +1,55 @@
 # Build stage
 FROM golang:1.22.5-alpine AS builder
 
+# Install necessary build tools
+RUN apk add --no-cache git
+
+# Set working directory
 WORKDIR /app
 
-# Install required packages
+# Copy go mod and sum files
 COPY go.mod go.sum ./
+
+# Download dependencies
 RUN go mod download
 
-# Copy the source code. Note the slash at the end, as explained in
-# https://docs.docker.com/reference/dockerfile/#copy
+# Copy source code
 COPY . .
 
-# Build
-RUN CGO_ENABLED=0 GOOS=linux go build -o /main
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o nutribox-api ./src/main.go
 
-# Optional:
-# To bind to a TCP port, runtime parameters must be supplied to the docker command.
-# But we can document in the Dockerfile what ports
-# the application is going to listen on by default.
-# https://docs.docker.com/reference/dockerfile/#expose
+# Final stage
+FROM alpine:latest
+
+# Add necessary runtime dependencies
+RUN apk --no-cache add ca-certificates tzdata
+
+# Set timezone
+RUN cp /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+RUN echo "Asia/Jakarta" > /etc/timezone
+
+# Create non-root user
+RUN adduser -D -g '' appuser
+
+# Create necessary directories
+RUN mkdir -p /app/uploads
+RUN chown -R appuser:appuser /app
+
+# Set working directory
+WORKDIR /app
+
+# Copy binary from builder stage
+COPY --from=builder /app/nutribox-api .
+
+# Copy necessary files
+COPY --from=builder /app/.env .
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
 EXPOSE 3000
 
-# Run
-CMD ["/main"]
+# Command to run the application
+CMD ["./nutribox-api"]

@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nutribox-api
+    restart: always
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    depends_on:
+      - postgresdb
+    environment:
+      - APP_ENV=prod
+      - APP_HOST=0.0.0.0
+      - APP_PORT=3000
+      - DB_HOST=postgresdb
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-thisisasamplepassword}
+      - DB_NAME=${DB_NAME:-nutriboxdb}
+      - DB_PORT=5432
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - nutribox-network
+
+  postgresdb:
+    image: postgres:15-alpine
+    container_name: nutribox-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-thisisasamplepassword}
+      - POSTGRES_DB=${DB_NAME:-nutriboxdb}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - nutribox-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  nutribox-network:
+    driver: bridge
