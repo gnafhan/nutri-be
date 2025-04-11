@@ -49,7 +49,7 @@ COPY --from=builder /app/.env .
 USER appuser
 
 # Expose port
-EXPOSE 3000
+EXPOSE 8097
 
 # Command to run the application
 CMD ["./nutribox-api"]

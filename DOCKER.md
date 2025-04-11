@@ -65,7 +65,7 @@ Script `run-docker.sh` mendukung beberapa perintah:
 ### 1. Container Aplikasi (nutribox-api)
 
 - Image: Dibangun dari Dockerfile
-- Port: 3000 (default, dapat diubah di .env)
+- Port: 8097 (default, dapat diubah di .env)
 - Volume: `./uploads:/app/uploads` untuk menyimpan file upload
 
 ### 2. Container Database (nutribox-postgres)
