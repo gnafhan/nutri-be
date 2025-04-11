@@ -26,7 +26,7 @@ services:
       - nutribox-network
 
   postgresdb:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     container_name: nutribox-postgres
     restart: always
     environment:
