@@ -1,13 +1,14 @@
 package database
 
 import (
-	"app/src/config"
 	"app/src/database/migrations"
 	"app/src/database/seeders"
 	"app/src/model"
 	"app/src/utils"
 	"fmt"
 	"log"
+	"os"
+	"strconv"
 	"time"
 
 	"gorm.io/driver/postgres"
@@ -16,22 +17,62 @@ import (
 )
 
 func Connect(dbHost, dbName string) *gorm.DB {
-	// hihihi maap
-	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
-		dbHost, config.DBUser, config.DBPassword, dbName, config.DBPort,
-	)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger:                 logger.Default.LogMode(logger.Info),
-		SkipDefaultTransaction: true,
-		PrepareStmt:            true,
-		TranslateError:         true,
-	})
-	if err != nil {
-		utils.Log.Errorf("Failed to connect to database: %+v", err)
-	}
-
+    // Override dbHost jika masih localhost/127.0.0.1
+    if dbHost == "localhost" || dbHost == "127.0.0.1" {
+        dbHost = "postgresdb"
+    }
+    
+    // Get environment variables directly using os package
+    dbUser := os.Getenv("DB_USER")
+    if dbUser == "" {
+        dbUser = "postgres"
+    }
+    
+    dbPassword := os.Getenv("DB_PASSWORD")
+    if dbPassword == "" {
+        dbPassword = "thisisasamplepassword"
+    }
+    
+    // Default port for PostgreSQL in Docker setup
+    dbPort := 5433
+    if port := os.Getenv("DB_PORT"); port != "" {
+        if p, err := strconv.Atoi(port); err == nil {
+            dbPort = p
+        }
+    }
+    
+    dsn := fmt.Sprintf(
+        "host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Jakarta",
+        dbHost,
+        dbUser,
+        dbPassword,
+        dbName,
+        dbPort,
+    )
+    utils.Log.Infof("Connecting to database: host=%s, database=%s, port=%d", dbHost, dbName, dbPort)
+    
+    // Tambahkan retry logic untuk koneksi
+    var db *gorm.DB
+    var err error
+    maxRetries := 5
+    for i := 0; i < maxRetries; i++ {
+        db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+            Logger: logger.Default.LogMode(logger.Info),
+            SkipDefaultTransaction: true,
+            PrepareStmt: true,
+            TranslateError: true,
+        })
+        if err == nil {
+            utils.Log.Info("Successfully connected to database")
+            break
+        }
+        utils.Log.Warnf("Failed to connect to database (attempt %d/%d): %v", i+1, maxRetries, err)
+        time.Sleep(5 * time.Second)
+    }
+    if err != nil {
+        utils.Log.Fatalf("Failed to connect to database after %d attempts: %v", maxRetries, err)
+    }
+    
 	if err := db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";").Error; err != nil {
 		utils.Log.Errorf("Failed to enable uuid-ossp extension: %+v", err)
 	}
@@ -52,28 +93,28 @@ func Connect(dbHost, dbName string) *gorm.DB {
 }
 
 func MigrateAndSeed(db *gorm.DB) {
-	// Run custom migrations
-	if err := migrations.CreateEnumDay(db); err != nil {
-		log.Fatalf("Failed to create enum type: %v", err)
-	}
+    // Run auto-migrations first to create tables
+    if err := db.AutoMigrate(
+        &model.User{},
+        &model.Token{},
+        &model.Article{},
+        &model.ArticleCategory{},
+        &model.MealHistory{},
+        &model.MealHistoryDetail{},
+        &model.ProductToken{},
+        &model.Recipe{},          // This will create the recipes table
+        &model.UsersStar{},
+        &model.UsersWeightHeightHistory{},
+        &model.UsersWeightHeightTarget{},
+    ); err != nil {
+        log.Fatalf("Failed to auto-migrate database: %v", err)
+    }
 
-	// Run auto-migrations
-	if err := db.AutoMigrate(
-		&model.User{},
-		&model.Token{},
-		&model.Article{},
-		&model.ArticleCategory{},
-		&model.MealHistory{},
-		&model.MealHistoryDetail{},
-		&model.ProductToken{},
-		&model.Recipe{},
-		&model.UsersStar{},
-		&model.UsersWeightHeightHistory{},
-		&model.UsersWeightHeightTarget{},
-	); err != nil {
-		log.Fatalf("Failed to auto-migrate database: %v", err)
-	}
+    // Then run custom migrations
+    if err := migrations.CreateEnumDay(db); err != nil {
+        log.Fatalf("Failed to create enum type: %v", err)
+    }
 
-	// Run seeders
-	seeders.RunSeeder(db)
+    // Run seeders
+    seeders.RunSeeder(db)
 }

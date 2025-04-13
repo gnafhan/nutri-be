@@ -6,19 +6,20 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: nutribox-api
-    restart: always
+    restart: "no"
     ports:
-      - "${APP_PORT:-8097}:3000"
+      - "${APP_PORT:-9097}:9097"
     depends_on:
-      - postgresdb
+      postgresdb:
+        condition: service_healthy   
     environment:
       - APP_ENV=prod
       - APP_HOST=0.0.0.0
-      - APP_PORT=8097
+      - APP_PORT=9097
       - DB_HOST=postgresdb
       - DB_USER=${DB_USER:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-thisisasamplepassword}
-      - DB_NAME=${DB_NAME:-nutriboxdb}
+      - DB_NAME=${DB_NAME:-nutribox_db}
       - DB_PORT=5433
     volumes:
       - ./uploads:/app/uploads
@@ -26,19 +27,25 @@ services:
       - nutribox-network
 
   postgresdb:
-    image: postgres:16-alpine
+    image: postgres:16
     container_name: nutribox-postgres
+    command: -p 5433
     restart: always
     environment:
       - POSTGRES_USER=${DB_USER:-postgres}
       - POSTGRES_PASSWORD=${DB_PASSWORD:-thisisasamplepassword}
-      - POSTGRES_DB=${DB_NAME:-nutriboxdb}
+      - POSTGRES_DB=${DB_NAME:-nutribox_db}
     ports:
-      - "${DB_PORT:-5433}:5432"
+      - "${DB_PORT:-5433}:5433"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - nutribox-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -p 5433"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:

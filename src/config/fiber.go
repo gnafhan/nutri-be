@@ -9,7 +9,7 @@ import (
 
 func FiberConfig() fiber.Config {
 	return fiber.Config{
-		Prefork:       IsProd,
+		Prefork:       false,
 		CaseSensitive: true,
 		ServerHeader:  "Fiber",
 		AppName:       "Fiber API",
