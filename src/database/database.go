@@ -52,11 +52,6 @@ func Connect(dbHost, dbName string) *gorm.DB {
 }
 
 func MigrateAndSeed(db *gorm.DB) {
-	// Run custom migrations
-	if err := migrations.CreateEnumDay(db); err != nil {
-		log.Fatalf("Failed to create enum type: %v", err)
-	}
-
 	// Run auto-migrations
 	if err := db.AutoMigrate(
 		&model.User{},
@@ -76,4 +71,9 @@ func MigrateAndSeed(db *gorm.DB) {
 
 	// Run seeders
 	seeders.RunSeeder(db)
+
+	// Run custom migrations
+	if err := migrations.CreateEnumDay(db); err != nil {
+		log.Fatalf("Failed to create enum type: %v", err)
+	}
 }
