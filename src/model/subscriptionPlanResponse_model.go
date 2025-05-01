@@ -12,6 +12,9 @@ type SubscriptionPlanResponse struct {
 	PriceFormatted string          `json:"price_formatted"`
 	Features       map[string]bool `json:"features"`
 	IsRecommended  bool            `json:"is_recommended"`
+	Description    string          `json:"description"`
+	ValidityDays   int             `json:"validity_days"`
+	AIscanLimit    int             `json:"ai_scan_limit"`
 }
 
 func (subscriptionPlanResponse *SubscriptionPlanResponse) BeforeCreate(_ *gorm.DB) error {

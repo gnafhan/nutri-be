@@ -24,17 +24,6 @@ type UserSubscription struct {
 type PurchaseSubscriptionRequest struct {
 	PaymentMethod string `json:"payment_method" validate:"required,oneof=gopay shopeepay bank_transfer"`
 }
-type UserSubscriptionResponse struct {
-	ID            uuid.UUID                `json:"id"`
-	UserID        uuid.UUID                `json:"user_id"`
-	Plan          SubscriptionPlanResponse `json:"plan"`
-	AIscansUsed   int                      `json:"ai_scans_used"`
-	StartDate     time.Time                `json:"start_date"`
-	EndDate       time.Time                `json:"end_date"`
-	IsActive      bool                     `json:"is_active"`
-	PaymentMethod string                   `json:"payment_method"`
-	CreatedAt     time.Time                `json:"created_at"`
-}
 
 func (userSubscription *UserSubscription) BeforeCreate(_ *gorm.DB) error {
 	userSubscription.ID = uuid.New()
