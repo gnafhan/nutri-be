@@ -395,3 +395,35 @@ type RecipeResponse struct {
 	CreatedAt    time.Time `json:"created_at" example:"2023-10-10T12:00:00Z"`
 	Day          string    `json:"day" example:"monday"`
 }
+
+type PurchaseSubscriptionRequest struct {
+	PaymentMethod string `json:"payment_method" example:"gopay"`
+}
+
+type FeatureFlags struct {
+	ScanAI   bool `json:"scan_ai" example:"true"`
+	BMICheck bool `json:"bmi_check" example:"true"`
+}
+
+type SubscriptionPlanResponse struct {
+	ID             string       `json:"id" example:"a1b2c3d4-e5f6-7890"`
+	Name           string       `json:"name" example:"Paket Sehat"`
+	Price          int          `json:"price" example:30000`
+	PriceFormatted string       `json:"price_formatted" example:"Rp 30.000"`
+	Features       FeatureFlags `json:"features"`
+	Description    string       `json:"description" example:"Paket best seller dengan fitur lengkap"`
+	ValidityDays   int          `json:"validity_days" example:30`
+	AIscanLimit    int          `json:"ai_scan_limit" example:30`
+}
+
+type UserSubscriptionResponse struct {
+	ID            string                   `json:"id" example:"x1y2z3w4-v5u6-7890"`
+	UserID        string                   `json:"user_id" example:"u1u2u3u4-v5v6-7890"`
+	Plan          SubscriptionPlanResponse `json:"plan"`
+	AIscansUsed   int                      `json:"ai_scans_used" example:5`
+	StartDate     string                   `json:"start_date" example:"2023-05-20T10:00:00Z"`
+	EndDate       string                   `json:"end_date" example:"2023-06-19T10:00:00Z"`
+	IsActive      bool                     `json:"is_active" example:true`
+	PaymentMethod string                   `json:"payment_method" example:"gopay"`
+	CreatedAt     string                   `json:"created_at" example:"2023-05-20T10:00:00Z"`
+}

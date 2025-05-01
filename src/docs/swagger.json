@@ -1260,6 +1260,131 @@
                 }
             }
         },
+        "/subscriptions/check-feature": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Check if user has access to a feature",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Check feature access",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Feature name",
+                        "name": "feature",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.FeatureAccessResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriptions/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get user's active subscription",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Get current subscription",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.UserSubscriptionResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriptions/plans": {
+            "get": {
+                "description": "Get available subscription plans",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Get all subscription plans",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.SubscriptionPlanResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriptions/purchase/{planID}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Purchase a subscription plan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Purchase subscription plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Plan ID",
+                        "name": "planID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Payment data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/example.PurchaseSubscriptionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.UserSubscriptionResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "security": [
@@ -2409,6 +2534,19 @@
                 }
             }
         },
+        "example.FeatureFlags": {
+            "type": "object",
+            "properties": {
+                "bmi_check": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "scan_ai": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "example.Forbidden": {
             "type": "object",
             "properties": {
@@ -2931,6 +3069,15 @@
                 }
             }
         },
+        "example.PurchaseSubscriptionRequest": {
+            "type": "object",
+            "properties": {
+                "payment_method": {
+                    "type": "string",
+                    "example": "gopay"
+                }
+            }
+        },
         "example.RefreshToken": {
             "type": "object",
             "properties": {
@@ -2994,6 +3141,39 @@
                 "status": {
                     "type": "string",
                     "example": "success"
+                }
+            }
+        },
+        "example.SubscriptionPlanResponse": {
+            "type": "object",
+            "properties": {
+                "ai_scan_limit": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Paket best seller dengan fitur lengkap"
+                },
+                "features": {
+                    "$ref": "#/definitions/example.FeatureFlags"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "a1b2c3d4-e5f6-7890"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Paket Sehat"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "price_formatted": {
+                    "type": "string",
+                    "example": "Rp 30.000"
+                },
+                "validity_days": {
+                    "type": "integer"
                 }
             }
         },
@@ -3308,6 +3488,44 @@
                 }
             }
         },
+        "example.UserSubscriptionResponse": {
+            "type": "object",
+            "properties": {
+                "ai_scans_used": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2023-05-20T10:00:00Z"
+                },
+                "end_date": {
+                    "type": "string",
+                    "example": "2023-06-19T10:00:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "x1y2z3w4-v5u6-7890"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "payment_method": {
+                    "type": "string",
+                    "example": "gopay"
+                },
+                "plan": {
+                    "$ref": "#/definitions/example.SubscriptionPlanResponse"
+                },
+                "start_date": {
+                    "type": "string",
+                    "example": "2023-05-20T10:00:00Z"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "u1u2u3u4-v5v6-7890"
+                }
+            }
+        },
         "example.UsersWeightHeightHistory": {
             "type": "object",
             "properties": {
@@ -3520,9 +3738,118 @@
                 }
             }
         },
+        "model.SubscriptionPlanResponse": {
+            "type": "object",
+            "properties": {
+                "ai_scan_limit": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "features": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "boolean"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_recommended": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "price_formatted": {
+                    "type": "string"
+                },
+                "validity_days": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.UserSubscriptionResponse": {
+            "type": "object",
+            "properties": {
+                "ai_scans_used": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "plan": {
+                    "$ref": "#/definitions/model.SubscriptionPlanResponse"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "response.Common": {
             "type": "object",
             "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.FeatureAccessResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/response.FeatureData"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.FeatureData": {
+            "type": "object",
+            "properties": {
+                "access": {
+                    "type": "boolean"
+                },
+                "feature": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.SubscriptionPlansResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.SubscriptionPlanResponse"
+                    }
+                },
                 "message": {
                     "type": "string"
                 },
@@ -3615,6 +3942,20 @@
                     "items": {
                         "$ref": "#/definitions/model.Recipe"
                     }
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.UserSubscriptionResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/model.UserSubscriptionResponse"
                 },
                 "message": {
                     "type": "string"

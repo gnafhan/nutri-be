@@ -254,6 +254,15 @@ definitions:
         example: error
         type: string
     type: object
+  example.FeatureFlags:
+    properties:
+      bmi_check:
+        example: true
+        type: boolean
+      scan_ai:
+        example: true
+        type: boolean
+    type: object
   example.Forbidden:
     properties:
       message:
@@ -621,6 +630,12 @@ definitions:
         example: kcal
         type: string
     type: object
+  example.PurchaseSubscriptionRequest:
+    properties:
+      payment_method:
+        example: gopay
+        type: string
+    type: object
   example.RefreshToken:
     properties:
       refresh_token:
@@ -665,6 +680,29 @@ definitions:
       status:
         example: success
         type: string
+    type: object
+  example.SubscriptionPlanResponse:
+    properties:
+      ai_scan_limit:
+        type: integer
+      description:
+        example: Paket best seller dengan fitur lengkap
+        type: string
+      features:
+        $ref: '#/definitions/example.FeatureFlags'
+      id:
+        example: a1b2c3d4-e5f6-7890
+        type: string
+      name:
+        example: Paket Sehat
+        type: string
+      price:
+        type: integer
+      price_formatted:
+        example: Rp 30.000
+        type: string
+      validity_days:
+        type: integer
     type: object
   example.TokenExpires:
     properties:
@@ -885,6 +923,33 @@ definitions:
             type: array
         type: object
     type: object
+  example.UserSubscriptionResponse:
+    properties:
+      ai_scans_used:
+        type: integer
+      created_at:
+        example: "2023-05-20T10:00:00Z"
+        type: string
+      end_date:
+        example: "2023-06-19T10:00:00Z"
+        type: string
+      id:
+        example: x1y2z3w4-v5u6-7890
+        type: string
+      is_active:
+        type: boolean
+      payment_method:
+        example: gopay
+        type: string
+      plan:
+        $ref: '#/definitions/example.SubscriptionPlanResponse'
+      start_date:
+        example: "2023-05-20T10:00:00Z"
+        type: string
+      user_id:
+        example: u1u2u3u4-v5v6-7890
+        type: string
+    type: object
   example.UsersWeightHeightHistory:
     properties:
       height:
@@ -1032,8 +1097,79 @@ definitions:
       user_id:
         type: string
     type: object
+  model.SubscriptionPlanResponse:
+    properties:
+      ai_scan_limit:
+        type: integer
+      description:
+        type: string
+      features:
+        additionalProperties:
+          type: boolean
+        type: object
+      id:
+        type: string
+      is_recommended:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: integer
+      price_formatted:
+        type: string
+      validity_days:
+        type: integer
+    type: object
+  model.UserSubscriptionResponse:
+    properties:
+      ai_scans_used:
+        type: integer
+      created_at:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      payment_method:
+        type: string
+      plan:
+        $ref: '#/definitions/model.SubscriptionPlanResponse'
+      start_date:
+        type: string
+      user_id:
+        type: string
+    type: object
   response.Common:
     properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.FeatureAccessResponse:
+    properties:
+      data:
+        $ref: '#/definitions/response.FeatureData'
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.FeatureData:
+    properties:
+      access:
+        type: boolean
+      feature:
+        type: string
+    type: object
+  response.SubscriptionPlansResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.SubscriptionPlanResponse'
+        type: array
       message:
         type: string
       status:
@@ -1094,6 +1230,15 @@ definitions:
         items:
           $ref: '#/definitions/model.Recipe'
         type: array
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.UserSubscriptionResponse:
+    properties:
+      data:
+        $ref: '#/definitions/model.UserSubscriptionResponse'
       message:
         type: string
       status:
@@ -2066,6 +2211,84 @@ paths:
       summary: Update recipe
       tags:
       - Recipes
+  /subscriptions/check-feature:
+    get:
+      description: Check if user has access to a feature
+      parameters:
+      - description: Feature name
+        in: query
+        name: feature
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.FeatureAccessResponse'
+      security:
+      - BearerAuth: []
+      summary: Check feature access
+      tags:
+      - Subscription
+  /subscriptions/me:
+    get:
+      description: Get user's active subscription
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.UserSubscriptionResponse'
+      security:
+      - BearerAuth: []
+      summary: Get current subscription
+      tags:
+      - Subscription
+  /subscriptions/plans:
+    get:
+      description: Get available subscription plans
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.SubscriptionPlanResponse'
+      summary: Get all subscription plans
+      tags:
+      - Subscription
+  /subscriptions/purchase/{planID}:
+    post:
+      consumes:
+      - application/json
+      description: Purchase a subscription plan
+      parameters:
+      - description: Plan ID
+        in: path
+        name: planID
+        required: true
+        type: string
+      - description: Payment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/example.PurchaseSubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.UserSubscriptionResponse'
+      security:
+      - BearerAuth: []
+      summary: Purchase subscription plan
+      tags:
+      - Subscription
   /users:
     get:
       description: Only admins can retrieve all users.
