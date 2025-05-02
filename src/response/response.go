@@ -134,3 +134,31 @@ type SuccessWithRecipeList struct {
 type Recipe struct {
 	Day string `json:"day" example:"monday"`
 }
+
+type SubscriptionPlansResponse struct {
+	Status  string                           `json:"status"`
+	Message string                           `json:"message"`
+	Data    []model.SubscriptionPlanResponse `json:"data"`
+}
+
+type UserSubscriptionResponse struct {
+	Status  string                         `json:"status"`
+	Message string                         `json:"message"`
+	Data    model.UserSubscriptionResponse `json:"data"`
+}
+
+type FeatureAccessResponse struct {
+	Status  string      `json:"status"`
+	Message string      `json:"message"`
+	Data    FeatureData `json:"data"`
+}
+
+type FeatureData struct {
+	Feature string `json:"feature"`
+	Access  bool   `json:"access"`
+}
+
+type CommonResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}

@@ -93,28 +93,30 @@ func Connect(dbHost, dbName string) *gorm.DB {
 }
 
 func MigrateAndSeed(db *gorm.DB) {
-    // Run auto-migrations first to create tables
-    if err := db.AutoMigrate(
-        &model.User{},
-        &model.Token{},
-        &model.Article{},
-        &model.ArticleCategory{},
-        &model.MealHistory{},
-        &model.MealHistoryDetail{},
-        &model.ProductToken{},
-        &model.Recipe{},          // This will create the recipes table
-        &model.UsersStar{},
-        &model.UsersWeightHeightHistory{},
-        &model.UsersWeightHeightTarget{},
-    ); err != nil {
-        log.Fatalf("Failed to auto-migrate database: %v", err)
-    }
+	// Run auto-migrations
+	if err := db.AutoMigrate(
+		&model.User{},
+		&model.Token{},
+		&model.Article{},
+		&model.ArticleCategory{},
+		&model.MealHistory{},
+		&model.MealHistoryDetail{},
+		&model.ProductToken{},
+		&model.Recipe{},
+		&model.UsersStar{},
+		&model.UsersWeightHeightHistory{},
+		&model.UsersWeightHeightTarget{},
+		&model.SubscriptionPlan{},
+		&model.UserSubscription{},
+	); err != nil {
+		log.Fatalf("Failed to auto-migrate database: %v", err)
+	}
 
-    // Then run custom migrations
-    if err := migrations.CreateEnumDay(db); err != nil {
-        log.Fatalf("Failed to create enum type: %v", err)
-    }
+	// Run seeders
+	seeders.RunSeeder(db)
 
-    // Run seeders
-    seeders.RunSeeder(db)
+	// Run custom migrations
+	if err := migrations.CreateEnumDay(db); err != nil {
+		log.Fatalf("Failed to create enum type: %v", err)
+	}
 }

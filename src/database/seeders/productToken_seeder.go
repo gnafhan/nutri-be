@@ -73,5 +73,6 @@ func RunSeeder(db *gorm.DB) {
 	SeedMeals(db)
 	SeedArticles(db)
 	SeedRecipes(db)
+	SeedSubscriptionPlans(db)
 	log.Println("🎉 Database seeding completed!")
 }
