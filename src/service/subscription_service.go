@@ -117,6 +117,7 @@ func (s *subscriptionService) PurchasePlan(ctx *fiber.Ctx, userID uuid.UUID, pla
 		return nil, err
 	}
 
+	fmt.Println("subscription oo", subscription)
 	return s.toSubscriptionResponse(&subscription)
 }
 
@@ -124,7 +125,7 @@ func (s *subscriptionService) GetUserActiveSubscription(ctx *fiber.Ctx, userID u
 	var subscription model.UserSubscription
 	err := s.DB.WithContext(ctx.Context()).
 		Joins("Plan").
-		Where("user_id = ? AND is_active = ? AND end_date > ?", userID, true, time.Now()).
+		Where("user_id = ? AND end_date > ?", userID, time.Now()).
 		First(&subscription).Error
 
 	if err != nil {
@@ -136,8 +137,15 @@ func (s *subscriptionService) GetUserActiveSubscription(ctx *fiber.Ctx, userID u
 
 func (s *subscriptionService) toSubscriptionResponse(sub *model.UserSubscription) (*model.UserSubscriptionResponse, error) {
 	var features map[string]bool
-	if err := json.Unmarshal([]byte(sub.Plan.Features), &features); err != nil {
-		return nil, err
+	// Initialize features map
+	features = make(map[string]bool)
+
+	// Only try to unmarshal if Features is not empty
+	if sub.Plan.Features != "" {
+		if err := json.Unmarshal([]byte(sub.Plan.Features), &features); err != nil {
+			s.Log.Errorf("Failed to unmarshal features: %v", err)
+			return nil, fmt.Errorf("invalid feature format: %w", err)
+		}
 	}
 
 	return &model.UserSubscriptionResponse{
