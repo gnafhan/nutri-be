@@ -65,6 +65,8 @@ func MigrateAndSeed(db *gorm.DB) {
 		&model.UsersStar{},
 		&model.UsersWeightHeightHistory{},
 		&model.UsersWeightHeightTarget{},
+		&model.SubscriptionPlan{},
+		&model.UserSubscription{},
 	); err != nil {
 		log.Fatalf("Failed to auto-migrate database: %v", err)
 	}
