@@ -15,15 +15,15 @@ func Routes(app *fiber.App, db *gorm.DB) {
 	healthCheckService := service.NewHealthCheckService(db)
 	emailService := service.NewEmailService()
 	userService := service.NewUserService(db, validate)
-	tokenService := service.NewTokenService(db, validate, userService)
+	paymentService := &service.MockPayment{}
+	subscriptionService := service.NewSubscriptionService(db, paymentService)
+	tokenService := service.NewTokenService(db, validate, userService, subscriptionService)
 	authService := service.NewAuthService(db, validate, userService, tokenService)
 	productTokenService := service.NewProductTokenService(db, validate)
 	mealService := service.NewMealService(db, config.LogMealApiKey, config.LogMealBaseUrl)
 	uwhService := service.NewUsersWeightHeightService(db)
 	articleService := service.NewArticlesService(db)
 	recipesService := service.NewRecipesService(db)
-	paymentService := &service.MockPayment{}
-	subscriptionService := service.NewSubscriptionService(db, paymentService)
 
 	v1 := app.Group("/v1")
 

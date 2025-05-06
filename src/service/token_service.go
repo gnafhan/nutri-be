@@ -17,7 +17,7 @@ import (
 )
 
 type TokenService interface {
-	GenerateToken(user *model.User, isProductTokenVerified bool, expires time.Time, tokenType string) (string, error)
+	GenerateToken(c *fiber.Ctx, user *model.User, isProductTokenVerified bool, expires time.Time, tokenType string) (string, error)
 	SaveToken(c *fiber.Ctx, token, userID, tokenType string, expires time.Time) error
 	DeleteToken(c *fiber.Ctx, tokenType string, userID string) error
 	DeleteAllToken(c *fiber.Ctx, userID string) error
@@ -28,23 +28,38 @@ type TokenService interface {
 }
 
 type tokenService struct {
-	Log         *logrus.Logger
-	DB          *gorm.DB
-	Validate    *validator.Validate
-	UserService UserService
+	Log                 *logrus.Logger
+	DB                  *gorm.DB
+	Validate            *validator.Validate
+	UserService         UserService
+	SubscriptionService SubscriptionService
 }
 
-func NewTokenService(db *gorm.DB, validate *validator.Validate, userService UserService) TokenService {
+func NewTokenService(db *gorm.DB, validate *validator.Validate, userService UserService, subscriptionService SubscriptionService) TokenService {
 	return &tokenService{
-		Log:         utils.Log,
-		DB:          db,
-		Validate:    validate,
-		UserService: userService,
+		Log:                 utils.Log,
+		DB:                  db,
+		Validate:            validate,
+		UserService:         userService,
+		SubscriptionService: subscriptionService,
 	}
 }
 
 // ✅ Generate JWT dengan `userData`
-func (s *tokenService) GenerateToken(user *model.User, isProductTokenVerified bool, expires time.Time, tokenType string) (string, error) {
+func (s *tokenService) GenerateToken(c *fiber.Ctx, user *model.User, isProductTokenVerified bool, expires time.Time, tokenType string) (string, error) {
+	// Get user's subscription features
+	var subscriptionFeatures map[string]bool
+	subscriptionFeatures = make(map[string]bool) // Initialize with empty map as default
+
+	// Only try to get subscription if we have a context
+	if c != nil {
+		subscription, err := s.SubscriptionService.GetUserActiveSubscription(c, user.ID)
+		if err == nil && subscription != nil {
+			// User has an active subscription
+			subscriptionFeatures = subscription.Plan.Features
+		}
+	}
+
 	claims := jwt.MapClaims{
 		"sub":  user.ID.String(),
 		"iat":  time.Now().Unix(),
@@ -64,6 +79,7 @@ func (s *tokenService) GenerateToken(user *model.User, isProductTokenVerified bo
 			"medical_history":        user.MedicalHistory,
 			"profile_picture":        user.ProfilePicture,
 			"isProductTokenVerified": isProductTokenVerified,
+			"subscriptionFeatures":   subscriptionFeatures,
 		},
 	}
 
@@ -119,14 +135,14 @@ func (s *tokenService) GenerateAuthTokens(c *fiber.Ctx, user *model.User) (*res.
 
 	// Generate Access Token
 	accessTokenExpires := time.Now().UTC().Add(time.Minute * time.Duration(config.JWTAccessExp))
-	accessToken, err := s.GenerateToken(user, isProductTokenVerified, accessTokenExpires, config.TokenTypeAccess)
+	accessToken, err := s.GenerateToken(c, user, isProductTokenVerified, accessTokenExpires, config.TokenTypeAccess)
 	if err != nil {
 		return nil, err
 	}
 
 	// Generate Refresh Token
 	refreshTokenExpires := time.Now().UTC().Add(time.Hour * 24 * time.Duration(config.JWTRefreshExp))
-	refreshToken, err := s.GenerateToken(user, isProductTokenVerified, refreshTokenExpires, config.TokenTypeRefresh)
+	refreshToken, err := s.GenerateToken(c, user, isProductTokenVerified, refreshTokenExpires, config.TokenTypeRefresh)
 	if err != nil {
 		return nil, err
 	}
@@ -160,13 +176,13 @@ func (s *tokenService) GenerateResetPasswordToken(c *fiber.Ctx, req *validation.
 	}
 
 	expires := time.Now().UTC().Add(time.Minute * time.Duration(config.JWTResetPasswordExp))
-	return s.GenerateToken(user, false, expires, config.TokenTypeResetPassword)
+	return s.GenerateToken(c, user, false, expires, config.TokenTypeResetPassword)
 }
 
 // ✅ Generate Token Verifikasi Email
 func (s *tokenService) GenerateVerifyEmailToken(c *fiber.Ctx, user *model.User) (*string, error) {
 	expires := time.Now().UTC().Add(time.Minute * time.Duration(config.JWTVerifyEmailExp))
-	verifyEmailToken, err := s.GenerateToken(user, false, expires, config.TokenTypeVerifyEmail)
+	verifyEmailToken, err := s.GenerateToken(c, user, false, expires, config.TokenTypeVerifyEmail)
 	if err != nil {
 		return nil, err
 	}
