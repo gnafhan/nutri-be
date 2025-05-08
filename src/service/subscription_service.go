@@ -71,7 +71,7 @@ func (s *subscriptionService) GetAllPlans(ctx *fiber.Ctx) ([]model.SubscriptionP
 			Price:          plan.Price,
 			PriceFormatted: formatCurrency(plan.Price),
 			Features:       features,
-			IsRecommended:  plan.Name == "Sehat",
+			IsRecommended:  plan.Name == "Early Bird",
 			Description:    plan.Description,
 			ValidityDays:   plan.ValidityDays,
 			AIscanLimit:    plan.AIscanLimit,

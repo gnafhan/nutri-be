@@ -35,6 +35,22 @@ func SeedSubscriptionPlans(db *gorm.DB) {
 			"Paket dasar untuk pemula",
 		),
 		createPlan(
+			"Early Bird",
+			99000,
+			60,
+			90,
+			map[string]bool{
+				"scan_ai":         true,
+				"scan_calorie":    true,
+				"chatbot":         true,
+				"bmi_check":       true,
+				"weight_tracking": true,
+				"health_info":     true,
+			},
+			"Paket premium dengan semua fitur",
+			true, // Mark as best seller
+		),
+		createPlan(
 			"Sehat",
 			30000,
 			10,
@@ -48,7 +64,6 @@ func SeedSubscriptionPlans(db *gorm.DB) {
 				"health_info":     false,
 			},
 			"Paket best seller dengan fitur lengkap",
-			true, // Mark as best seller
 		),
 		createPlan(
 			"Sultan",
