@@ -20,6 +20,11 @@ func SubscriptionRoutes(
 	{
 		subGroup.Get("/plans", subController.GetPlans)
 
+		// Webhook endpoint for payment notification - doesn't require auth
+		subGroup.Post("/notification", subController.HandlePaymentNotification)
+		// Also handle the route with trailing slash
+		subGroup.Post("/notification/", subController.HandlePaymentNotification)
+
 		// Authenticated endpoints
 		authGroup := subGroup.Group("", m.Auth(u, p))
 		{

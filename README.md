@@ -1,4 +1,3 @@
-
 ## Quick Start
 
 To create a project, simply run:
@@ -133,4 +132,81 @@ src\
  |--utils\          # Utility classes and functions
  |--validation\     # Request data validation schemas
  |--main.go         # Fiber app
+```
+
+# Subscription with Midtrans Integration
+
+This API supports payment processing with Midtrans for subscription plans. 
+
+## Setup
+
+1. Create a Midtrans account at https://midtrans.com
+2. Get your Server Key and Client Key from the Midtrans Dashboard
+3. Add the following environment variables to your `.env` file:
+
+```
+MIDTRANS_MERCHANT_ID=your_midtrans_merchant_id
+NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your_midtrans_client_key
+MIDTRANS_SERVER_KEY=your_midtrans_server_key
+MIDTRANS_STATUS=SANDBOX or PRODUCTION
+```
+
+## API Endpoints
+
+### Purchase Subscription
+
+`POST /subscriptions/purchase/:planID`
+
+Request body (optional):
+```json
+{
+  "payment_method": "credit_card | gopay | shopeepay | bank_transfer"
+}
+```
+
+If no payment method is specified, Midtrans will display all available payment options on the payment page.
+
+Response:
+```json
+{
+  "status": "success",
+  "message": "Payment initiated successfully",
+  "data": {
+    "transaction_token": "snap-token-from-midtrans",
+    "redirect_url": "https://app.midtrans.com/snap/v2/vtweb/...",
+    "order_id": "SUB-12345-1614849849"
+  }
+}
+```
+
+### Payment Notification Webhook
+
+Set up a webhook URL in the Midtrans Dashboard to receive payment notifications:
+
+1. Login to your Midtrans Dashboard
+2. Go to Settings > Configuration
+3. Set the Payment Notification URL to `https://your-api-domain.com/v1/subscriptions/notification`
+
+## Frontend Integration
+
+To display the Snap payment page:
+
+1. Include the Snap.js library in your HTML:
+```html
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="YOUR-CLIENT-KEY"></script>
+```
+
+2. Use the transaction token to display the payment page:
+```javascript
+snap.pay('TRANSACTION_TOKEN', {
+  onSuccess: function(result){
+    // Handle success
+  },
+  onPending: function(result){
+    // Handle pending
+  },
+  onError: function(result){
+    // Handle error
+  }
+});
 ```

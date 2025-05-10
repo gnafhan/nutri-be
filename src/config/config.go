@@ -1,7 +1,7 @@
 package config
 
 import (
-	"app/src/utils"
+	"log"
 
 	"github.com/spf13/viper"
 )
@@ -31,6 +31,8 @@ var (
 	GoogleClientID      string
 	GoogleClientSecret  string
 	RedirectURL         string
+	MidtransServerKey   string
+	MidtransStatus      string
 )
 
 func init() {
@@ -73,6 +75,10 @@ func init() {
 	GoogleClientID = viper.GetString("GOOGLE_CLIENT_ID")
 	GoogleClientSecret = viper.GetString("GOOGLE_CLIENT_SECRET")
 	RedirectURL = viper.GetString("REDIRECT_URL")
+
+	// Midtrans configuration
+	MidtransServerKey = viper.GetString("MIDTRANS_SERVER_KEY")
+	MidtransStatus = viper.GetString("MIDTRANS_STATUS")
 }
 
 func loadConfig() {
@@ -85,10 +91,10 @@ func loadConfig() {
 		viper.SetConfigFile(path + ".env")
 
 		if err := viper.ReadInConfig(); err == nil {
-			utils.Log.Infof("Config file loaded from %s", path)
+			log.Printf("Config file loaded from %s", path)
 			return
 		}
 	}
 
-	utils.Log.Error("Failed to load any config file")
+	log.Println("Failed to load any config file")
 }

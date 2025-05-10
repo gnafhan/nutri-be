@@ -18,8 +18,8 @@ import (
 func Connect(dbHost, dbName string) *gorm.DB {
 	// hihihi maap
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
-		dbHost, config.DBUser, config.DBPassword, dbName, config.DBPort,
+		"host=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
+		dbHost, dbName, config.DBPort,
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
@@ -67,6 +67,7 @@ func MigrateAndSeed(db *gorm.DB) {
 		&model.UsersWeightHeightTarget{},
 		&model.SubscriptionPlan{},
 		&model.UserSubscription{},
+		&model.TransactionDetail{},
 	); err != nil {
 		log.Fatalf("Failed to auto-migrate database: %v", err)
 	}

@@ -16,6 +16,7 @@ type UserSubscriptionResponse struct {
 	EndDate       time.Time                `json:"end_date"`
 	IsActive      bool                     `json:"is_active"`
 	PaymentMethod string                   `json:"payment_method"`
+	PaymentStatus string                   `json:"payment_status"`
 	CreatedAt     time.Time                `json:"created_at"`
 }
 

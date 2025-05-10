@@ -1326,6 +1326,29 @@ const docTemplate = `{
                 }
             }
         },
+        "/subscriptions/notification": {
+            "post": {
+                "description": "Handle payment notification from Midtrans",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Midtrans payment notification webhook",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Common"
+                        }
+                    }
+                }
+            }
+        },
         "/subscriptions/plans": {
             "get": {
                 "description": "Get available subscription plans",
@@ -1373,12 +1396,11 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Payment data",
+                        "description": "Payment data (optional)",
                         "name": "request",
                         "in": "body",
-                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/example.PurchaseSubscriptionRequest"
+                            "$ref": "#/definitions/model.PurchaseSubscriptionRequest"
                         }
                     }
                 ],
@@ -1386,7 +1408,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/example.UserSubscriptionResponse"
+                            "$ref": "#/definitions/response.PaymentResponse"
                         }
                     }
                 }
@@ -3076,15 +3098,6 @@ const docTemplate = `{
                 }
             }
         },
-        "example.PurchaseSubscriptionRequest": {
-            "type": "object",
-            "properties": {
-                "payment_method": {
-                    "type": "string",
-                    "example": "gopay"
-                }
-            }
-        },
         "example.RefreshToken": {
             "type": "object",
             "properties": {
@@ -3710,6 +3723,34 @@ const docTemplate = `{
                 "Female"
             ]
         },
+        "model.PaymentResponse": {
+            "type": "object",
+            "properties": {
+                "order_id": {
+                    "type": "string"
+                },
+                "redirect_url": {
+                    "type": "string"
+                },
+                "transaction_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.PurchaseSubscriptionRequest": {
+            "type": "object",
+            "properties": {
+                "payment_method": {
+                    "type": "string",
+                    "enum": [
+                        "gopay",
+                        "shopeepay",
+                        "bank_transfer",
+                        "credit_card"
+                    ]
+                }
+            }
+        },
         "model.Recipe": {
             "type": "object",
             "properties": {
@@ -3801,6 +3842,9 @@ const docTemplate = `{
                 "payment_method": {
                     "type": "string"
                 },
+                "payment_status": {
+                    "type": "string"
+                },
                 "plan": {
                     "$ref": "#/definitions/model.SubscriptionPlanResponse"
                 },
@@ -3844,6 +3888,20 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "feature": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.PaymentResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/model.PaymentResponse"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }

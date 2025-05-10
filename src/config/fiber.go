@@ -11,6 +11,7 @@ func FiberConfig() fiber.Config {
 	return fiber.Config{
 		Prefork:       IsProd,
 		CaseSensitive: true,
+		StrictRouting: false,
 		ServerHeader:  "Fiber",
 		AppName:       "Fiber API",
 		ErrorHandler:  utils.ErrorHandler,

@@ -630,12 +630,6 @@ definitions:
         example: kcal
         type: string
     type: object
-  example.PurchaseSubscriptionRequest:
-    properties:
-      payment_method:
-        example: gopay
-        type: string
-    type: object
   example.RefreshToken:
     properties:
       refresh_token:
@@ -1074,6 +1068,25 @@ definitions:
     x-enum-varnames:
     - Male
     - Female
+  model.PaymentResponse:
+    properties:
+      order_id:
+        type: string
+      redirect_url:
+        type: string
+      transaction_token:
+        type: string
+    type: object
+  model.PurchaseSubscriptionRequest:
+    properties:
+      payment_method:
+        enum:
+        - gopay
+        - shopeepay
+        - bank_transfer
+        - credit_card
+        type: string
+    type: object
   model.Recipe:
     properties:
       day:
@@ -1134,6 +1147,8 @@ definitions:
         type: boolean
       payment_method:
         type: string
+      payment_status:
+        type: string
       plan:
         $ref: '#/definitions/model.SubscriptionPlanResponse'
       start_date:
@@ -1162,6 +1177,15 @@ definitions:
       access:
         type: boolean
       feature:
+        type: string
+    type: object
+  response.PaymentResponse:
+    properties:
+      data:
+        $ref: '#/definitions/model.PaymentResponse'
+      message:
+        type: string
+      status:
         type: string
     type: object
   response.SubscriptionPlansResponse:
@@ -2247,6 +2271,21 @@ paths:
       summary: Get current subscription
       tags:
       - Subscription
+  /subscriptions/notification:
+    post:
+      consumes:
+      - application/json
+      description: Handle payment notification from Midtrans
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Common'
+      summary: Midtrans payment notification webhook
+      tags:
+      - Subscription
   /subscriptions/plans:
     get:
       description: Get available subscription plans
@@ -2271,19 +2310,18 @@ paths:
         name: planID
         required: true
         type: string
-      - description: Payment data
+      - description: Payment data (optional)
         in: body
         name: request
-        required: true
         schema:
-          $ref: '#/definitions/example.PurchaseSubscriptionRequest'
+          $ref: '#/definitions/model.PurchaseSubscriptionRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/example.UserSubscriptionResponse'
+            $ref: '#/definitions/response.PaymentResponse'
       security:
       - BearerAuth: []
       summary: Purchase subscription plan

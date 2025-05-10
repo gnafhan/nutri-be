@@ -15,7 +15,7 @@ func Routes(app *fiber.App, db *gorm.DB) {
 	healthCheckService := service.NewHealthCheckService(db)
 	emailService := service.NewEmailService()
 	userService := service.NewUserService(db, validate)
-	paymentService := &service.MockPayment{}
+	paymentService := service.NewMidtransPaymentService()
 	subscriptionService := service.NewSubscriptionService(db, paymentService)
 	tokenService := service.NewTokenService(db, validate, userService, subscriptionService)
 	authService := service.NewAuthService(db, validate, userService, tokenService)
