@@ -351,9 +351,8 @@ func (s *subscriptionService) GetUserActiveSubscription(ctx *fiber.Ctx, userID u
 }
 
 func (s *subscriptionService) toSubscriptionResponse(sub *model.UserSubscription) (*model.UserSubscriptionResponse, error) {
-	var features map[string]bool
 	// Initialize features map
-	features = make(map[string]bool)
+	features := make(map[string]bool)
 
 	// Only try to unmarshal if Features is not empty
 	if sub.Plan.Features != "" {
