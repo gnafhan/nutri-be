@@ -9,3 +9,4 @@ lint.txt
 main
 
 uploads/*
+src/database/connect.go
