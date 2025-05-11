@@ -6,6 +6,8 @@ var allRoles = map[string][]string{
 		"getUsers", "manageUsers",
 		"getProductTokens", "createProductToken", "deleteProductToken",
 		"getUserDetails", "updateUser",
+		"getSubscriptions", "manageSubscriptions", "viewTransactions", "updatePaymentStatus",
+		"getSubscriptionPlans",
 	},
 }
 

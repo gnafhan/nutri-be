@@ -2,6 +2,7 @@ package service
 
 import (
 	"app/src/model"
+	"app/src/validation"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -34,6 +35,16 @@ type SubscriptionService interface {
 	IncrementScanUsage(ctx *fiber.Ctx, userID uuid.UUID) error
 	GetRemainingScans(ctx *fiber.Ctx, userID uuid.UUID) (int, error)
 	HandlePaymentNotification(ctx *fiber.Ctx, notificationData []byte) error
+
+	// Admin-related methods
+	GetAllUserSubscriptions(ctx *fiber.Ctx, query *validation.SubscriptionQuery) ([]model.UserSubscriptionResponse, int64, error)
+	GetUserSubscriptionByID(ctx *fiber.Ctx, subscriptionID uuid.UUID) (*model.UserSubscriptionResponse, error)
+	GetAllSubscriptionPlansWithUsers(ctx *fiber.Ctx, withUsers bool) ([]model.SubscriptionPlanWithUsers, error)
+	UpdateUserSubscription(ctx *fiber.Ctx, subscriptionID uuid.UUID, req *validation.UpdateSubscription) (*model.UserSubscriptionResponse, error)
+	DeleteUserSubscription(ctx *fiber.Ctx, subscriptionID uuid.UUID) error
+	GetTransactionsBySubscriptionID(ctx *fiber.Ctx, subscriptionID uuid.UUID) ([]model.TransactionDetail, error)
+	UpdatePaymentStatus(ctx *fiber.Ctx, subscriptionID uuid.UUID, status string) (*model.UserSubscriptionResponse, error)
+	GetAllTransactions(ctx *fiber.Ctx, page, limit int) ([]model.TransactionDetail, int64, error)
 }
 
 type subscriptionService struct {
@@ -411,4 +422,296 @@ func (s *subscriptionService) GetRemainingScans(ctx *fiber.Ctx, userID uuid.UUID
 		return 0, nil
 	}
 	return remaining, nil
+}
+
+// GetAllUserSubscriptions retrieves all user subscriptions with pagination and filtering
+func (s *subscriptionService) GetAllUserSubscriptions(ctx *fiber.Ctx, query *validation.SubscriptionQuery) ([]model.UserSubscriptionResponse, int64, error) {
+	var subscriptions []model.UserSubscription
+	var totalResults int64
+
+	db := s.DB.WithContext(ctx.Context()).
+		Joins("Plan").
+		Joins("User")
+
+	// Apply status filter if provided
+	if query.Status != "" {
+		db = db.Where("user_subscriptions.payment_status = ?", query.Status)
+	}
+
+	// Count total results
+	if err := db.Model(&model.UserSubscription{}).Count(&totalResults).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Apply pagination
+	if err := db.
+		Offset((query.Page - 1) * query.Limit).
+		Limit(query.Limit).
+		Order("user_subscriptions.created_at DESC").
+		Find(&subscriptions).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Convert to response format
+	var responses []model.UserSubscriptionResponse
+	for _, sub := range subscriptions {
+		response, err := s.toSubscriptionResponse(&sub)
+		if err != nil {
+			return nil, 0, err
+		}
+		responses = append(responses, *response)
+	}
+
+	return responses, totalResults, nil
+}
+
+// GetUserSubscriptionByID retrieves a specific user subscription by ID
+func (s *subscriptionService) GetUserSubscriptionByID(ctx *fiber.Ctx, subscriptionID uuid.UUID) (*model.UserSubscriptionResponse, error) {
+	var subscription model.UserSubscription
+
+	if err := s.DB.WithContext(ctx.Context()).
+		Joins("Plan").
+		Joins("User").
+		Where("user_subscriptions.id = ?", subscriptionID).
+		First(&subscription).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fiber.NewError(fiber.StatusNotFound, "Subscription not found")
+		}
+		return nil, err
+	}
+
+	return s.toSubscriptionResponse(&subscription)
+}
+
+// GetAllSubscriptionPlansWithUsers retrieves all subscription plans with their users
+func (s *subscriptionService) GetAllSubscriptionPlansWithUsers(ctx *fiber.Ctx, withUsers bool) ([]model.SubscriptionPlanWithUsers, error) {
+	var plans []model.SubscriptionPlan
+
+	if err := s.DB.WithContext(ctx.Context()).Find(&plans).Error; err != nil {
+		return nil, err
+	}
+
+	var result []model.SubscriptionPlanWithUsers
+
+	for _, plan := range plans {
+		// Parse features
+		var features map[string]bool
+		if err := json.Unmarshal([]byte(plan.Features), &features); err != nil {
+			return nil, err
+		}
+
+		planWithUsers := model.SubscriptionPlanWithUsers{
+			ID:             plan.ID,
+			Name:           plan.Name,
+			Price:          plan.Price,
+			PriceFormatted: formatCurrency(plan.Price),
+			Description:    plan.Description,
+			AIscanLimit:    plan.AIscanLimit,
+			ValidityDays:   plan.ValidityDays,
+			Features:       features,
+			IsActive:       plan.IsActive,
+		}
+
+		// Count users for this plan
+		var userCount int64
+		if err := s.DB.WithContext(ctx.Context()).
+			Model(&model.UserSubscription{}).
+			Where("plan_id = ? AND is_active = ?", plan.ID, true).
+			Count(&userCount).Error; err != nil {
+			return nil, err
+		}
+
+		planWithUsers.UserCount = int(userCount)
+
+		// Get users if requested
+		if withUsers {
+			var subscriptions []model.UserSubscription
+			if err := s.DB.WithContext(ctx.Context()).
+				Joins("User").
+				Where("plan_id = ? AND is_active = ?", plan.ID, true).
+				Find(&subscriptions).Error; err != nil {
+				return nil, err
+			}
+
+			for _, sub := range subscriptions {
+				response, err := s.toSubscriptionResponse(&sub)
+				if err != nil {
+					return nil, err
+				}
+				planWithUsers.Users = append(planWithUsers.Users, *response)
+			}
+		}
+
+		result = append(result, planWithUsers)
+	}
+
+	return result, nil
+}
+
+// UpdateUserSubscription updates a user subscription
+func (s *subscriptionService) UpdateUserSubscription(ctx *fiber.Ctx, subscriptionID uuid.UUID, req *validation.UpdateSubscription) (*model.UserSubscriptionResponse, error) {
+	var subscription model.UserSubscription
+
+	if err := s.DB.WithContext(ctx.Context()).
+		Joins("Plan").
+		Where("user_subscriptions.id = ?", subscriptionID).
+		First(&subscription).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fiber.NewError(fiber.StatusNotFound, "Subscription not found")
+		}
+		return nil, err
+	}
+
+	// Update fields if provided
+	if req.PlanID != nil {
+		// Verify the plan exists
+		var plan model.SubscriptionPlan
+		if err := s.DB.WithContext(ctx.Context()).First(&plan, "id = ?", *req.PlanID).Error; err != nil {
+			return nil, fiber.NewError(fiber.StatusBadRequest, "Invalid plan ID")
+		}
+		subscription.PlanID = *req.PlanID
+	}
+
+	if req.IsActive != nil {
+		subscription.IsActive = *req.IsActive
+	}
+
+	if req.AIscansUsed != nil {
+		subscription.AIscansUsed = *req.AIscansUsed
+	}
+
+	if req.StartDate != nil {
+		subscription.StartDate = *req.StartDate
+	}
+
+	if req.EndDate != nil {
+		subscription.EndDate = *req.EndDate
+	}
+
+	if req.PaymentMethod != nil {
+		subscription.PaymentMethod = *req.PaymentMethod
+	}
+
+	// Save changes
+	if err := s.DB.WithContext(ctx.Context()).Save(&subscription).Error; err != nil {
+		return nil, err
+	}
+
+	// Refresh subscription data
+	if err := s.DB.WithContext(ctx.Context()).
+		Joins("Plan").
+		Where("user_subscriptions.id = ?", subscriptionID).
+		First(&subscription).Error; err != nil {
+		return nil, err
+	}
+
+	return s.toSubscriptionResponse(&subscription)
+}
+
+// DeleteUserSubscription deletes a user subscription
+func (s *subscriptionService) DeleteUserSubscription(ctx *fiber.Ctx, subscriptionID uuid.UUID) error {
+	var subscription model.UserSubscription
+
+	if err := s.DB.WithContext(ctx.Context()).
+		Where("id = ?", subscriptionID).
+		First(&subscription).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fiber.NewError(fiber.StatusNotFound, "Subscription not found")
+		}
+		return err
+	}
+
+	// Delete subscription
+	if err := s.DB.WithContext(ctx.Context()).Delete(&subscription).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// GetTransactionsBySubscriptionID retrieves all transactions for a subscription
+func (s *subscriptionService) GetTransactionsBySubscriptionID(ctx *fiber.Ctx, subscriptionID uuid.UUID) ([]model.TransactionDetail, error) {
+	var transactions []model.TransactionDetail
+
+	if err := s.DB.WithContext(ctx.Context()).
+		Where("user_subscription_id = ?", subscriptionID).
+		Order("created_at DESC").
+		Find(&transactions).Error; err != nil {
+		return nil, err
+	}
+
+	return transactions, nil
+}
+
+// UpdatePaymentStatus updates the payment status of a subscription
+func (s *subscriptionService) UpdatePaymentStatus(ctx *fiber.Ctx, subscriptionID uuid.UUID, status string) (*model.UserSubscriptionResponse, error) {
+	var subscription model.UserSubscription
+
+	if err := s.DB.WithContext(ctx.Context()).
+		Joins("Plan").
+		Where("user_subscriptions.id = ?", subscriptionID).
+		First(&subscription).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fiber.NewError(fiber.StatusNotFound, "Subscription not found")
+		}
+		return nil, err
+	}
+
+	// Update payment status
+	subscription.PaymentStatus = status
+
+	// If status is success, activate the subscription
+	if status == "success" {
+		subscription.IsActive = true
+	} else if status == "failed" {
+		subscription.IsActive = false
+	}
+
+	// Save changes
+	if err := s.DB.WithContext(ctx.Context()).Save(&subscription).Error; err != nil {
+		return nil, err
+	}
+
+	// Create transaction record
+	transactionDetail := &model.TransactionDetail{
+		UserSubscriptionID: subscription.ID,
+		OrderID:            subscription.TransactionID,
+		TransactionStatus:  status,
+		TransactionTime:    time.Now(),
+		GrossAmount:        fmt.Sprintf("%d", subscription.Plan.Price),
+		Currency:           "IDR",
+	}
+
+	if err := s.DB.WithContext(ctx.Context()).Create(&transactionDetail).Error; err != nil {
+		s.Log.Warnf("Failed to create transaction record: %v", err)
+		// Continue even if transaction record creation fails
+	}
+
+	return s.toSubscriptionResponse(&subscription)
+}
+
+// GetAllTransactions retrieves all transaction logs with pagination
+func (s *subscriptionService) GetAllTransactions(ctx *fiber.Ctx, page, limit int) ([]model.TransactionDetail, int64, error) {
+	var transactions []model.TransactionDetail
+	var totalResults int64
+
+	// Count total results
+	if err := s.DB.WithContext(ctx.Context()).
+		Model(&model.TransactionDetail{}).
+		Count(&totalResults).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Apply pagination
+	if err := s.DB.WithContext(ctx.Context()).
+		Preload("UserSubscription").
+		Preload("UserSubscription.User").
+		Order("created_at DESC").
+		Offset((page - 1) * limit).
+		Limit(limit).
+		Find(&transactions).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return transactions, totalResults, nil
 }
