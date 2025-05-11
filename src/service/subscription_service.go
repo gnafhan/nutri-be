@@ -45,6 +45,7 @@ type SubscriptionService interface {
 	GetTransactionsBySubscriptionID(ctx *fiber.Ctx, subscriptionID uuid.UUID) ([]model.TransactionDetail, error)
 	UpdatePaymentStatus(ctx *fiber.Ctx, subscriptionID uuid.UUID, status string) (*model.UserSubscriptionResponse, error)
 	GetAllTransactions(ctx *fiber.Ctx, page, limit int) ([]model.TransactionDetail, int64, error)
+	GetTransactionByID(ctx *fiber.Ctx, transactionID uuid.UUID) (*model.TransactionDetail, error)
 }
 
 type subscriptionService struct {
@@ -714,4 +715,22 @@ func (s *subscriptionService) GetAllTransactions(ctx *fiber.Ctx, page, limit int
 	}
 
 	return transactions, totalResults, nil
+}
+
+func (s *subscriptionService) GetTransactionByID(ctx *fiber.Ctx, transactionID uuid.UUID) (*model.TransactionDetail, error) {
+	var transaction model.TransactionDetail
+
+	if err := s.DB.WithContext(ctx.Context()).
+		Preload("UserSubscription").
+		Preload("UserSubscription.User").
+		Preload("UserSubscription.Plan").
+		Where("id = ?", transactionID).
+		First(&transaction).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fiber.NewError(fiber.StatusNotFound, "Transaction not found")
+		}
+		return nil, err
+	}
+
+	return &transaction, nil
 }

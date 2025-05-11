@@ -304,3 +304,36 @@ func (c *AdminSubscriptionController) GetAllTransactions(ctx *fiber.Ctx) error {
 		TotalResults: totalResults,
 	})
 }
+
+// @Tags         Admin
+// @Summary      Get transaction details
+// @Description  Returns details of a specific transaction
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path  string  true  "Transaction ID"
+// @Router       /admin/transactions/{id} [get]
+// @Success      200  {object}  example.TransactionDetailResponse
+// @Failure      403  {object}  response.ErrorResponse
+// @Failure      404  {object}  response.ErrorResponse
+func (c *AdminSubscriptionController) GetTransactionByID(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "Transaction ID is required")
+	}
+
+	transactionID, err := uuid.Parse(id)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid transaction ID format")
+	}
+
+	transaction, err := c.SubscriptionService.GetTransactionByID(ctx, transactionID)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.SuccessWithTransaction{
+		Status:  "success",
+		Message: "Transaction details retrieved successfully",
+		Data:    *transaction,
+	})
+}

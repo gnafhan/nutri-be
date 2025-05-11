@@ -1930,13 +1930,13 @@ paths:
       summary: Get all user subscriptions
       tags:
       - Admin
-  /admin/subscriptions/{id}:
+  /admin/subscriptions/{subscription_id}:
     delete:
       description: Deletes a user subscription
       parameters:
       - description: Subscription ID
         in: path
-        name: id
+        name: subscription_id
         required: true
         type: string
       produces:
@@ -1964,7 +1964,7 @@ paths:
       parameters:
       - description: Subscription ID
         in: path
-        name: id
+        name: subscription_id
         required: true
         type: string
       produces:
@@ -1994,7 +1994,7 @@ paths:
       parameters:
       - description: Subscription ID
         in: path
-        name: id
+        name: subscription_id
         required: true
         type: string
       - description: Update subscription data
@@ -2027,7 +2027,7 @@ paths:
       summary: Update user subscription
       tags:
       - Admin
-  /admin/subscriptions/{id}/payment-status:
+  /admin/subscriptions/{subscription_id}/payment-status:
     patch:
       consumes:
       - application/json
@@ -2035,7 +2035,7 @@ paths:
       parameters:
       - description: Subscription ID
         in: path
-        name: id
+        name: subscription_id
         required: true
         type: string
       - description: Update payment status data
@@ -2125,6 +2125,35 @@ paths:
       security:
       - BearerAuth: []
       summary: Get all transaction logs
+      tags:
+      - Admin
+  /admin/transactions/{id}:
+    get:
+      description: Returns details of a specific transaction
+      parameters:
+      - description: Transaction ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.TransactionDetailResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get transaction details
       tags:
       - Admin
   /admin/users:

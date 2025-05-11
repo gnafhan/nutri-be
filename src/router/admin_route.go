@@ -45,4 +45,5 @@ func AdminRoutes(v1 fiber.Router, userService service.UserService, tokenService 
 	// All transactions route
 	transactions := admin.Group("/transactions", m.Auth(userService, productTokenService, "viewTransactions"))
 	transactions.Get("/", adminSubscriptionController.GetAllTransactions)
+	transactions.Get("/:id", adminSubscriptionController.GetTransactionByID)
 }

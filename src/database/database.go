@@ -4,6 +4,7 @@ import (
 	"app/src/database/migrations"
 	"app/src/database/seeders"
 	"app/src/model"
+	"app/src/utils"
 	"log"
 
 	"gorm.io/gorm"

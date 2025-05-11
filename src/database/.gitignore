@@ -1,2 +1,5 @@
 # Ignore database configuration file
-database.go
+
+connect.go
+/connect.go
+

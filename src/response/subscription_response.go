@@ -54,3 +54,10 @@ type SuccessWithTransactions struct {
 	TotalPages   int64                     `json:"total_pages,omitempty"`
 	TotalResults int64                     `json:"total_results,omitempty"`
 }
+
+// SuccessWithTransaction is a response for a single transaction
+type SuccessWithTransaction struct {
+	Status  string                  `json:"status"`
+	Message string                  `json:"message"`
+	Data    model.TransactionDetail `json:"data"`
+}

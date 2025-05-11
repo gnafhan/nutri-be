@@ -245,7 +245,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/subscriptions/{id}": {
+        "/admin/subscriptions/{subscription_id}": {
             "get": {
                 "security": [
                     {
@@ -264,7 +264,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Subscription ID",
-                        "name": "id",
+                        "name": "subscription_id",
                         "in": "path",
                         "required": true
                     }
@@ -308,7 +308,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Subscription ID",
-                        "name": "id",
+                        "name": "subscription_id",
                         "in": "path",
                         "required": true
                     }
@@ -355,7 +355,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Subscription ID",
-                        "name": "id",
+                        "name": "subscription_id",
                         "in": "path",
                         "required": true
                     },
@@ -397,7 +397,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/subscriptions/{id}/payment-status": {
+        "/admin/subscriptions/{subscription_id}/payment-status": {
             "patch": {
                 "security": [
                     {
@@ -419,7 +419,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Subscription ID",
-                        "name": "id",
+                        "name": "subscription_id",
                         "in": "path",
                         "required": true
                     },
@@ -547,6 +547,52 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/transactions/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns details of a specific transaction",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get transaction details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Transaction ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.TransactionDetailResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/response.ErrorResponse"
                         }
