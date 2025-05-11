@@ -99,6 +99,46 @@ definitions:
         example: success
         type: string
     type: object
+  example.AdminSubscriptionPlanWithUsersResponse:
+    properties:
+      ai_scan_limit:
+        type: integer
+      description:
+        type: string
+      features:
+        additionalProperties:
+          type: boolean
+        type: object
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: integer
+      price_formatted:
+        type: string
+      user_count:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/example.UserSubscriptionResponse'
+        type: array
+      validity_days:
+        type: integer
+    type: object
+  example.AdminSubscriptionPlansResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/example.AdminSubscriptionPlanWithUsersResponse'
+        type: array
+      message:
+        type: string
+      status:
+        type: string
+    type: object
   example.CalorieStat:
     properties:
       calories:
@@ -133,6 +173,17 @@ definitions:
         type: string
       title:
         example: My First Article
+        type: string
+    type: object
+  example.CreateProductTokenResponse:
+    properties:
+      data:
+        $ref: '#/definitions/example.ProductTokenResponse'
+      message:
+        example: Product token created successfully
+        type: string
+      status:
+        example: success
         type: string
     type: object
   example.CreateRecipeRequest:
@@ -305,6 +356,19 @@ definitions:
       total_results:
         example: 50
         type: integer
+    type: object
+  example.GetAllProductTokensResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/example.ProductTokenResponse'
+        type: array
+      message:
+        example: Product tokens retrieved successfully
+        type: string
+      status:
+        example: success
+        type: string
     type: object
   example.GetAllUserResponse:
     properties:
@@ -530,6 +594,9 @@ definitions:
         example: "2023-10-10T08:00:00Z"
         type: string
     type: object
+  example.JSONData:
+    additionalProperties: true
+    type: object
   example.LoginResponse:
     properties:
       message:
@@ -630,6 +697,37 @@ definitions:
         example: kcal
         type: string
     type: object
+  example.ProductTokenResponse:
+    properties:
+      activated_at:
+        example: "2025-04-20T14:30:00Z"
+        type: string
+      created_at:
+        example: "2025-04-01T10:00:00Z"
+        type: string
+      created_by:
+        $ref: '#/definitions/example.SimpleUser'
+      created_by_id:
+        example: b1c2d3e4-f5g6-h7i8-j9k0-l1m2n3o4p5q6
+        type: string
+      id:
+        example: e088d183-9eea-4a11-8d5d-74d7ec91bdf5
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      token:
+        example: abc123def456ghi789
+        type: string
+      updated_at:
+        example: "2025-04-01T10:00:00Z"
+        type: string
+      user:
+        $ref: '#/definitions/example.SimpleUser'
+      user_id:
+        example: a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6
+        type: string
+    type: object
   example.RefreshToken:
     properties:
       refresh_token:
@@ -675,6 +773,24 @@ definitions:
         example: success
         type: string
     type: object
+  example.SimpleUser:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      id:
+        example: e088d183-9eea-4a11-8d5d-74d7ec91bdf5
+        type: string
+      name:
+        example: John Doe
+        type: string
+      role:
+        example: user
+        type: string
+      verified_email:
+        example: true
+        type: boolean
+    type: object
   example.SubscriptionPlanResponse:
     properties:
       ai_scan_limit:
@@ -698,6 +814,31 @@ definitions:
       validity_days:
         type: integer
     type: object
+  example.SuccessWithPaginateUsers:
+    properties:
+      limit:
+        example: 10
+        type: integer
+      message:
+        example: Get all users successfully
+        type: string
+      page:
+        example: 1
+        type: integer
+      results:
+        items:
+          $ref: '#/definitions/example.SimpleUser'
+        type: array
+      status:
+        example: success
+        type: string
+      total_pages:
+        example: 5
+        type: integer
+      total_results:
+        example: 42
+        type: integer
+    type: object
   example.TokenExpires:
     properties:
       expires:
@@ -713,6 +854,98 @@ definitions:
         $ref: '#/definitions/example.TokenExpires'
       refresh:
         $ref: '#/definitions/example.TokenExpires'
+    type: object
+  example.TransactionDetailResponse:
+    properties:
+      acquirer:
+        type: string
+      approval_code:
+        type: string
+      bank:
+        type: string
+      bill_key:
+        type: string
+      biller_code:
+        type: string
+      card_type:
+        type: string
+      channel_response_code:
+        type: string
+      channel_response_message:
+        type: string
+      created_at:
+        type: string
+      currency:
+        type: string
+      eci:
+        type: string
+      fraud_status:
+        type: string
+      gross_amount:
+        type: string
+      id:
+        type: string
+      issuer:
+        description: E-wallet specific fields
+        type: string
+      masked_card:
+        description: Credit Card specific fields
+        type: string
+      order_id:
+        type: string
+      payment_amounts:
+        $ref: '#/definitions/example.JSONData'
+      payment_code:
+        type: string
+      payment_type:
+        type: string
+      permata_va_number:
+        type: string
+      raw_response:
+        allOf:
+        - $ref: '#/definitions/example.JSONData'
+        description: Raw response for debugging
+      settlement_time:
+        description: Settlement info
+        type: string
+      status_code:
+        type: string
+      status_message:
+        type: string
+      store:
+        description: Store specific fields
+        type: string
+      transaction_id:
+        type: string
+      transaction_status:
+        type: string
+      transaction_time:
+        type: string
+      user_subscription_id:
+        type: string
+      va_numbers:
+        allOf:
+        - $ref: '#/definitions/example.JSONData'
+        description: Bank Transfer specific fields
+    type: object
+  example.TransactionsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/example.TransactionDetailResponse'
+        type: array
+      limit:
+        type: integer
+      message:
+        type: string
+      page:
+        type: integer
+      status:
+        type: string
+      total_pages:
+        type: integer
+      total_results:
+        type: integer
     type: object
   example.Unauthorized:
     properties:
@@ -1133,6 +1366,37 @@ definitions:
       validity_days:
         type: integer
     type: object
+  model.User:
+    properties:
+      activity_level:
+        $ref: '#/definitions/model.ActivityLevel'
+      birth_date:
+        type: string
+      email:
+        type: string
+      gender:
+        $ref: '#/definitions/model.GenderType'
+      google_id_token:
+        type: string
+      height:
+        type: number
+      id:
+        type: string
+      medical_history:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      profile_picture:
+        type: string
+      role:
+        type: string
+      verified_email:
+        type: boolean
+      weight:
+        type: number
+    type: object
   model.UserSubscriptionResponse:
     properties:
       ai_scans_used:
@@ -1158,6 +1422,14 @@ definitions:
     type: object
   response.Common:
     properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.ErrorResponse:
+    properties:
+      errors: {}
       message:
         type: string
       status:
@@ -1239,6 +1511,25 @@ definitions:
       status:
         type: string
     type: object
+  response.SuccessWithPaginateSubscriptions:
+    properties:
+      limit:
+        type: integer
+      message:
+        type: string
+      page:
+        type: integer
+      results:
+        items:
+          $ref: '#/definitions/model.UserSubscriptionResponse'
+        type: array
+      status:
+        type: string
+      total_pages:
+        type: integer
+      total_results:
+        type: integer
+    type: object
   response.SuccessWithRecipe:
     properties:
       data:
@@ -1259,6 +1550,24 @@ definitions:
       status:
         type: string
     type: object
+  response.SuccessWithSubscription:
+    properties:
+      data:
+        $ref: '#/definitions/model.UserSubscriptionResponse'
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.SuccessWithUser:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+      user:
+        $ref: '#/definitions/model.User'
+    type: object
   response.UserSubscriptionResponse:
     properties:
       data:
@@ -1267,6 +1576,17 @@ definitions:
         type: string
       status:
         type: string
+    type: object
+  validation.CreateCustomToken:
+    properties:
+      is_active:
+        type: boolean
+      token:
+        maxLength: 32
+        minLength: 8
+        type: string
+    required:
+    - token
     type: object
   validation.CreateUser:
     properties:
@@ -1382,6 +1702,33 @@ definitions:
         minLength: 8
         type: string
     type: object
+  validation.UpdatePaymentStatus:
+    properties:
+      status:
+        enum:
+        - pending
+        - success
+        - failed
+        type: string
+    required:
+    - status
+    type: object
+  validation.UpdateSubscription:
+    properties:
+      ai_scans_used:
+        minimum: 0
+        type: integer
+      end_date:
+        type: string
+      is_active:
+        type: boolean
+      payment_method:
+        type: string
+      plan_id:
+        type: string
+      start_date:
+        type: string
+    type: object
   validation.UpdateUser:
     properties:
       activity_level:
@@ -1441,6 +1788,444 @@ info:
   title: Nutribox API documentation
   version: 1.0.0
 paths:
+  /admin/product-tokens:
+    get:
+      description: Returns a list of all product tokens with their activation status
+      parameters:
+      - description: Include user data
+        in: query
+        name: with_user
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.GetAllProductTokensResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all product tokens
+      tags:
+      - Admin
+    post:
+      consumes:
+      - application/json
+      description: Creates a new custom product token that can be used by users
+      parameters:
+      - description: Product token details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/validation.CreateCustomToken'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/example.CreateProductTokenResponse'
+        "400":
+          description: Invalid request or token already exists
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create new product token
+      tags:
+      - Admin
+  /admin/product-tokens/{id}:
+    delete:
+      description: Deletes a product token by ID
+      parameters:
+      - description: Product token ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Common'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete product token
+      tags:
+      - Admin
+  /admin/subscription-plans:
+    get:
+      description: Returns a list of all subscription plans with their users
+      parameters:
+      - description: Include users for each plan
+        in: query
+        name: with_users
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.AdminSubscriptionPlansResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all subscription plans
+      tags:
+      - Admin
+  /admin/subscriptions:
+    get:
+      description: Returns a list of all user subscriptions with pagination
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Maximum number of subscriptions
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by status (active, expired, pending)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithPaginateSubscriptions'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all user subscriptions
+      tags:
+      - Admin
+  /admin/subscriptions/{id}:
+    delete:
+      description: Deletes a user subscription
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Common'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete user subscription
+      tags:
+      - Admin
+    get:
+      description: Returns details of a specific user subscription
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithSubscription'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user subscription details
+      tags:
+      - Admin
+    patch:
+      consumes:
+      - application/json
+      description: Updates a user subscription (plan, status, etc.)
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update subscription data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/validation.UpdateSubscription'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithSubscription'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user subscription
+      tags:
+      - Admin
+  /admin/subscriptions/{id}/payment-status:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the payment status of a user subscription
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update payment status data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/validation.UpdatePaymentStatus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithSubscription'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update payment status
+      tags:
+      - Admin
+  /admin/subscriptions/{subscription_id}/transactions:
+    get:
+      description: Returns transaction logs for a specific user subscription
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: subscription_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.TransactionsResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get transaction logs
+      tags:
+      - Admin
+  /admin/transactions:
+    get:
+      description: Returns a list of all transaction logs with pagination
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Maximum number of transactions
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.TransactionsResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all transaction logs
+      tags:
+      - Admin
+  /admin/users:
+    get:
+      description: Admin endpoint to retrieve all users with pagination
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Maximum number of users
+        in: query
+        name: limit
+        type: integer
+      - description: Search by name or email or role
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.SuccessWithPaginateUsers'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - Admin
+  /admin/users/{id}:
+    get:
+      description: Admin endpoint to get detailed user information
+      parameters:
+      - description: User id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithUser'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user details
+      tags:
+      - Admin
+    patch:
+      consumes:
+      - application/json
+      description: Admin endpoint to update user information
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update user data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/validation.UpdateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithUser'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - Admin
   /article-categories:
     get:
       description: Get all article categories

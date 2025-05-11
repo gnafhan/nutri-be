@@ -10,6 +10,9 @@ import (
 )
 
 func MigrateAndSeed(db *gorm.DB) {
+	// Run our custom migrations first to fix any data issues
+	runCustomMigrations(db)
+
 	// Run auto-migrations
 	if err := db.AutoMigrate(
 		&model.User{},
@@ -32,9 +35,31 @@ func MigrateAndSeed(db *gorm.DB) {
 
 	// Run seeders
 	seeders.RunSeeder(db)
+}
 
-	// Run custom migrations
+func runCustomMigrations(db *gorm.DB) {
+	// Fix product token records with invalid user_id
+	if err := db.Exec(`
+		UPDATE product_tokens 
+		SET user_id = NULL 
+		WHERE user_id IS NOT NULL AND NOT EXISTS (
+			SELECT 1 FROM users WHERE users.id = product_tokens.user_id
+		);
+	`).Error; err != nil {
+		utils.Log.Warnf("Failed to clean invalid user_id in product_tokens: %v", err)
+	}
+
+	// Run custom enum day migration
 	if err := migrations.CreateEnumDay(db); err != nil {
 		log.Fatalf("Failed to create enum type: %v", err)
+	}
+
+	// Run product token columns migration (without foreign key constraints)
+	if err := db.Exec(`
+		ALTER TABLE product_tokens 
+		ADD COLUMN IF NOT EXISTS created_by_id UUID DEFAULT NULL,
+		ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+	`).Error; err != nil {
+		utils.Log.Warnf("Failed to add columns to product_tokens: %v", err)
 	}
 }

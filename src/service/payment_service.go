@@ -107,22 +107,16 @@ func (s *MidtransPaymentService) CheckTransactionStatus(transactionID string) (i
 }
 
 func (s *MidtransPaymentService) HandleNotification(notificationJSON []byte) (interface{}, error) {
-	// s.Log.Infof("HandleNotification called with data: %s", string(notificationJSON))
-
 	var notificationPayload map[string]interface{}
 
-	err := json.Unmarshal(notificationJSON, &notificationPayload)
-	if err != nil {
-		s.Log.Errorf("Error parsing notification JSON: %v", err)
-		return nil, fmt.Errorf("error parsing notification JSON: %w", err)
+	jsonErr := json.Unmarshal(notificationJSON, &notificationPayload)
+	if jsonErr != nil {
+		s.Log.Errorf("Error parsing notification JSON: %v", jsonErr)
+		return nil, fmt.Errorf("error parsing notification JSON: %w", jsonErr)
 	}
 
 	// Verify signature key
-	isValidSignature, err := s.verifySignatureKey(notificationPayload)
-	if err != nil {
-		s.Log.Errorf("Error verifying signature key: %v", err)
-		return nil, fmt.Errorf("error verifying signature: %w", err)
-	}
+	isValidSignature, _ := s.verifySignatureKey(notificationPayload)
 
 	if !isValidSignature {
 		s.Log.Error("Invalid signature key, possible security threat")
@@ -140,10 +134,10 @@ func (s *MidtransPaymentService) HandleNotification(notificationJSON []byte) (in
 	s.Log.Infof("Checking transaction status for order ID: %s", orderID)
 
 	// Get transaction status from Midtrans
-	response, err := s.CoreAPIClient.CheckTransaction(orderID)
-	if err != nil {
-		s.Log.Errorf("Error checking transaction with Midtrans: %v", err)
-		return nil, fmt.Errorf("error checking transaction: %w", err)
+	response, txErr := s.CoreAPIClient.CheckTransaction(orderID)
+	if txErr != nil {
+		s.Log.Errorf("Error checking transaction with Midtrans: %v", txErr)
+		return nil, fmt.Errorf("error checking transaction: %w", txErr)
 	}
 
 	s.Log.Infof("Transaction status response from Midtrans: %+v", response)
