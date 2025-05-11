@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func SubscriptionRequired(subService service.SubscriptionService) fiber.Handler {
+func SubscriptionRequired(subService service.SubscriptionService, feature_name string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		user := c.Locals("user").(*model.User)
 
@@ -20,6 +20,26 @@ func SubscriptionRequired(subService service.SubscriptionService) fiber.Handler 
 				map[string]interface{}{
 					"upgrade_url": "/v1/subscriptions/plans",
 				})
+		}
+		if feature_name != "" {
+			// Check if the user has access to the requested feature
+			hasAccess, err := subService.CheckFeatureAccess(c, user.ID, feature_name)
+			if err != nil {
+				return utils.APIError(c, fiber.StatusForbidden,
+					"subscription_required",
+					"Active subscription required",
+					map[string]interface{}{
+						"upgrade_url": "/v1/subscriptions/plans",
+					})
+			}
+			if !hasAccess {
+				return utils.APIError(c, fiber.StatusForbidden,
+					"access",
+					"You don't have access to this feature",
+					map[string]interface{}{
+						"upgrade_url": "/v1/subscriptions/plans",
+					})
+			}
 		}
 
 		return c.Next()
