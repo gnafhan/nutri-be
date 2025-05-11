@@ -21,6 +21,19 @@ type SuccessWithMeal struct {
 	Message string            `json:"message"`
 	Meal    model.MealHistory `json:"meal_history"`
 }
+
+type SuccessWithProductTokens struct {
+	Status  string               `json:"status"`
+	Message string               `json:"message"`
+	Data    []model.ProductToken `json:"data"`
+}
+
+type SuccessWithProductToken struct {
+	Status  string             `json:"status"`
+	Message string             `json:"message"`
+	Data    model.ProductToken `json:"data"`
+}
+
 type SuccessWithMealScanDetail struct {
 	Status         string                  `json:"status"`
 	Message        string                  `json:"message"`
@@ -73,6 +86,9 @@ type ErrorDetails struct {
 	Message string      `json:"message"`
 	Errors  interface{} `json:"errors"`
 }
+
+// ErrorResponse adalah alias untuk ErrorDetails untuk Swagger
+type ErrorResponse = ErrorDetails
 
 type UserStatistics struct {
 	Heights  []HeightStat  `json:"heights"`

@@ -19,6 +19,11 @@ type ProductTokenService interface {
 	GetProductTokenByUserID(c *fiber.Ctx, userId uuid.UUID) (*model.ProductToken, error)
 	DeleteProductToken(c *fiber.Ctx, tokenID uuid.UUID) error
 	VerifyProductToken(c *fiber.Ctx, query *validation.Token) error
+
+	// Admin endpoints
+	GetAllProductTokens(c *fiber.Ctx, query *validation.ProductTokenQuery) ([]model.ProductToken, error)
+	CreateProductToken(c *fiber.Ctx, req *validation.CreateCustomToken) (*model.ProductToken, error)
+	AdminDeleteProductToken(c *fiber.Ctx, tokenID uuid.UUID) error
 }
 
 type productTokenService struct {
@@ -74,7 +79,7 @@ func (s *productTokenService) VerifyProductToken(c *fiber.Ctx, query *validation
 
 	var productToken model.ProductToken
 	if err := s.DB.WithContext(c.Context()).
-		Where("token = ? AND user_id IS NULL", query.Token).
+		Where("token = ? AND user_id IS NULL AND is_active = ?", query.Token, true).
 		First(&productToken).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return fiber.NewError(fiber.StatusNotFound, "Invalid or already used product token")
@@ -93,4 +98,72 @@ func (s *productTokenService) VerifyProductToken(c *fiber.Ctx, query *validation
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Product token verified successfully",
 	})
+}
+
+// Admin functions
+
+func (s *productTokenService) GetAllProductTokens(c *fiber.Ctx, query *validation.ProductTokenQuery) ([]model.ProductToken, error) {
+	var tokens []model.ProductToken
+	db := s.DB.WithContext(c.Context())
+
+	if query != nil && query.WithUser {
+		db = db.Preload("User").Preload("CreatedBy")
+	}
+
+	if err := db.Find(&tokens).Error; err != nil {
+		return nil, err
+	}
+
+	return tokens, nil
+}
+
+func (s *productTokenService) CreateProductToken(c *fiber.Ctx, req *validation.CreateCustomToken) (*model.ProductToken, error) {
+	userData := c.Locals("user")
+	admin, ok := userData.(*model.User)
+	if !ok {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "User not found")
+	}
+
+	if err := s.Validate.Struct(req); err != nil {
+		return nil, fiber.NewError(fiber.StatusBadRequest, "Invalid request data")
+	}
+
+	// Jika token kustom disediakan, gunakan itu; jika tidak, hasilkan token acak
+	token := req.Token
+	if token == "" {
+		token = utils.GenerateRandomString(16)
+	}
+
+	// Periksa apakah token sudah ada
+	var existingCount int64
+	if err := s.DB.WithContext(c.Context()).Model(&model.ProductToken{}).Where("token = ?", token).Count(&existingCount).Error; err != nil {
+		return nil, fiber.ErrInternalServerError
+	}
+
+	if existingCount > 0 {
+		return nil, fiber.NewError(fiber.StatusBadRequest, "Token already exists")
+	}
+
+	productToken := model.ProductToken{
+		Token:       token,
+		CreatedByID: admin.ID,
+		IsActive:    req.IsActive,
+	}
+
+	if err := s.DB.WithContext(c.Context()).Create(&productToken).Error; err != nil {
+		return nil, err
+	}
+
+	// Reload the token with the creator information
+	if err := s.DB.WithContext(c.Context()).Preload("CreatedBy").First(&productToken, productToken.ID).Error; err != nil {
+		s.Log.Warnf("Unable to load creator information: %v", err)
+	}
+
+	return &productToken, nil
+}
+
+func (s *productTokenService) AdminDeleteProductToken(c *fiber.Ctx, tokenID uuid.UUID) error {
+	return s.DB.WithContext(c.Context()).
+		Where("id = ?", tokenID).
+		Delete(&model.ProductToken{}).Error
 }

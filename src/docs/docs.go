@@ -19,6 +19,295 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/product-tokens": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns a list of all product tokens with their activation status",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get all product tokens",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Include user data",
+                        "name": "with_user",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.GetAllProductTokensResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new custom product token that can be used by users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Create new product token",
+                "parameters": [
+                    {
+                        "description": "Product token details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validation.CreateCustomToken"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/example.CreateProductTokenResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or token already exists",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/product-tokens/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes a product token by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Delete product token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product token ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Common"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin endpoint to retrieve all users with pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get all users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Maximum number of users",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by name or email or role",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.SuccessWithPaginateUsers"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin endpoint to get detailed user information",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get user details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithUser"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin endpoint to update user information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Update user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update user data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validation.UpdateUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithUser"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/article-categories": {
             "get": {
                 "security": [
@@ -2393,6 +2682,22 @@ const docTemplate = `{
                 }
             }
         },
+        "example.CreateProductTokenResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/example.ProductTokenResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Product token created successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "example.CreateRecipeRequest": {
             "type": "object",
             "properties": {
@@ -2634,6 +2939,25 @@ const docTemplate = `{
                 "total_results": {
                     "type": "integer",
                     "example": 50
+                }
+            }
+        },
+        "example.GetAllProductTokensResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/example.ProductTokenResponse"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Product tokens retrieved successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
                 }
             }
         },
@@ -3098,6 +3422,49 @@ const docTemplate = `{
                 }
             }
         },
+        "example.ProductTokenResponse": {
+            "type": "object",
+            "properties": {
+                "activated_at": {
+                    "type": "string",
+                    "example": "2025-04-20T14:30:00Z"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2025-04-01T10:00:00Z"
+                },
+                "created_by": {
+                    "$ref": "#/definitions/example.SimpleUser"
+                },
+                "created_by_id": {
+                    "type": "string",
+                    "example": "b1c2d3e4-f5g6-h7i8-j9k0-l1m2n3o4p5q6"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "e088d183-9eea-4a11-8d5d-74d7ec91bdf5"
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "token": {
+                    "type": "string",
+                    "example": "abc123def456ghi789"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2025-04-01T10:00:00Z"
+                },
+                "user": {
+                    "$ref": "#/definitions/example.SimpleUser"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6"
+                }
+            }
+        },
         "example.RefreshToken": {
             "type": "object",
             "properties": {
@@ -3164,6 +3531,31 @@ const docTemplate = `{
                 }
             }
         },
+        "example.SimpleUser": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john.doe@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "e088d183-9eea-4a11-8d5d-74d7ec91bdf5"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "role": {
+                    "type": "string",
+                    "example": "user"
+                },
+                "verified_email": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "example.SubscriptionPlanResponse": {
             "type": "object",
             "properties": {
@@ -3194,6 +3586,41 @@ const docTemplate = `{
                 },
                 "validity_days": {
                     "type": "integer"
+                }
+            }
+        },
+        "example.SuccessWithPaginateUsers": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Get all users successfully"
+                },
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/example.SimpleUser"
+                    }
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "total_pages": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "total_results": {
+                    "type": "integer",
+                    "example": 42
                 }
             }
         },
@@ -3821,6 +4248,53 @@ const docTemplate = `{
                 }
             }
         },
+        "model.User": {
+            "type": "object",
+            "properties": {
+                "activity_level": {
+                    "$ref": "#/definitions/model.ActivityLevel"
+                },
+                "birth_date": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "gender": {
+                    "$ref": "#/definitions/model.GenderType"
+                },
+                "google_id_token": {
+                    "type": "string"
+                },
+                "height": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "medical_history": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "profile_picture": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "verified_email": {
+                    "type": "boolean"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
         "model.UserSubscriptionResponse": {
             "type": "object",
             "properties": {
@@ -3859,6 +4333,18 @@ const docTemplate = `{
         "response.Common": {
             "type": "object",
             "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "errors": {},
                 "message": {
                     "type": "string"
                 },
@@ -4016,6 +4502,20 @@ const docTemplate = `{
                 }
             }
         },
+        "response.SuccessWithUser": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/model.User"
+                }
+            }
+        },
         "response.UserSubscriptionResponse": {
             "type": "object",
             "properties": {
@@ -4027,6 +4527,22 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "string"
+                }
+            }
+        },
+        "validation.CreateCustomToken": {
+            "type": "object",
+            "required": [
+                "token"
+            ],
+            "properties": {
+                "is_active": {
+                    "type": "boolean"
+                },
+                "token": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 8
                 }
             }
         },

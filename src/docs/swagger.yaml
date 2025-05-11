@@ -135,6 +135,17 @@ definitions:
         example: My First Article
         type: string
     type: object
+  example.CreateProductTokenResponse:
+    properties:
+      data:
+        $ref: '#/definitions/example.ProductTokenResponse'
+      message:
+        example: Product token created successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
   example.CreateRecipeRequest:
     properties:
       day:
@@ -305,6 +316,19 @@ definitions:
       total_results:
         example: 50
         type: integer
+    type: object
+  example.GetAllProductTokensResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/example.ProductTokenResponse'
+        type: array
+      message:
+        example: Product tokens retrieved successfully
+        type: string
+      status:
+        example: success
+        type: string
     type: object
   example.GetAllUserResponse:
     properties:
@@ -630,6 +654,37 @@ definitions:
         example: kcal
         type: string
     type: object
+  example.ProductTokenResponse:
+    properties:
+      activated_at:
+        example: "2025-04-20T14:30:00Z"
+        type: string
+      created_at:
+        example: "2025-04-01T10:00:00Z"
+        type: string
+      created_by:
+        $ref: '#/definitions/example.SimpleUser'
+      created_by_id:
+        example: b1c2d3e4-f5g6-h7i8-j9k0-l1m2n3o4p5q6
+        type: string
+      id:
+        example: e088d183-9eea-4a11-8d5d-74d7ec91bdf5
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      token:
+        example: abc123def456ghi789
+        type: string
+      updated_at:
+        example: "2025-04-01T10:00:00Z"
+        type: string
+      user:
+        $ref: '#/definitions/example.SimpleUser'
+      user_id:
+        example: a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6
+        type: string
+    type: object
   example.RefreshToken:
     properties:
       refresh_token:
@@ -675,6 +730,24 @@ definitions:
         example: success
         type: string
     type: object
+  example.SimpleUser:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      id:
+        example: e088d183-9eea-4a11-8d5d-74d7ec91bdf5
+        type: string
+      name:
+        example: John Doe
+        type: string
+      role:
+        example: user
+        type: string
+      verified_email:
+        example: true
+        type: boolean
+    type: object
   example.SubscriptionPlanResponse:
     properties:
       ai_scan_limit:
@@ -696,6 +769,31 @@ definitions:
         example: Rp 30.000
         type: string
       validity_days:
+        type: integer
+    type: object
+  example.SuccessWithPaginateUsers:
+    properties:
+      limit:
+        example: 10
+        type: integer
+      message:
+        example: Get all users successfully
+        type: string
+      page:
+        example: 1
+        type: integer
+      results:
+        items:
+          $ref: '#/definitions/example.SimpleUser'
+        type: array
+      status:
+        example: success
+        type: string
+      total_pages:
+        example: 5
+        type: integer
+      total_results:
+        example: 42
         type: integer
     type: object
   example.TokenExpires:
@@ -1133,6 +1231,37 @@ definitions:
       validity_days:
         type: integer
     type: object
+  model.User:
+    properties:
+      activity_level:
+        $ref: '#/definitions/model.ActivityLevel'
+      birth_date:
+        type: string
+      email:
+        type: string
+      gender:
+        $ref: '#/definitions/model.GenderType'
+      google_id_token:
+        type: string
+      height:
+        type: number
+      id:
+        type: string
+      medical_history:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      profile_picture:
+        type: string
+      role:
+        type: string
+      verified_email:
+        type: boolean
+      weight:
+        type: number
+    type: object
   model.UserSubscriptionResponse:
     properties:
       ai_scans_used:
@@ -1158,6 +1287,14 @@ definitions:
     type: object
   response.Common:
     properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.ErrorResponse:
+    properties:
+      errors: {}
       message:
         type: string
       status:
@@ -1259,6 +1396,15 @@ definitions:
       status:
         type: string
     type: object
+  response.SuccessWithUser:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+      user:
+        $ref: '#/definitions/model.User'
+    type: object
   response.UserSubscriptionResponse:
     properties:
       data:
@@ -1267,6 +1413,17 @@ definitions:
         type: string
       status:
         type: string
+    type: object
+  validation.CreateCustomToken:
+    properties:
+      is_active:
+        type: boolean
+      token:
+        maxLength: 32
+        minLength: 8
+        type: string
+    required:
+    - token
     type: object
   validation.CreateUser:
     properties:
@@ -1441,6 +1598,189 @@ info:
   title: Nutribox API documentation
   version: 1.0.0
 paths:
+  /admin/product-tokens:
+    get:
+      description: Returns a list of all product tokens with their activation status
+      parameters:
+      - description: Include user data
+        in: query
+        name: with_user
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.GetAllProductTokensResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all product tokens
+      tags:
+      - Admin
+    post:
+      consumes:
+      - application/json
+      description: Creates a new custom product token that can be used by users
+      parameters:
+      - description: Product token details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/validation.CreateCustomToken'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/example.CreateProductTokenResponse'
+        "400":
+          description: Invalid request or token already exists
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create new product token
+      tags:
+      - Admin
+  /admin/product-tokens/{id}:
+    delete:
+      description: Deletes a product token by ID
+      parameters:
+      - description: Product token ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Common'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete product token
+      tags:
+      - Admin
+  /admin/users:
+    get:
+      description: Admin endpoint to retrieve all users with pagination
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Maximum number of users
+        in: query
+        name: limit
+        type: integer
+      - description: Search by name or email or role
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.SuccessWithPaginateUsers'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - Admin
+  /admin/users/{id}:
+    get:
+      description: Admin endpoint to get detailed user information
+      parameters:
+      - description: User id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithUser'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user details
+      tags:
+      - Admin
+    patch:
+      consumes:
+      - application/json
+      description: Admin endpoint to update user information
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update user data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/validation.UpdateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithUser'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - Admin
   /article-categories:
     get:
       description: Get all article categories
