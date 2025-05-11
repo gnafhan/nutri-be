@@ -340,7 +340,7 @@ func (s *subscriptionService) GetUserActiveSubscription(ctx *fiber.Ctx, userID u
 	var subscription model.UserSubscription
 	err := s.DB.WithContext(ctx.Context()).
 		Joins("Plan").
-		Where("user_id = ? AND end_date > ? AND is_active = ?", userID, time.Now(), true).
+		Where("user_subscriptions.user_id = ? AND user_subscriptions.end_date > ? AND user_subscriptions.is_active = ?", userID, time.Now(), true).
 		First(&subscription).Error
 
 	if err != nil {
