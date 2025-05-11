@@ -60,13 +60,13 @@ func (c *AdminSubscriptionController) GetAllUserSubscriptions(ctx *fiber.Ctx) er
 // @Description  Returns details of a specific user subscription
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path  string  true  "Subscription ID"
-// @Router       /admin/subscriptions/{id} [get]
+// @Param        subscription_id   path  string  true  "Subscription ID"
+// @Router       /admin/subscriptions/{subscription_id} [get]
 // @Success      200  {object}  response.SuccessWithSubscription
 // @Failure      403  {object}  response.ErrorResponse
 // @Failure      404  {object}  response.ErrorResponse
 func (c *AdminSubscriptionController) GetUserSubscriptionDetails(ctx *fiber.Ctx) error {
-	id := ctx.Params("id")
+	id := ctx.Params("subscription_id")
 	if id == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "Subscription ID is required")
 	}
@@ -135,15 +135,15 @@ func (c *AdminSubscriptionController) GetAllSubscriptionPlans(ctx *fiber.Ctx) er
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id       path  string  true  "Subscription ID"
+// @Param        subscription_id       path  string  true  "Subscription ID"
 // @Param        request  body  validation.UpdateSubscription  true  "Update subscription data"
-// @Router       /admin/subscriptions/{id} [patch]
+// @Router       /admin/subscriptions/{subscription_id} [patch]
 // @Success      200  {object}  response.SuccessWithSubscription
 // @Failure      400  {object}  response.ErrorResponse
 // @Failure      403  {object}  response.ErrorResponse
 // @Failure      404  {object}  response.ErrorResponse
 func (c *AdminSubscriptionController) UpdateUserSubscription(ctx *fiber.Ctx) error {
-	id := ctx.Params("id")
+	id := ctx.Params("subscription_id")
 	if id == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "Subscription ID is required")
 	}
@@ -175,13 +175,13 @@ func (c *AdminSubscriptionController) UpdateUserSubscription(ctx *fiber.Ctx) err
 // @Description  Deletes a user subscription
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id   path  string  true  "Subscription ID"
-// @Router       /admin/subscriptions/{id} [delete]
+// @Param        subscription_id   path  string  true  "Subscription ID"
+// @Router       /admin/subscriptions/{subscription_id} [delete]
 // @Success      200  {object}  response.Common
 // @Failure      403  {object}  response.ErrorResponse
 // @Failure      404  {object}  response.ErrorResponse
 func (c *AdminSubscriptionController) DeleteUserSubscription(ctx *fiber.Ctx) error {
-	id := ctx.Params("id")
+	id := ctx.Params("subscription_id")
 	if id == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "Subscription ID is required")
 	}
@@ -240,15 +240,15 @@ func (c *AdminSubscriptionController) GetTransactionLogs(ctx *fiber.Ctx) error {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        id       path  string  true  "Subscription ID"
+// @Param        subscription_id       path  string  true  "Subscription ID"
 // @Param        request  body  validation.UpdatePaymentStatus  true  "Update payment status data"
-// @Router       /admin/subscriptions/{id}/payment-status [patch]
+// @Router       /admin/subscriptions/{subscription_id}/payment-status [patch]
 // @Success      200  {object}  response.SuccessWithSubscription
 // @Failure      400  {object}  response.ErrorResponse
 // @Failure      403  {object}  response.ErrorResponse
 // @Failure      404  {object}  response.ErrorResponse
 func (c *AdminSubscriptionController) UpdatePaymentStatus(ctx *fiber.Ctx) error {
-	id := ctx.Params("id")
+	id := ctx.Params("subscription_id")
 	if id == "" {
 		return fiber.NewError(fiber.StatusBadRequest, "Subscription ID is required")
 	}

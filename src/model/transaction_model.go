@@ -12,11 +12,12 @@ import (
 
 // TransactionDetail stores all payment-related information from Midtrans
 type TransactionDetail struct {
-	ID                 uuid.UUID `gorm:"primaryKey;default:uuid_generate_v4()"`
-	UserSubscriptionID uuid.UUID `gorm:"not null"`
-	OrderID            string    `gorm:"size:100;index"`
-	TransactionID      string    `gorm:"size:100"`
-	TransactionStatus  string    `gorm:"size:50"`
+	ID                 uuid.UUID        `gorm:"primaryKey;default:uuid_generate_v4()"`
+	UserSubscriptionID uuid.UUID        `gorm:"not null"`
+	UserSubscription   UserSubscription `gorm:"foreignKey:UserSubscriptionID"`
+	OrderID            string           `gorm:"size:100;index"`
+	TransactionID      string           `gorm:"size:100"`
+	TransactionStatus  string           `gorm:"size:50"`
 	TransactionTime    time.Time
 	StatusCode         string `gorm:"size:10"`
 	StatusMessage      string
@@ -75,11 +76,21 @@ func (j *JSON) Scan(value interface{}) error {
 		*j = JSON("null")
 		return nil
 	}
-	s, ok := value.(string)
-	if !ok {
-		return errors.New("invalid scan source for JSON")
+
+	switch v := value.(type) {
+	case string:
+		*j = JSON(v)
+	case []byte:
+		*j = JSON(v)
+	default:
+		// Try to marshal the value to JSON
+		data, err := json.Marshal(v)
+		if err != nil {
+			return errors.New("invalid scan source for JSON")
+		}
+		*j = JSON(data)
 	}
-	*j = JSON(s)
+
 	return nil
 }
 

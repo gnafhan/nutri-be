@@ -96,6 +96,11 @@ func runCustomMigrations(db *gorm.DB) {
 		log.Fatalf("Failed to create enum type: %v", err)
 	}
 
+	// Fix transaction details foreign key constraint
+	if err := migrations.FixTransactionDetailsForeignKey(db); err != nil {
+		utils.Log.Warnf("Failed to fix transaction details foreign key: %v", err)
+	}
+
 	// Run product token columns migration (without foreign key constraints)
 	if err := db.Exec(`
 		ALTER TABLE product_tokens 

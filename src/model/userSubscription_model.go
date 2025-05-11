@@ -10,6 +10,7 @@ import (
 type UserSubscription struct {
 	ID            uuid.UUID        `gorm:"primaryKey;default:uuid_generate_v4()"`
 	UserID        uuid.UUID        `gorm:"not null"`
+	User          User             `gorm:"foreignKey:UserID"`
 	PlanID        uuid.UUID        `gorm:"not null"`
 	Plan          SubscriptionPlan `gorm:"foreignKey:PlanID"`
 	AIscansUsed   int              `gorm:"default:0"`

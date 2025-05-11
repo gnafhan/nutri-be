@@ -350,7 +350,7 @@ func getString(data map[string]interface{}, key string, defaultValue string) str
 func (s *subscriptionService) GetUserActiveSubscription(ctx *fiber.Ctx, userID uuid.UUID) (*model.UserSubscriptionResponse, error) {
 	var subscription model.UserSubscription
 	err := s.DB.WithContext(ctx.Context()).
-		Joins("Plan").
+		Preload("Plan").
 		Where("user_subscriptions.user_id = ? AND user_subscriptions.end_date > ? AND user_subscriptions.is_active = ? AND user_subscriptions.payment_status = ?", userID, time.Now(), true, "success").
 		First(&subscription).Error
 
@@ -430,8 +430,8 @@ func (s *subscriptionService) GetAllUserSubscriptions(ctx *fiber.Ctx, query *val
 	var totalResults int64
 
 	db := s.DB.WithContext(ctx.Context()).
-		Joins("Plan").
-		Joins("User")
+		Preload("Plan").
+		Preload("User")
 
 	// Apply status filter if provided
 	if query.Status != "" {
@@ -470,8 +470,8 @@ func (s *subscriptionService) GetUserSubscriptionByID(ctx *fiber.Ctx, subscripti
 	var subscription model.UserSubscription
 
 	if err := s.DB.WithContext(ctx.Context()).
-		Joins("Plan").
-		Joins("User").
+		Preload("Plan").
+		Preload("User").
 		Where("user_subscriptions.id = ?", subscriptionID).
 		First(&subscription).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -527,7 +527,7 @@ func (s *subscriptionService) GetAllSubscriptionPlansWithUsers(ctx *fiber.Ctx, w
 		if withUsers {
 			var subscriptions []model.UserSubscription
 			if err := s.DB.WithContext(ctx.Context()).
-				Joins("User").
+				Preload("User").
 				Where("plan_id = ? AND is_active = ?", plan.ID, true).
 				Find(&subscriptions).Error; err != nil {
 				return nil, err
@@ -553,7 +553,7 @@ func (s *subscriptionService) UpdateUserSubscription(ctx *fiber.Ctx, subscriptio
 	var subscription model.UserSubscription
 
 	if err := s.DB.WithContext(ctx.Context()).
-		Joins("Plan").
+		Preload("Plan").
 		Where("user_subscriptions.id = ?", subscriptionID).
 		First(&subscription).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -599,7 +599,7 @@ func (s *subscriptionService) UpdateUserSubscription(ctx *fiber.Ctx, subscriptio
 
 	// Refresh subscription data
 	if err := s.DB.WithContext(ctx.Context()).
-		Joins("Plan").
+		Preload("Plan").
 		Where("user_subscriptions.id = ?", subscriptionID).
 		First(&subscription).Error; err != nil {
 		return nil, err
