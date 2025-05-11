@@ -8,12 +8,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func MealRoutes(v1 fiber.Router, u service.UserService, p service.ProductTokenService, ml service.MealService) {
+func MealRoutes(v1 fiber.Router, u service.UserService, p service.ProductTokenService, ml service.MealService, ss service.SubscriptionService) {
 	mealController := controller.NewMealController(ml)
 
 	meal := v1.Group("/meals")
 
-	meal.Get("/", m.Auth(u, p), mealController.GetMeals)
+	meal.Get("/", m.Auth(u, p), m.SubscriptionRequired(ss, "health_info"), mealController.GetMeals)
 	meal.Post("/", m.Auth(u, p), mealController.AddMeal)
 	meal.Post("/scan", m.Auth(u, p), mealController.ScanMeal)
 	meal.Get("/:mealId", m.Auth(u, p), mealController.GetMealByID)

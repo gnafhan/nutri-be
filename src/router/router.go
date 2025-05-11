@@ -31,7 +31,7 @@ func Routes(app *fiber.App, db *gorm.DB) {
 	AuthRoutes(v1, authService, userService, productTokenService, tokenService, emailService)
 	UserRoutes(v1, userService, productTokenService, tokenService)
 	ProductTokenRoutes(v1, userService, productTokenService)
-	MealRoutes(v1, userService, productTokenService, mealService)
+	MealRoutes(v1, userService, productTokenService, mealService, subscriptionService)
 	UsersWeightHeightRoutes(v1, userService, productTokenService, uwhService)
 	ArticleRoutes(v1, userService, productTokenService, articleService)
 	RecipeRoutes(v1, userService, productTokenService, recipesService)
