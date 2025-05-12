@@ -52,7 +52,8 @@ func setupFiberApp() *fiber.App {
 	// Middleware setup
 	app.Use("/v1/auth", middleware.LimiterConfig())
 	app.Use(middleware.LoggerConfig())
-	app.Use(middleware.RequestBodyLoggerConfig()) // Add the new request body logger middleware
+	app.Use(middleware.APILoggerConfig())
+	app.Use(middleware.RequestBodyLoggerConfig())
 	app.Use(helmet.New())
 	app.Use(compress.New())
 	app.Use(cors.New())

@@ -1460,6 +1460,29 @@ definitions:
       status:
         type: string
     type: object
+  response.SubscriptionPlanResponse:
+    properties:
+      ai_scan_limit:
+        type: integer
+      description:
+        type: string
+      features:
+        additionalProperties:
+          type: boolean
+        type: object
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: integer
+      price_formatted:
+        type: string
+      validity_days:
+        type: integer
+    type: object
   response.SubscriptionPlansResponse:
     properties:
       data:
@@ -1554,6 +1577,15 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/model.UserSubscriptionResponse'
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.SuccessWithSubscriptionPlan:
+    properties:
+      data:
+        $ref: '#/definitions/response.SubscriptionPlanResponse'
       message:
         type: string
       status:
@@ -1729,6 +1761,30 @@ definitions:
       start_date:
         type: string
     type: object
+  validation.UpdateSubscriptionPlan:
+    properties:
+      ai_scan_limit:
+        minimum: 1
+        type: integer
+      description:
+        type: string
+      features:
+        additionalProperties:
+          type: boolean
+        type: object
+      is_active:
+        type: boolean
+      name:
+        maxLength: 50
+        minLength: 2
+        type: string
+      price:
+        minimum: 1
+        type: integer
+      validity_days:
+        minimum: 1
+        type: integer
+    type: object
   validation.UpdateUser:
     properties:
       activity_level:
@@ -1894,6 +1950,75 @@ paths:
       security:
       - BearerAuth: []
       summary: Get all subscription plans
+      tags:
+      - Admin
+  /admin/subscription-plans/{plan_id}:
+    get:
+      description: Returns details of a specific subscription plan
+      parameters:
+      - description: Plan ID
+        in: path
+        name: plan_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithSubscriptionPlan'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get subscription plan details
+      tags:
+      - Admin
+    patch:
+      consumes:
+      - application/json
+      description: Updates a subscription plan (name, price, features, etc.)
+      parameters:
+      - description: Plan ID
+        in: path
+        name: plan_id
+        required: true
+        type: string
+      - description: Update plan data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/validation.UpdateSubscriptionPlan'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithSubscriptionPlan'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update subscription plan
       tags:
       - Admin
   /admin/subscriptions:

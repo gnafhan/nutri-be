@@ -27,3 +27,14 @@ type UpdateSubscription struct {
 type UpdatePaymentStatus struct {
 	Status string `json:"status" validate:"required,oneof=pending success failed"`
 }
+
+// UpdateSubscriptionPlan adalah struktur untuk update subscription plan
+type UpdateSubscriptionPlan struct {
+	Name         *string          `json:"name" validate:"omitempty,min=2,max=50"`
+	Price        *int             `json:"price" validate:"omitempty,min=1"`
+	Description  *string          `json:"description" validate:"omitempty"`
+	AIscanLimit  *int             `json:"ai_scan_limit" validate:"omitempty,min=1"`
+	ValidityDays *int             `json:"validity_days" validate:"omitempty,min=1"`
+	Features     *map[string]bool `json:"features" validate:"omitempty"`
+	IsActive     *bool            `json:"is_active" validate:"omitempty"`
+}

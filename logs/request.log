@@ -1,0 +1,6 @@
+{"ipAddress":"127.0.0.1","level":"info","method":"POST","msg":"API Request","path":"/v1/auth/login","requestBody":{"email":"Adm123in@gmail.com","password":"Adm123in@gmail.com"},"requestID":"req-ad25830c","time":"2025-05-12T13:05:00+07:00","userAgent":"node","userID":""}
+{"elapsedTime":"254.060291ms","level":"info","method":"POST","msg":"API Response","path":"/v1/auth/login","requestID":"req-ad25830c","response":null,"statusCode":200,"time":"2025-05-12T13:05:00+07:00","userID":""}
+{"ipAddress":"127.0.0.1","level":"info","method":"GET","msg":"API Request","path":"/v1/admin/subscriptions","requestBody":null,"requestID":"req-c78154f7","time":"2025-05-12T13:05:06+07:00","userAgent":"node","userID":""}
+{"elapsedTime":"74.975792ms","level":"info","method":"GET","msg":"API Response","path":"/v1/admin/subscriptions","requestID":"req-c78154f7","response":null,"statusCode":200,"time":"2025-05-12T13:05:06+07:00","userID":""}
+{"ipAddress":"127.0.0.1","level":"info","method":"GET","msg":"API Request","path":"/v1/admin/subscriptions","requestBody":null,"requestID":"req-661a8b03","time":"2025-05-12T13:05:06+07:00","userAgent":"node","userID":""}
+{"elapsedTime":"2.998ms","level":"info","method":"GET","msg":"API Response","path":"/v1/admin/subscriptions","requestID":"req-661a8b03","response":null,"statusCode":200,"time":"2025-05-12T13:05:06+07:00","userID":""}

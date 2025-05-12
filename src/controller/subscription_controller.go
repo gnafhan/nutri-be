@@ -69,6 +69,9 @@ func (c *SubscriptionController) PurchasePlan(ctx *fiber.Ctx) error {
 		return utils.APIError(ctx, fiber.StatusInternalServerError, "purchase_failed", err.Error())
 	}
 
+	// Log subscription purchase activity
+	utils.LogSubscriptionPurchase(ctx, user.ID.String(), planID, req.PaymentMethod)
+
 	return ctx.JSON(response.PaymentResponse{
 		Status:  "success",
 		Message: "Payment initiated successfully",

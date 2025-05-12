@@ -9,6 +9,8 @@ import (
 	"context"
 	"log"
 
+	"app/src/utils"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
@@ -58,6 +60,9 @@ func (a *AuthController) Register(c *fiber.Ctx) error {
 		return err
 	}
 
+	// Log user registration activity
+	utils.LogRegistration(c, user.ID.String())
+
 	return c.Status(fiber.StatusCreated).
 		JSON(response.SuccessWithTokens{
 			Status:  "success",
@@ -84,6 +89,8 @@ func (a *AuthController) Login(c *fiber.Ctx) error {
 
 	user, err := a.AuthService.Login(c, req)
 	if err != nil {
+		// Log failed login attempt
+		utils.LogLogin(c, req.Email, false)
 		return err
 	}
 
@@ -91,6 +98,9 @@ func (a *AuthController) Login(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
+	// Log successful login
+	utils.LogLogin(c, user.ID.String(), true)
 
 	return c.Status(fiber.StatusOK).
 		JSON(response.SuccessWithTokens{

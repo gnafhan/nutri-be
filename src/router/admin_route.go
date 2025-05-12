@@ -41,6 +41,8 @@ func AdminRoutes(v1 fiber.Router, userService service.UserService, tokenService 
 	// Subscription plans routes
 	subscriptionPlans := admin.Group("/subscription-plans", m.Auth(userService, productTokenService, "getSubscriptionPlans"))
 	subscriptionPlans.Get("/", adminSubscriptionController.GetAllSubscriptionPlans)
+	subscriptionPlans.Get("/:plan_id", adminSubscriptionController.GetSubscriptionPlanByID)
+	subscriptionPlans.Patch("/:plan_id", adminSubscriptionController.UpdateSubscriptionPlan, m.Auth(userService, productTokenService, "manageSubscriptionPlans"))
 
 	// All transactions route
 	transactions := admin.Group("/transactions", m.Auth(userService, productTokenService, "viewTransactions"))

@@ -46,6 +46,8 @@ type SubscriptionService interface {
 	UpdatePaymentStatus(ctx *fiber.Ctx, subscriptionID uuid.UUID, status string) (*model.UserSubscriptionResponse, error)
 	GetAllTransactions(ctx *fiber.Ctx, page, limit int) ([]model.TransactionDetail, int64, error)
 	GetTransactionByID(ctx *fiber.Ctx, transactionID uuid.UUID) (*model.TransactionDetail, error)
+	GetSubscriptionPlanByID(ctx *fiber.Ctx, planID uuid.UUID) (*model.SubscriptionPlan, error)
+	UpdateSubscriptionPlan(ctx *fiber.Ctx, planID uuid.UUID, req *validation.UpdateSubscriptionPlan) (*model.SubscriptionPlan, error)
 }
 
 type subscriptionService struct {
@@ -733,4 +735,66 @@ func (s *subscriptionService) GetTransactionByID(ctx *fiber.Ctx, transactionID u
 	}
 
 	return &transaction, nil
+}
+
+func (s *subscriptionService) GetSubscriptionPlanByID(ctx *fiber.Ctx, planID uuid.UUID) (*model.SubscriptionPlan, error) {
+	var plan model.SubscriptionPlan
+
+	if err := s.DB.WithContext(ctx.Context()).First(&plan, "id = ?", planID).Error; err != nil {
+		return nil, err
+	}
+
+	return &plan, nil
+}
+
+func (s *subscriptionService) UpdateSubscriptionPlan(ctx *fiber.Ctx, planID uuid.UUID, req *validation.UpdateSubscriptionPlan) (*model.SubscriptionPlan, error) {
+	var plan model.SubscriptionPlan
+
+	if err := s.DB.WithContext(ctx.Context()).First(&plan, "id = ?", planID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fiber.NewError(fiber.StatusNotFound, "Subscription plan not found")
+		}
+		return nil, err
+	}
+
+	// Update fields if provided
+	if req.Name != nil {
+		plan.Name = *req.Name
+	}
+
+	if req.Price != nil {
+		plan.Price = *req.Price
+	}
+
+	if req.ValidityDays != nil {
+		plan.ValidityDays = *req.ValidityDays
+	}
+
+	if req.AIscanLimit != nil {
+		plan.AIscanLimit = *req.AIscanLimit
+	}
+
+	if req.IsActive != nil {
+		plan.IsActive = *req.IsActive
+	}
+
+	if req.Description != nil {
+		plan.Description = *req.Description
+	}
+
+	// Update features if provided
+	if req.Features != nil {
+		featuresJSON, err := json.Marshal(req.Features)
+		if err != nil {
+			return nil, fiber.NewError(fiber.StatusBadRequest, "Invalid features format")
+		}
+		plan.Features = string(featuresJSON)
+	}
+
+	// Save changes
+	if err := s.DB.WithContext(ctx.Context()).Save(&plan).Error; err != nil {
+		return nil, err
+	}
+
+	return &plan, nil
 }

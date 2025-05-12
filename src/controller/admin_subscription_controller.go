@@ -1,9 +1,14 @@
 package controller
 
 import (
+	"app/src/model"
 	"app/src/response"
 	"app/src/service"
+	"app/src/utils"
 	"app/src/validation"
+
+	"encoding/json"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -11,6 +16,11 @@ import (
 
 type AdminSubscriptionController struct {
 	SubscriptionService service.SubscriptionService
+}
+
+// Helper function to format currency
+func formatCurrency(amount int) string {
+	return fmt.Sprintf("Rp %d", amount)
 }
 
 func NewAdminSubscriptionController(
@@ -268,6 +278,38 @@ func (c *AdminSubscriptionController) UpdatePaymentStatus(ctx *fiber.Ctx) error 
 		return err
 	}
 
+	// Log payment status update activity
+	admin := ctx.Locals("user")
+	var adminID string
+	if admin != nil {
+		if u, ok := admin.(*model.User); ok && u != nil {
+			adminID = u.ID.String()
+		}
+	}
+
+	// Generate request ID if not available
+	requestID := ctx.Locals("requestID")
+	var requestIDStr string
+	if requestID == nil {
+		requestIDStr = fmt.Sprintf("req-%s", uuid.New().String()[:8])
+	} else {
+		requestIDStr = requestID.(string)
+	}
+
+	utils.LogUserActivity(utils.ActivityData{
+		UserID:     adminID,
+		Action:     "update_payment_status",
+		Resource:   "subscription",
+		ResourceID: subscriptionID.String(),
+		Details: map[string]interface{}{
+			"status": req.Status,
+		},
+		RequestID:  requestIDStr,
+		IPAddress:  ctx.IP(),
+		UserAgent:  ctx.Get("User-Agent"),
+		StatusCode: ctx.Response().StatusCode(),
+	})
+
 	return ctx.Status(fiber.StatusOK).JSON(response.SuccessWithSubscription{
 		Status:  "success",
 		Message: "Payment status updated successfully",
@@ -335,5 +377,111 @@ func (c *AdminSubscriptionController) GetTransactionByID(ctx *fiber.Ctx) error {
 		Status:  "success",
 		Message: "Transaction details retrieved successfully",
 		Data:    *transaction,
+	})
+}
+
+// @Tags         Admin
+// @Summary      Get subscription plan details
+// @Description  Returns details of a specific subscription plan
+// @Produce      json
+// @Security     BearerAuth
+// @Param        plan_id   path  string  true  "Plan ID"
+// @Router       /admin/subscription-plans/{plan_id} [get]
+// @Success      200  {object}  response.SuccessWithSubscriptionPlan
+// @Failure      403  {object}  response.ErrorResponse
+// @Failure      404  {object}  response.ErrorResponse
+func (c *AdminSubscriptionController) GetSubscriptionPlanByID(ctx *fiber.Ctx) error {
+	id := ctx.Params("plan_id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "Plan ID is required")
+	}
+
+	planID, err := uuid.Parse(id)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid plan ID format")
+	}
+
+	plan, err := c.SubscriptionService.GetSubscriptionPlanByID(ctx, planID)
+	if err != nil {
+		return err
+	}
+
+	// Parse features
+	var features map[string]bool
+	if err := json.Unmarshal([]byte(plan.Features), &features); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Error parsing plan features")
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.SuccessWithSubscriptionPlan{
+		Status:  "success",
+		Message: "Subscription plan details retrieved successfully",
+		Data: response.SubscriptionPlanResponse{
+			ID:             plan.ID.String(),
+			Name:           plan.Name,
+			Price:          plan.Price,
+			PriceFormatted: formatCurrency(plan.Price),
+			Description:    plan.Description,
+			AIscanLimit:    plan.AIscanLimit,
+			ValidityDays:   plan.ValidityDays,
+			Features:       features,
+			IsActive:       plan.IsActive,
+		},
+	})
+}
+
+// @Tags         Admin
+// @Summary      Update subscription plan
+// @Description  Updates a subscription plan (name, price, features, etc.)
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        plan_id   path  string  true  "Plan ID"
+// @Param        request  body  validation.UpdateSubscriptionPlan  true  "Update plan data"
+// @Router       /admin/subscription-plans/{plan_id} [patch]
+// @Success      200  {object}  response.SuccessWithSubscriptionPlan
+// @Failure      400  {object}  response.ErrorResponse
+// @Failure      403  {object}  response.ErrorResponse
+// @Failure      404  {object}  response.ErrorResponse
+func (c *AdminSubscriptionController) UpdateSubscriptionPlan(ctx *fiber.Ctx) error {
+	id := ctx.Params("plan_id")
+	if id == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "Plan ID is required")
+	}
+
+	planID, err := uuid.Parse(id)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid plan ID format")
+	}
+
+	req := new(validation.UpdateSubscriptionPlan)
+	if err := ctx.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
+	}
+
+	plan, err := c.SubscriptionService.UpdateSubscriptionPlan(ctx, planID, req)
+	if err != nil {
+		return err
+	}
+
+	// Parse features
+	var features map[string]bool
+	if err := json.Unmarshal([]byte(plan.Features), &features); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Error parsing plan features")
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.SuccessWithSubscriptionPlan{
+		Status:  "success",
+		Message: "Subscription plan updated successfully",
+		Data: response.SubscriptionPlanResponse{
+			ID:             plan.ID.String(),
+			Name:           plan.Name,
+			Price:          plan.Price,
+			PriceFormatted: formatCurrency(plan.Price),
+			Description:    plan.Description,
+			AIscanLimit:    plan.AIscanLimit,
+			ValidityDays:   plan.ValidityDays,
+			Features:       features,
+			IsActive:       plan.IsActive,
+		},
 	})
 }
