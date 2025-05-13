@@ -1,212 +1,203 @@
-## Quick Start
+# NutriBox API
 
-To create a project, simply run:
+NutriBox API is a comprehensive backend solution for a nutrition and meal tracking application. Built with Go and the Fiber framework, it provides robust functionality for user management, meal tracking, recipe management, subscription handling, and more.
+
+## Features
+
+- **User Management**: Registration, authentication, profile management
+- **Meal Tracking**: Log and track daily meals with nutritional information
+- **Recipe Management**: Store and retrieve recipes
+- **Subscription System**: Manage subscription plans with Midtrans payment integration
+- **Article Management**: Create and manage nutritional articles and categories
+- **Health Metrics**: Track user weight, height, and health targets
+- **Login Streak**: Track user engagement through login streaks
+- **Admin Dashboard**: Manage users, subscriptions, and product tokens
+
+## Tech Stack
+
+- **Language**: Go
+- **Framework**: Fiber (Fast HTTP web framework)
+- **Database**: PostgreSQL
+- **ORM**: GORM
+- **Authentication**: JWT
+- **Payment Gateway**: Midtrans
+- **Image Recognition**: LogMeal API integration
+- **Documentation**: Swagger
+
+## Prerequisites
+
+- Go 1.16 or higher
+- PostgreSQL
+- Docker and Docker Compose (optional)
+
+## Installation
+
+### Option 1: Quick Start
 
 ```bash
-go mod init <project-name>
+# Clone the repository
+git clone https://github.com/yourusername/nutribox-api.git
+cd nutribox-api
+
+# Initialize Go modules
+go mod tidy
+
+# Create and configure environment variables
+cp .env.example .env
+# Edit .env file with your configuration
 ```
 
-## Manual Installation
-
-If you would still prefer to do the installation manually, follow these steps:
-
-Clone the repo:
+### Option 2: Manual Setup
 
 ```bash
+# Initialize a new Go project
+go mod init <project-name>
+
+# Clone the repository
 git clone --depth 1 https://github.com/TheValeHack/nutribox-api.git
 cd nutribox-api
 rm -rf ./.git
-```
 
-Install the dependencies:
-
-```bash
+# Install dependencies
 go mod tidy
-```
 
-Set the environment variables:
-
-```bash
+# Set up environment variables
 cp .env.example .env
-
-# open .env and modify the environment variables (if needed)
-```
-
-## Commands
-
-Running locally:
-
-```bash
-make start
-```
-
-Or running with live reload:
-
-```bash
-air
-```
-
-Testing:
-
-```bash
-# run all tests
-make tests
-
-# run all tests with gotestsum format
-make testsum
-
-# run test for the selected function name
-make tests-TestUserModel
-```
-
-Linting:
-
-```bash
-# run lint
-make lint
-```
-
-Swagger:
-
-```bash
-# generate the swagger documentation
-make swagger
+# Edit .env file with your configuration
 ```
 
 ## Environment Variables
 
-The environment variables can be found and modified in the `.env` file. They come with these default values:
+Create a `.env` file in the root directory with the following variables:
 
-```bash
-# server configuration
+```
+# Server configuration
 # Env value : prod || dev
 APP_ENV=dev
 APP_HOST=0.0.0.0
 APP_PORT=3000
 
-# database configuration
-DB_HOST=postgresdb
+# Database configuration
+DB_HOST=localhost
 DB_USER=postgres
-DB_PASSWORD=thisisasamplepassword
-DB_NAME=fiberdb
+DB_PASSWORD=yourpassword
+DB_NAME=nutribox
 DB_PORT=5432
 
+# Product token
+PRODUCT_TOKEN_EXP_DAYS=30
+
+# LogMeal API
+LOG_MEAL_BASE_URL=https://api.logmeal.es/v2
+LOG_MEAL_API_KEY=your_logmeal_api_key
+
 # JWT
-# JWT secret key
-JWT_SECRET=thisisasamplesecret
-# Number of minutes after which an access token expires
+JWT_SECRET=yoursecretkey
 JWT_ACCESS_EXP_MINUTES=30
-# Number of days after which a refresh token expires
 JWT_REFRESH_EXP_DAYS=30
-# Number of minutes after which a reset password token expires
 JWT_RESET_PASSWORD_EXP_MINUTES=10
-# Number of minutes after which a verify email token expires
 JWT_VERIFY_EMAIL_EXP_MINUTES=10
 
-# SMTP configuration options for the email service
+# SMTP configuration
 SMTP_HOST=email-server
 SMTP_PORT=587
 SMTP_USERNAME=email-server-username
 SMTP_PASSWORD=email-server-password
-EMAIL_FROM=support@yourapp.com
+EMAIL_FROM=support@nutribox.com
 
 # OAuth2 configuration
-GOOGLE_CLIENT_ID=yourapps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=thisisasamplesecret
+GOOGLE_CLIENT_ID=yourgoogleclientid.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=yourgoogleclientsecret
 REDIRECT_URL=http://localhost:3000/v1/auth/google-callback
+
+# Midtrans configuration
+MIDTRANS_SERVER_KEY=your_midtrans_server_key
+MIDTRANS_STATUS=SANDBOX
+```
+
+## Running the Application
+
+### Local Development
+
+```bash
+# Run the application
+make start
+
+# Or run with live reload (requires Air to be installed)
+air
+```
+
+### Using Docker
+
+```bash
+# Build and run with Docker Compose
+docker-compose up -d
+
+# Or use the provided script
+./run-docker.sh
+```
+
+## Testing
+
+```bash
+# Run all tests
+make tests
+
+# Run tests with gotestsum format
+make testsum
+
+# Run test for a specific function
+make tests-TestUserModel
+```
+
+## API Documentation
+
+Swagger documentation is available at `/swagger/index.html` when the application is running.
+
+To generate updated Swagger documentation:
+
+```bash
+make swagger
 ```
 
 ## Project Structure
 
 ```
 src\
- |--config\         # Environment variables and configuration related things
+ |--config\         # Environment variables and configuration
  |--controller\     # Route controllers (controller layer)
  |--database\       # Database connection & migrations
  |--docs\           # Swagger files
  |--middleware\     # Custom fiber middlewares
- |--model\          # Postgres models (data layer)
+ |--model\          # Database models (data layer)
  |--response\       # Response models
  |--router\         # Routes
  |--service\        # Business logic (service layer)
  |--utils\          # Utility classes and functions
  |--validation\     # Request data validation schemas
- |--main.go         # Fiber app
+ |--midtrans\       # Midtrans payment integration
+ |--main.go         # Application entry point
 ```
 
-# Subscription with Midtrans Integration
+## Midtrans Payment Integration
 
-This API supports payment processing with Midtrans for subscription plans. 
+NutriBox API integrates with Midtrans for subscription payments.
 
-## Setup
+### Setup Midtrans
 
 1. Create a Midtrans account at https://midtrans.com
 2. Get your Server Key and Client Key from the Midtrans Dashboard
-3. Add the following environment variables to your `.env` file:
+3. Add the Midtrans credentials to your `.env` file
 
-```
-MIDTRANS_MERCHANT_ID=your_midtrans_merchant_id
-NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your_midtrans_client_key
-MIDTRANS_SERVER_KEY=your_midtrans_server_key
-MIDTRANS_STATUS=SANDBOX or PRODUCTION
-```
+### Payment Endpoints
 
-## API Endpoints
+- `POST /v1/subscriptions/purchase/:planID`: Initiate a subscription purchase
+- `POST /v1/subscriptions/notification`: Webhook endpoint for Midtrans payment notifications
 
-### Purchase Subscription
+## License
 
-`POST /subscriptions/purchase/:planID`
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-Request body (optional):
-```json
-{
-  "payment_method": "credit_card | gopay | shopeepay | bank_transfer"
-}
-```
+## Contributing
 
-If no payment method is specified, Midtrans will display all available payment options on the payment page.
-
-Response:
-```json
-{
-  "status": "success",
-  "message": "Payment initiated successfully",
-  "data": {
-    "transaction_token": "snap-token-from-midtrans",
-    "redirect_url": "https://app.midtrans.com/snap/v2/vtweb/...",
-    "order_id": "SUB-12345-1614849849"
-  }
-}
-```
-
-### Payment Notification Webhook
-
-Set up a webhook URL in the Midtrans Dashboard to receive payment notifications:
-
-1. Login to your Midtrans Dashboard
-2. Go to Settings > Configuration
-3. Set the Payment Notification URL to `https://your-api-domain.com/v1/subscriptions/notification`
-
-## Frontend Integration
-
-To display the Snap payment page:
-
-1. Include the Snap.js library in your HTML:
-```html
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="YOUR-CLIENT-KEY"></script>
-```
-
-2. Use the transaction token to display the payment page:
-```javascript
-snap.pay('TRANSACTION_TOKEN', {
-  onSuccess: function(result){
-    // Handle success
-  },
-  onPending: function(result){
-    // Handle pending
-  },
-  onError: function(result){
-    // Handle error
-  }
-});
-```
+Contributions are welcome! Please feel free to submit a Pull Request.
