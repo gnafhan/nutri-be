@@ -2567,6 +2567,98 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/login-streak": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the login streak information for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Login Streak"
+                ],
+                "summary": "Get login streak",
+                "responses": {
+                    "200": {
+                        "description": "Login streak data",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithLoginStreak"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/login-streak/record": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Records a login streak for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Login Streak"
+                ],
+                "summary": "Record login streak",
+                "responses": {
+                    "200": {
+                        "description": "Login streak recorded successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.CommonResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/weight-height": {
             "get": {
                 "security": [
@@ -4911,6 +5003,38 @@ const docTemplate = `{
                 "Female"
             ]
         },
+        "model.LoginStreakData": {
+            "type": "object",
+            "properties": {
+                "current_streak": {
+                    "type": "integer"
+                },
+                "longest_streak": {
+                    "type": "integer"
+                },
+                "weekly_streak": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.LoginStreakDayInfo"
+                    }
+                }
+            }
+        },
+        "model.LoginStreakDayInfo": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "day_of_week": {
+                    "description": "1 = Monday, ..., 7 = Sunday",
+                    "type": "integer"
+                },
+                "has_login": {
+                    "type": "boolean"
+                }
+            }
+        },
         "model.PaymentResponse": {
             "type": "object",
             "properties": {
@@ -5102,6 +5226,17 @@ const docTemplate = `{
                 }
             }
         },
+        "response.CommonResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "response.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -5264,6 +5399,22 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "string"
+                }
+            }
+        },
+        "response.SuccessWithLoginStreak": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/model.LoginStreakData"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Login streak retrieved successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
                 }
             }
         },

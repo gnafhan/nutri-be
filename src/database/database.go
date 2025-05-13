@@ -30,6 +30,7 @@ func MigrateAndSeed(db *gorm.DB) {
 		&model.SubscriptionPlan{},
 		&model.UserSubscription{},
 		&model.TransactionDetail{},
+		&model.LoginStreak{},
 	); err != nil {
 		log.Fatalf("Failed to auto-migrate database: %v", err)
 	}
@@ -58,6 +59,11 @@ func runCustomMigrations(db *gorm.DB) {
 	// Fix transaction details foreign key constraint
 	if err := migrations.FixTransactionDetailsForeignKey(db); err != nil {
 		utils.Log.Warnf("Failed to fix transaction details foreign key: %v", err)
+	}
+
+	// Create login streaks table
+	if err := migrations.CreateLoginStreaksTable(db); err != nil {
+		utils.Log.Warnf("Failed to create login streaks table: %v", err)
 	}
 
 	// Run product token columns migration (without foreign key constraints)
