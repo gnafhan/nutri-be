@@ -427,3 +427,33 @@ type UserSubscriptionResponse struct {
 	PaymentMethod string                   `json:"payment_method" example:"gopay"`
 	CreatedAt     string                   `json:"created_at" example:"2023-05-20T10:00:00Z"`
 }
+
+// DailyNutrition represents the nutritional summary for a day
+type DailyNutrition struct {
+	Date     time.Time `json:"date" example:"2023-10-10T00:00:00Z"`
+	Calories float64   `json:"calories" example:"1250.5"`
+	Protein  float64   `json:"protein" example:"85.2"`
+	Carbs    float64   `json:"carbs" example:"150.3"`
+	Fat      float64   `json:"fat" example:"45.1"`
+}
+
+// WeightHeightStatistics represents weight and height statistics
+type WeightHeightStatistics struct {
+	CurrentWeight      *float64                   `json:"current_weight,omitempty" example:"75.5"`
+	CurrentHeight      *float64                   `json:"current_height,omitempty" example:"178.0"`
+	WeightHistory      []UsersWeightHeightHistory `json:"weight_history"`
+	LatestWeightTarget *UsersWeightHeightTarget   `json:"latest_weight_target,omitempty"`
+}
+
+// HomeStatistics combines multiple statistics for the home page
+type HomeStatistics struct {
+	DailyNutrition         *DailyNutrition         `json:"daily_nutrition"`
+	WeightHeightStatistics *WeightHeightStatistics `json:"weight_height_statistics"`
+}
+
+// GetHomeStatisticsResponse represents the response for home statistics
+type GetHomeStatisticsResponse struct {
+	Status  string         `json:"status" example:"success"`
+	Message string         `json:"message" example:"Home statistics fetched successfully"`
+	Data    HomeStatistics `json:"data"`
+}

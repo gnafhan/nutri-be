@@ -1499,6 +1499,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/home/statistic": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Logged in users can fetch their home statistics including today's consumed calories and weight/height info",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Statistics"
+                ],
+                "summary": "Get home statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/example.GetHomeStatisticsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/example.Unauthorized"
+                        }
+                    }
+                }
+            }
+        },
         "/meals": {
             "get": {
                 "security": [
@@ -3459,6 +3490,31 @@ const docTemplate = `{
                 }
             }
         },
+        "example.DailyNutrition": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "type": "number",
+                    "example": 1250.5
+                },
+                "carbs": {
+                    "type": "number",
+                    "example": 150.3
+                },
+                "date": {
+                    "type": "string",
+                    "example": "2023-10-10T00:00:00Z"
+                },
+                "fat": {
+                    "type": "number",
+                    "example": 45.1
+                },
+                "protein": {
+                    "type": "number",
+                    "example": 85.2
+                }
+            }
+        },
         "example.DeleteMealResponse": {
             "type": "object",
             "properties": {
@@ -3742,6 +3798,22 @@ const docTemplate = `{
                 }
             }
         },
+        "example.GetHomeStatisticsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/example.HomeStatistics"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Home statistics fetched successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "example.GetMealResponse": {
             "type": "object",
             "properties": {
@@ -3984,6 +4056,17 @@ const docTemplate = `{
                 "recorded_at": {
                     "type": "string",
                     "example": "2023-10-10T08:00:00Z"
+                }
+            }
+        },
+        "example.HomeStatistics": {
+            "type": "object",
+            "properties": {
+                "daily_nutrition": {
+                    "$ref": "#/definitions/example.DailyNutrition"
+                },
+                "weight_height_statistics": {
+                    "$ref": "#/definitions/example.WeightHeightStatistics"
                 }
             }
         },
@@ -4911,6 +4994,28 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "example": "success"
+                }
+            }
+        },
+        "example.WeightHeightStatistics": {
+            "type": "object",
+            "properties": {
+                "current_height": {
+                    "type": "number",
+                    "example": 178
+                },
+                "current_weight": {
+                    "type": "number",
+                    "example": 75.5
+                },
+                "latest_weight_target": {
+                    "$ref": "#/definitions/example.UsersWeightHeightTarget"
+                },
+                "weight_history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/example.UsersWeightHeightHistory"
+                    }
                 }
             }
         },

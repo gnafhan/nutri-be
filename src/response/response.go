@@ -178,3 +178,10 @@ type CommonResponse struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
 }
+
+// SuccessWithHomeStatistics represents a successful response with home statistics
+type SuccessWithHomeStatistics struct {
+	Status  string               `json:"status"`
+	Message string               `json:"message"`
+	Data    model.HomeStatistics `json:"data"`
+}

@@ -224,6 +224,24 @@ definitions:
       user:
         $ref: '#/definitions/example.User'
     type: object
+  example.DailyNutrition:
+    properties:
+      calories:
+        example: 1250.5
+        type: number
+      carbs:
+        example: 150.3
+        type: number
+      date:
+        example: "2023-10-10T00:00:00Z"
+        type: string
+      fat:
+        example: 45.1
+        type: number
+      protein:
+        example: 85.2
+        type: number
+    type: object
   example.DeleteMealResponse:
     properties:
       message:
@@ -421,6 +439,17 @@ definitions:
         example: success
         type: string
     type: object
+  example.GetHomeStatisticsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/example.HomeStatistics'
+      message:
+        example: Home statistics fetched successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
   example.GetMealResponse:
     properties:
       meal:
@@ -593,6 +622,13 @@ definitions:
       recorded_at:
         example: "2023-10-10T08:00:00Z"
         type: string
+    type: object
+  example.HomeStatistics:
+    properties:
+      daily_nutrition:
+        $ref: '#/definitions/example.DailyNutrition'
+      weight_height_statistics:
+        $ref: '#/definitions/example.WeightHeightStatistics'
     type: object
   example.JSONData:
     additionalProperties: true
@@ -1239,6 +1275,21 @@ definitions:
       status:
         example: success
         type: string
+    type: object
+  example.WeightHeightStatistics:
+    properties:
+      current_height:
+        example: 178
+        type: number
+      current_weight:
+        example: 75.5
+        type: number
+      latest_weight_target:
+        $ref: '#/definitions/example.UsersWeightHeightTarget'
+      weight_history:
+        items:
+          $ref: '#/definitions/example.UsersWeightHeightHistory'
+        type: array
     type: object
   example.WeightStat:
     properties:
@@ -2822,6 +2873,26 @@ paths:
       summary: Health Check
       tags:
       - Health
+  /home/statistic:
+    get:
+      description: Logged in users can fetch their home statistics including today's
+        consumed calories and weight/height info
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/example.GetHomeStatisticsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/example.Unauthorized'
+      security:
+      - BearerAuth: []
+      summary: Get home statistics
+      tags:
+      - Statistics
   /meals:
     get:
       description: Logged in users can fetch only their own meals information.

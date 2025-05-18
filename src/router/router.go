@@ -39,6 +39,7 @@ func Routes(app *fiber.App, db *gorm.DB) {
 	SubscriptionRoutes(v1, userService, productTokenService, subscriptionService)
 	AdminRoutes(v1, userService, tokenService, productTokenService, subscriptionService)
 	LoginStreakRoutes(v1, userService, productTokenService, loginStreakService)
+	HomeRoutes(v1, userService, productTokenService, mealService)
 
 	// TODO: add another routes here...
 

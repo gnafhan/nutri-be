@@ -29,6 +29,8 @@ type MealService interface {
 	AddMeal(c *fiber.Ctx, meal *model.MealHistory) (*model.MealHistory, error)
 	UpdateMeal(c *fiber.Ctx, id string, meal *model.MealHistory) (*model.MealHistory, error)
 	DeleteMeal(c *fiber.Ctx, id string) error
+	GetTodayNutrition(c *fiber.Ctx, userID uuid.UUID) (*model.DailyNutrition, error)
+	GetHomeStatistics(c *fiber.Ctx, userID uuid.UUID) (*model.HomeStatistics, error)
 }
 
 type mealService struct {
@@ -445,4 +447,97 @@ func (s *mealService) AddMealScanDetail(c *fiber.Ctx, mealId string, meal *model
 	}
 
 	return meal, nil
+}
+
+// GetTodayNutrition fetches today's nutrition data for a user
+func (s *mealService) GetTodayNutrition(c *fiber.Ctx, userID uuid.UUID) (*model.DailyNutrition, error) {
+	todayStart := time.Now().Truncate(24 * time.Hour)
+	todayEnd := todayStart.Add(24 * time.Hour)
+
+	var meals []model.MealHistory
+	if err := s.DB.WithContext(c.Context()).
+		Where("user_id = ? AND meal_time >= ? AND meal_time < ?", userID, todayStart, todayEnd).
+		Find(&meals).Error; err != nil {
+		s.Log.Errorf("Failed to get today's meals: %+v", err)
+		return nil, err
+	}
+
+	dailyNutrition := &model.DailyNutrition{
+		Date:     todayStart,
+		Calories: 0,
+		Protein:  0,
+		Carbs:    0,
+		Fat:      0,
+	}
+
+	for _, meal := range meals {
+		dailyNutrition.Calories += meal.Calories
+		dailyNutrition.Protein += meal.Protein
+		dailyNutrition.Carbs += meal.Carbs
+		dailyNutrition.Fat += meal.Fat
+	}
+
+	return dailyNutrition, nil
+}
+
+// GetHomeStatistics fetches combined statistics for home screen
+func (s *mealService) GetHomeStatistics(c *fiber.Ctx, userID uuid.UUID) (*model.HomeStatistics, error) {
+	// Get today's nutrition data
+	dailyNutrition, err := s.GetTodayNutrition(c, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get weight height data
+	weightHeightService := NewUsersWeightHeightService(s.DB)
+
+	// Get current user data with weight and height
+	userService := NewUserService(s.DB, nil)
+	user, err := userService.GetUserByID(c, userID.String())
+	if err != nil {
+		s.Log.Errorf("Failed to get user information: %+v", err)
+		return nil, err
+	}
+
+	// Get weight history (4 latest records)
+	weightHeightHistory, err := weightHeightService.GetWeightHeights(c, userID)
+	if err != nil {
+		s.Log.Errorf("Failed to get weight height history: %+v", err)
+		return nil, err
+	}
+
+	// Limit to 4 records if more exist
+	historyLimit := 4
+	if len(weightHeightHistory) > historyLimit {
+		weightHeightHistory = weightHeightHistory[:historyLimit]
+	}
+
+	// Get weight height targets
+	weightHeightTargets, err := weightHeightService.GetWeightHeightsTarget(c, userID)
+	if err != nil {
+		s.Log.Errorf("Failed to get weight height targets: %+v", err)
+		return nil, err
+	}
+
+	// Get the most recent target if any exists
+	var latestTarget *model.UsersWeightHeightTarget
+	if len(weightHeightTargets) > 0 {
+		latestTarget = &weightHeightTargets[0]
+	}
+
+	// Create weight height statistics
+	weightHeightStats := &model.WeightHeightStatistics{
+		CurrentWeight:      user.Weight,
+		CurrentHeight:      user.Height,
+		WeightHistory:      weightHeightHistory,
+		LatestWeightTarget: latestTarget,
+	}
+
+	// Combine all statistics
+	homeStats := &model.HomeStatistics{
+		DailyNutrition:         dailyNutrition,
+		WeightHeightStatistics: weightHeightStats,
+	}
+
+	return homeStats, nil
 }

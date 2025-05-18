@@ -293,3 +293,29 @@ func (mc *MealController) DeleteMeal(c *fiber.Ctx) error {
 		Message: "Meal deleted successfully",
 	})
 }
+
+// @Tags         Statistics
+// @Summary      Get home statistics
+// @Description  Logged in users can fetch their home statistics including today's consumed calories and weight/height info
+// @Security     BearerAuth
+// @Produce      json
+// @Router       /home/statistic [get]
+// @Success      200  {object}  example.GetHomeStatisticsResponse
+// @Failure      401  {object}  example.Unauthorized  "Unauthorized"
+func (mc *MealController) GetHomeStatistics(c *fiber.Ctx) error {
+	user := c.Locals("user").(*model.User)
+
+	homeStats, err := mc.MealService.GetHomeStatistics(c, user.ID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(response.Common{
+			Status:  "error",
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response.SuccessWithHomeStatistics{
+		Status:  "success",
+		Message: "Home statistics fetched successfully",
+		Data:    *homeStats,
+	})
+}
