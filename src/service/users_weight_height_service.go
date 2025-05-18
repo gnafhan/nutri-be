@@ -232,6 +232,12 @@ func (s *usersWeightHeightService) GetWeightHeightTargetByID(ctx *fiber.Ctx, rec
 
 func (s *usersWeightHeightService) UpdateWeightHeightTarget(ctx *fiber.Ctx, recordID string, record *model.UsersWeightHeightTarget) (*model.UsersWeightHeightTarget, error) {
 	existingRecord := new(model.UsersWeightHeightTarget)
+	userService := NewUserService(s.DB, nil)
+	user, err := userService.GetUserByID(ctx, record.UserID.String())
+	if err != nil {
+		s.Log.Errorf("Failed to get user information: %+v", err)
+		return nil, err
+	}
 	if err := s.DB.WithContext(ctx.Context()).
 		First(existingRecord, "id = ? AND user_id = ?", recordID, record.UserID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -258,6 +264,9 @@ func (s *usersWeightHeightService) UpdateWeightHeightTarget(ctx *fiber.Ctx, reco
 	if len(updates) == 0 {
 		return existingRecord, nil
 	}
+
+	updates["weight_history"] = user.Weight
+	updates["height_history"] = user.Height
 
 	if err := s.DB.WithContext(ctx.Context()).
 		Model(existingRecord).
