@@ -178,3 +178,15 @@ type CommonResponse struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
 }
+
+type SuccessWithBahanMakanan struct {
+	Status  string             `json:"status"`
+	Message string             `json:"message"`
+	Data    model.BahanMakanan `json:"data"`
+}
+
+type SuccessWithBahanMakananList struct {
+	Status  string               `json:"status"`
+	Message string               `json:"message"`
+	Data    []model.BahanMakanan `json:"data"`
+}

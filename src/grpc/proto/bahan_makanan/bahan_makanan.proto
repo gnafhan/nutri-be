@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package bahan_makanan;
+
+option go_package = ".;bahan_makanan";
+
+message BahanMakanan {
+    uint32 id = 1;
+    string kode = 2;
+    string nama_bahan_makanan = 3;
+    double air_g = 4;
+    double energi_kal = 5;
+    double protein_g = 6;
+    double lemak_g = 7;
+    double karbohidrat_g = 8;
+    optional double serat_g = 9;
+    double abu_g = 10;
+    optional double kalsium_ca_mg = 11;
+    optional double fosfor_p_mg = 12;
+    optional double besi_fe_mg = 13;
+    optional double natrium_na_mg = 14;
+    optional double kalium_ka_mg = 15;
+    optional double tembaga_cu_mg = 16;
+    optional double seng_zn_mg = 17;
+    optional double retinol_vit_a_mcg = 18;
+    optional double beta_karoten_mcg = 19;
+    optional double karoten_total_mcg = 20;
+    optional double thiamin_vit_b1_mg = 21;
+    optional double riboflavin_vit_b2_mg = 22;
+    optional double niasin_mg = 23;
+    optional double vitamin_c_mg = 24;
+    double bdd_persen = 25;
+    string mentah_olahan = 26;
+    string kelompok_makanan = 27;
+}
+
+message GetBahanMakananRequest {
+    string kode = 1;
+}
+
+message GetBahanMakananByIdRequest {
+    uint32 id = 1;
+}
+
+message GetBahanMakananByMentahOlahanRequest {
+    string mentah_olahan = 1;
+}
+
+message GetBahanMakananByKelompokRequest {
+    string kelompok_makanan = 1;
+}
+
+message UpdateBahanMakananRequest {
+    uint32 id = 1;
+    BahanMakanan bahan_makanan = 2;
+}
+
+message BahanMakananResponse {
+    BahanMakanan bahan_makanan = 1;
+}
+
+message ListBahanMakananResponse {
+    repeated BahanMakanan bahan_makanan = 1;
+}
+
+message Empty {}
+
+service BahanMakananService {
+    rpc GetAllBahanMakanan(Empty) returns (ListBahanMakananResponse);
+    rpc GetBahanMakananByKode(GetBahanMakananRequest) returns (BahanMakananResponse);
+    rpc GetBahanMakananById(GetBahanMakananByIdRequest) returns (BahanMakananResponse);
+    rpc GetBahanMakananByMentahOlahan(GetBahanMakananByMentahOlahanRequest) returns (ListBahanMakananResponse);
+    rpc GetBahanMakananByKelompok(GetBahanMakananByKelompokRequest) returns (ListBahanMakananResponse);
+    rpc UpdateBahanMakanan(UpdateBahanMakananRequest) returns (BahanMakananResponse);
+}

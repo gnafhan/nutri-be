@@ -33,6 +33,8 @@ var (
 	RedirectURL         string
 	MidtransServerKey   string
 	MidtransStatus      string
+	GRPC_HOST           string
+	GRPC_PORT           string
 )
 
 func init() {
@@ -79,6 +81,10 @@ func init() {
 	// Midtrans configuration
 	MidtransServerKey = viper.GetString("MIDTRANS_SERVER_KEY")
 	MidtransStatus = viper.GetString("MIDTRANS_STATUS")
+
+	// gRPC configuration
+	GRPC_HOST = viper.GetString("GRPC_HOST")
+	GRPC_PORT = viper.GetString("GRPC_PORT")
 }
 
 func loadConfig() {
