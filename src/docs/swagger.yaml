@@ -1344,6 +1344,63 @@ definitions:
       user_id:
         type: string
     type: object
+  model.BahanMakanan:
+    properties:
+      abu_g:
+        type: number
+      air_g:
+        type: number
+      bdd_persen:
+        type: number
+      besi_fe_mg:
+        type: number
+      beta_karoten_mcg:
+        type: number
+      energi_kal:
+        type: number
+      fosfor_p_mg:
+        type: number
+      id:
+        type: integer
+      kalium_ka_mg:
+        type: number
+      kalsium_ca_mg:
+        type: number
+      karbohidrat_g:
+        type: number
+      karoten_total_mcg:
+        type: number
+      kelompok_makanan:
+        type: string
+      kode:
+        type: string
+      lemak_g:
+        type: number
+      mentah_olahan:
+        type: string
+      nama_bahan_makanan:
+        type: string
+      natrium_na_mg:
+        type: number
+      niasin_mg:
+        type: number
+      protein_g:
+        type: number
+      retinol_vit_a_mcg:
+        type: number
+      riboflavin_vit_b2_mg:
+        type: number
+      seng_zn_mg:
+        type: number
+      serat_g:
+        type: number
+      tembaga_cu_mg:
+        type: number
+      thiamin_vit_b1_mg:
+        type: number
+      vitamin_c_mg:
+        type: number
+    type: object
   model.GenderType:
     enum:
     - Male
@@ -1607,6 +1664,26 @@ definitions:
       data:
         items:
           $ref: '#/definitions/model.ArticleResponse'
+        type: array
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.SuccessWithBahanMakanan:
+    properties:
+      data:
+        $ref: '#/definitions/model.BahanMakanan'
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.SuccessWithBahanMakananList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.BahanMakanan'
         type: array
       message:
         type: string
@@ -2854,6 +2931,133 @@ paths:
       summary: Verify email
       tags:
       - Auth
+  /bahan-makanan:
+    get:
+      description: Get all bahan makanan
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithBahanMakananList'
+      security:
+      - BearerAuth: []
+      summary: Get all bahan makanan
+      tags:
+      - BahanMakanan
+  /bahan-makanan/{id}:
+    get:
+      description: Get bahan makanan by ID
+      parameters:
+      - description: Bahan Makanan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithBahanMakanan'
+      security:
+      - BearerAuth: []
+      summary: Get bahan makanan by ID
+      tags:
+      - BahanMakanan
+    put:
+      consumes:
+      - application/json
+      description: Update bahan makanan
+      parameters:
+      - description: Bahan Makanan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Bahan Makanan data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.BahanMakanan'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithBahanMakanan'
+      security:
+      - BearerAuth: []
+      summary: Update bahan makanan
+      tags:
+      - BahanMakanan
+  /bahan-makanan/kelompok/{kelompok}:
+    get:
+      description: Get bahan makanan by kelompok makanan
+      parameters:
+      - description: Kelompok Makanan
+        in: path
+        name: kelompok
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithBahanMakananList'
+      security:
+      - BearerAuth: []
+      summary: Get bahan makanan by kelompok
+      tags:
+      - BahanMakanan
+  /bahan-makanan/kode/{kode}:
+    get:
+      description: Get bahan makanan by kode
+      parameters:
+      - description: Kode Bahan Makanan
+        in: path
+        name: kode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithBahanMakanan'
+      security:
+      - BearerAuth: []
+      summary: Get bahan makanan by kode
+      tags:
+      - BahanMakanan
+  /bahan-makanan/mentah-olahan/{mentah_olahan}:
+    get:
+      description: Get bahan makanan by mentah olahan status
+      parameters:
+      - description: Mentah/Olahan Status
+        in: path
+        name: mentah_olahan
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithBahanMakananList'
+      security:
+      - BearerAuth: []
+      summary: Get bahan makanan by mentah olahan
+      tags:
+      - BahanMakanan
   /health-check:
     get:
       consumes:

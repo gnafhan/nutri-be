@@ -1463,6 +1463,211 @@
                 }
             }
         },
+        "/bahan-makanan": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all bahan makanan",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "BahanMakanan"
+                ],
+                "summary": "Get all bahan makanan",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithBahanMakananList"
+                        }
+                    }
+                }
+            }
+        },
+        "/bahan-makanan/kelompok/{kelompok}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get bahan makanan by kelompok makanan",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "BahanMakanan"
+                ],
+                "summary": "Get bahan makanan by kelompok",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Kelompok Makanan",
+                        "name": "kelompok",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithBahanMakananList"
+                        }
+                    }
+                }
+            }
+        },
+        "/bahan-makanan/kode/{kode}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get bahan makanan by kode",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "BahanMakanan"
+                ],
+                "summary": "Get bahan makanan by kode",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Kode Bahan Makanan",
+                        "name": "kode",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithBahanMakanan"
+                        }
+                    }
+                }
+            }
+        },
+        "/bahan-makanan/mentah-olahan/{mentah_olahan}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get bahan makanan by mentah olahan status",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "BahanMakanan"
+                ],
+                "summary": "Get bahan makanan by mentah olahan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Mentah/Olahan Status",
+                        "name": "mentah_olahan",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithBahanMakananList"
+                        }
+                    }
+                }
+            }
+        },
+        "/bahan-makanan/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get bahan makanan by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "BahanMakanan"
+                ],
+                "summary": "Get bahan makanan by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Bahan Makanan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithBahanMakanan"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update bahan makanan",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "BahanMakanan"
+                ],
+                "summary": "Update bahan makanan",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Bahan Makanan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Bahan Makanan data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.BahanMakanan"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithBahanMakanan"
+                        }
+                    }
+                }
+            }
+        },
         "/health-check": {
             "get": {
                 "description": "Check the status of services and database connections",
@@ -5090,6 +5295,92 @@
                 }
             }
         },
+        "model.BahanMakanan": {
+            "type": "object",
+            "properties": {
+                "abu_g": {
+                    "type": "number"
+                },
+                "air_g": {
+                    "type": "number"
+                },
+                "bdd_persen": {
+                    "type": "number"
+                },
+                "besi_fe_mg": {
+                    "type": "number"
+                },
+                "beta_karoten_mcg": {
+                    "type": "number"
+                },
+                "energi_kal": {
+                    "type": "number"
+                },
+                "fosfor_p_mg": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "kalium_ka_mg": {
+                    "type": "number"
+                },
+                "kalsium_ca_mg": {
+                    "type": "number"
+                },
+                "karbohidrat_g": {
+                    "type": "number"
+                },
+                "karoten_total_mcg": {
+                    "type": "number"
+                },
+                "kelompok_makanan": {
+                    "type": "string"
+                },
+                "kode": {
+                    "type": "string"
+                },
+                "lemak_g": {
+                    "type": "number"
+                },
+                "mentah_olahan": {
+                    "type": "string"
+                },
+                "nama_bahan_makanan": {
+                    "type": "string"
+                },
+                "natrium_na_mg": {
+                    "type": "number"
+                },
+                "niasin_mg": {
+                    "type": "number"
+                },
+                "protein_g": {
+                    "type": "number"
+                },
+                "retinol_vit_a_mcg": {
+                    "type": "number"
+                },
+                "riboflavin_vit_b2_mg": {
+                    "type": "number"
+                },
+                "seng_zn_mg": {
+                    "type": "number"
+                },
+                "serat_g": {
+                    "type": "number"
+                },
+                "tembaga_cu_mg": {
+                    "type": "number"
+                },
+                "thiamin_vit_b1_mg": {
+                    "type": "number"
+                },
+                "vitamin_c_mg": {
+                    "type": "number"
+                }
+            }
+        },
         "model.GenderType": {
             "type": "string",
             "enum": [
@@ -5490,6 +5781,37 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.ArticleResponse"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.SuccessWithBahanMakanan": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/model.BahanMakanan"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.SuccessWithBahanMakananList": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.BahanMakanan"
                     }
                 },
                 "message": {

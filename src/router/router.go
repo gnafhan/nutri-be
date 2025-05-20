@@ -2,8 +2,10 @@ package router
 
 import (
 	"app/src/config"
+	"app/src/grpc"
 	"app/src/service"
 	"app/src/validation"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -11,6 +13,8 @@ import (
 
 func Routes(app *fiber.App, db *gorm.DB) {
 	validate := validation.Validator()
+	grpcServerAddr := fmt.Sprintf("%s:%s", config.GRPC_HOST, config.GRPC_PORT)
+	client, _ := grpc.NewBahanMakananClient(grpcServerAddr)
 
 	healthCheckService := service.NewHealthCheckService(db)
 	emailService := service.NewEmailService()
@@ -25,6 +29,7 @@ func Routes(app *fiber.App, db *gorm.DB) {
 	articleService := service.NewArticlesService(db)
 	recipesService := service.NewRecipesService(db)
 	loginStreakService := service.NewLoginStreakService(db, validate)
+	bahanMakananService := service.NewBahanMakananService(client)
 
 	v1 := app.Group("/v1")
 
@@ -39,6 +44,7 @@ func Routes(app *fiber.App, db *gorm.DB) {
 	SubscriptionRoutes(v1, userService, productTokenService, subscriptionService)
 	AdminRoutes(v1, userService, tokenService, productTokenService, subscriptionService)
 	LoginStreakRoutes(v1, userService, productTokenService, loginStreakService)
+	BahanMakananRoutes(v1, userService, productTokenService, bahanMakananService)
 	HomeRoutes(v1, userService, productTokenService, mealService)
 
 	// TODO: add another routes here...
