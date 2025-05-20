@@ -51,7 +51,7 @@ func (s *emailService) SendResetPasswordEmail(to, token string) error {
 	subject := "Reset password"
 
 	// TODO: replace this url with the link to the reset password page of your front-end app
-	resetPasswordURL := fmt.Sprintf("http://link-to-app/reset-password?token=%s", token)
+	resetPasswordURL := fmt.Sprintf("%s/reset-password?token=%s", config.FrontendURL, token)
 	body := fmt.Sprintf(`Dear user,
 
 To reset your password, click on this link: %s
@@ -64,11 +64,12 @@ func (s *emailService) SendVerificationEmail(to, token string) error {
 	subject := "Email Verification"
 
 	// TODO: replace this url with the link to the email verification page of your front-end app
-	verificationEmailURL := fmt.Sprintf("http://link-to-app/verify-email?token=%s", token)
-	body := fmt.Sprintf(`Dear user,
+	verificationEmailURL := fmt.Sprintf("%s/verify-email?token=%s", config.FrontendURL, token)
+	body := fmt.Sprintf(`Pengguna yang terhormat,
 
-To verify your email, click on this link: %s
+Silakan klik tautan di bawah ini untuk memverifikasi alamat email Anda:
+%s
 
-If you did not create an account, then ignore this email.`, verificationEmailURL)
+Apabila Anda tidak merasa membuat akun dengan email ini, mohon abaikan pesan ini.`, verificationEmailURL)
 	return s.SendEmail(to, subject, body)
 }
