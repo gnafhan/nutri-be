@@ -16,6 +16,9 @@ RUN go mod download
 # Copy source code
 COPY . .
 
+# Ensure .env file exists (copy from example if not)
+RUN if [ ! -f .env ]; then cp .env.example .env || echo "No .env.example found"; fi
+
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o nutribox-api ./src/main.go
 
@@ -35,6 +38,7 @@ RUN adduser -D -g '' appuser
 # Create necessary directories
 RUN mkdir -p /app/uploads
 RUN chown -R appuser:appuser /app
+RUN chmod -R 777 /app
 
 # Set working directory
 WORKDIR /app
@@ -49,7 +53,7 @@ COPY --from=builder /app/.env .
 USER appuser
 
 # Expose port
-EXPOSE 8097
+EXPOSE 9097
 
 # Command to run the application
-CMD ["./nutribox-api"]
+ENTRYPOINT ["./nutribox-api"]

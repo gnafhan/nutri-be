@@ -7,10 +7,13 @@ import (
 	"app/src/router"
 	"app/src/utils"
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -33,12 +36,41 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	// Log environment variables for debugging
+	fmt.Printf("Environment variables:\n")
+	fmt.Printf("APP_ENV: %s\n", os.Getenv("APP_ENV"))
+	fmt.Printf("APP_HOST: %s\n", os.Getenv("APP_HOST"))
+	fmt.Printf("APP_PORT: %s\n", os.Getenv("APP_PORT"))
+	fmt.Printf("DB_HOST: %s\n", os.Getenv("DB_HOST"))
+	fmt.Printf("DB_PORT: %s\n", os.Getenv("DB_PORT"))
+
+	// Debug config values
+	fmt.Printf("\nConfig values from viper:\n")
+	fmt.Printf("IsProd: %v\n", config.IsProd)
+	fmt.Printf("AppHost: %s\n", config.AppHost)
+	fmt.Printf("AppPort: %d\n", config.AppPort)
+	fmt.Printf("DBHost: %s\n", config.DBHost)
+	fmt.Printf("DBPort: %d\n", config.DBPort)
+
+	// Give PostgreSQL a moment to fully initialize in Docker environment
+	if os.Getenv("APP_ENV") == "prod" {
+		utils.Log.Info("Running in production mode, waiting for database to initialize...")
+		time.Sleep(5 * time.Second)
+	}
+
 	app := setupFiberApp()
+
+	// Setup database connection
+	utils.Log.Info("Setting up database connection...")
 	db := setupDatabase()
 	defer closeDatabase(db)
+
+	// Setup routes
+	utils.Log.Info("Setting up API routes...")
 	setupRoutes(app, db)
 
 	address := fmt.Sprintf("%s:%d", config.AppHost, config.AppPort)
+	utils.Log.Infof("Starting server on %s", address)
 
 	// Start server and handle graceful shutdown
 	serverErrors := make(chan error, 1)
@@ -47,6 +79,7 @@ func main() {
 }
 
 func setupFiberApp() *fiber.App {
+	utils.Log.Info("Setting up Fiber app...")
 	app := fiber.New(config.FiberConfig())
 
 	// Middleware setup
@@ -66,7 +99,6 @@ func setupFiberApp() *fiber.App {
 
 func setupDatabase() *gorm.DB {
 	db := database.Connect(config.DBHost, config.DBName)
-	// Add any additional database setup if needed
 	return db
 }
 
@@ -76,8 +108,20 @@ func setupRoutes(app *fiber.App, db *gorm.DB) {
 }
 
 func startServer(app *fiber.App, address string, errs chan<- error) {
+	log.Printf("Starting server on %s", address)
+
+	// Listen for incoming connections
 	if err := app.Listen(address); err != nil {
-		errs <- fmt.Errorf("error starting server: %w", err)
+		utils.Log.Errorf("Failed to start server on %s: %v", address, err)
+		fmt.Printf("Error starting server: %v\n", err)
+
+		// Detect specific error for address already in use
+		if errors.Is(err, syscall.EADDRINUSE) {
+			utils.Log.Error("Port is already in use, try another port or wait a moment")
+		}
+
+		errs <- fmt.Errorf("failed to start server on %s (config: host=%s port=%d): %w",
+			address, config.AppHost, config.AppPort, err)
 	}
 }
 
