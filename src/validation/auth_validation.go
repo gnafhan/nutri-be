@@ -14,7 +14,7 @@ type Register struct {
 	Weight         float64             `json:"weight" validate:"required,gt=0" example:"65.5"`
 	Gender         model.GenderType    `json:"gender" validate:"required,oneof=Male Female" example:"Male"`
 	ActivityLevel  model.ActivityLevel `json:"activity_level" validate:"required,oneof=Light Medium Heavy" example:"Medium"`
-	MedicalHistory string              `json:"medical_history" validate:"required,max=1000" example:"No known medical issues"`
+	MedicalHistory string              `json:"medical_history,omitempty" validate:"max=1000" example:"No known medical issues"`
 }
 
 type Login struct {
