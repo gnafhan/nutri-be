@@ -1439,6 +1439,33 @@ definitions:
       transaction_token:
         type: string
     type: object
+  model.ProductToken:
+    properties:
+      activated_at:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        $ref: '#/definitions/model.User'
+      created_by_id:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      subscription_plan:
+        $ref: '#/definitions/model.SubscriptionPlan'
+      subscription_plan_id:
+        type: string
+      token:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/model.User'
+      user_id:
+        type: string
+    type: object
   model.PurchaseSubscriptionRequest:
     properties:
       payment_method:
@@ -1471,6 +1498,30 @@ definitions:
         type: string
       user_id:
         type: string
+    type: object
+  model.SubscriptionPlan:
+    properties:
+      aiscanLimit:
+        description: -1 for unlimited
+        type: integer
+      createdAt:
+        type: string
+      description:
+        type: string
+      features:
+        type: string
+      id:
+        type: string
+      isActive:
+        type: boolean
+      name:
+        type: string
+      price:
+        description: in Rupiah
+        type: integer
+      validityDays:
+        description: in days
+        type: integer
     type: object
   model.SubscriptionPlanResponse:
     properties:
@@ -1720,6 +1771,15 @@ definitions:
       total_results:
         type: integer
     type: object
+  response.SuccessWithProductToken:
+    properties:
+      data:
+        $ref: '#/definitions/model.ProductToken'
+      message:
+        type: string
+      status:
+        type: string
+    type: object
   response.SuccessWithRecipe:
     properties:
       data:
@@ -1780,6 +1840,8 @@ definitions:
     properties:
       is_active:
         type: boolean
+      subscription_plan_id:
+        type: string
       token:
         maxLength: 32
         minLength: 8
@@ -1912,6 +1974,18 @@ definitions:
     required:
     - status
     type: object
+  validation.UpdateProductToken:
+    properties:
+      is_active:
+        type: boolean
+      subscription_plan_id:
+        description: Allow empty string to clear the plan
+        type: string
+      token:
+        maxLength: 32
+        minLength: 8
+        type: string
+    type: object
   validation.UpdateSubscription:
     properties:
       ai_scans_used:
@@ -2038,9 +2112,11 @@ paths:
     post:
       consumes:
       - application/json
-      description: Creates a new custom product token that can be used by users
+      description: Creates a new custom product token that can be used by users. Optionally,
+        a `subscription_plan_id` can be provided to grant a subscription when the
+        token is verified.
       parameters:
-      - description: Product token details
+      - description: Product token details (token, is_active, subscription_plan_id)
         in: body
         name: request
         required: true
@@ -2093,6 +2169,48 @@ paths:
       security:
       - BearerAuth: []
       summary: Delete product token
+      tags:
+      - Admin
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing product token. Fields to update (token, is_active,
+        subscription_plan_id) should be provided in the request body. To remove a
+        subscription plan, pass an empty string for `subscription_plan_id`.
+      parameters:
+      - description: Product token ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Product token details to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/validation.UpdateProductToken'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessWithProductToken'
+        "400":
+          description: Invalid request, token already exists, or invalid SubscriptionPlanID
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Product token or Subscription Plan not found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update product token
       tags:
       - Admin
   /admin/subscription-plans:

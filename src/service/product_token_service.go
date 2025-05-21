@@ -24,6 +24,7 @@ type ProductTokenService interface {
 	GetAllProductTokens(c *fiber.Ctx, query *validation.ProductTokenQuery) ([]model.ProductToken, error)
 	CreateProductToken(c *fiber.Ctx, req *validation.CreateCustomToken) (*model.ProductToken, error)
 	AdminDeleteProductToken(c *fiber.Ctx, tokenID uuid.UUID) error
+	UpdateProductToken(c *fiber.Ctx, tokenID uuid.UUID, req *validation.UpdateProductToken) (*model.ProductToken, error)
 }
 
 type productTokenService struct {
@@ -79,6 +80,7 @@ func (s *productTokenService) VerifyProductToken(c *fiber.Ctx, query *validation
 
 	var productToken model.ProductToken
 	if err := s.DB.WithContext(c.Context()).
+		Preload("SubscriptionPlan").
 		Where("token = ? AND user_id IS NULL AND is_active = ?", query.Token, true).
 		First(&productToken).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -91,8 +93,40 @@ func (s *productTokenService) VerifyProductToken(c *fiber.Ctx, query *validation
 	productToken.UserID = user.ID
 	productToken.ActivatedAt = &now
 
-	if err := s.DB.WithContext(c.Context()).Save(&productToken).Error; err != nil {
+	if err := s.DB.WithContext(c.Context()).Omit("SubscriptionPlan").Save(&productToken).Error; err != nil {
 		return fiber.ErrInternalServerError
+	}
+
+	// If product token has an associated subscription plan, create it for the user
+	if productToken.SubscriptionPlanID != nil && productToken.SubscriptionPlan != nil {
+		// Check if user already has an active subscription to this plan to avoid duplicates
+		var existingUserSubscription model.UserSubscription
+		err := s.DB.WithContext(c.Context()).
+			Where("user_id = ? AND plan_id = ? AND is_active = ?", user.ID, productToken.SubscriptionPlanID, true).
+			First(&existingUserSubscription).Error
+
+		if err == nil {
+			s.Log.Infof("User %s already has an active subscription to plan %s. Skipping creation.", user.ID, *productToken.SubscriptionPlanID)
+		} else if errors.Is(err, gorm.ErrRecordNotFound) {
+			// User does not have this specific active subscription, proceed to create
+			userSubscription := model.UserSubscription{
+				UserID:        user.ID,
+				PlanID:        *productToken.SubscriptionPlanID,
+				StartDate:     time.Now(),
+				EndDate:       time.Now().AddDate(0, 0, productToken.SubscriptionPlan.ValidityDays),
+				PaymentMethod: "product_token",
+				PaymentStatus: "success", // Assuming token verification implies successful "payment"
+				IsActive:      true,
+				TransactionID: fmt.Sprintf("TOKEN-%s", productToken.ID.String()), // Link to product token
+			}
+			if err := s.DB.WithContext(c.Context()).Create(&userSubscription).Error; err != nil {
+				s.Log.Errorf("Failed to create subscription for user %s with plan %s: %v", user.ID, *productToken.SubscriptionPlanID, err)
+				// Decide if this should be a hard error or just a warning. For now, log and continue.
+			}
+		} else {
+			// Some other DB error occurred when checking for existing subscription
+			s.Log.Errorf("Error checking for existing subscription for user %s, plan %s: %v", user.ID, *productToken.SubscriptionPlanID, err)
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -104,7 +138,7 @@ func (s *productTokenService) VerifyProductToken(c *fiber.Ctx, query *validation
 
 func (s *productTokenService) GetAllProductTokens(c *fiber.Ctx, query *validation.ProductTokenQuery) ([]model.ProductToken, error) {
 	var tokens []model.ProductToken
-	db := s.DB.WithContext(c.Context())
+	db := s.DB.WithContext(c.Context()).Preload("SubscriptionPlan")
 
 	if query != nil && query.WithUser {
 		db = db.Preload("User").Preload("CreatedBy")
@@ -150,13 +184,29 @@ func (s *productTokenService) CreateProductToken(c *fiber.Ctx, req *validation.C
 		IsActive:    req.IsActive,
 	}
 
+	if req.SubscriptionPlanID != nil && *req.SubscriptionPlanID != "" {
+		planID, err := uuid.Parse(*req.SubscriptionPlanID)
+		if err != nil {
+			return nil, fiber.NewError(fiber.StatusBadRequest, "Invalid SubscriptionPlanID format")
+		}
+		// Verify if the plan ID exists
+		var plan model.SubscriptionPlan
+		if err := s.DB.WithContext(c.Context()).First(&plan, "id = ?", planID).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, fiber.NewError(fiber.StatusNotFound, "Subscription plan not found")
+			}
+			return nil, fiber.ErrInternalServerError
+		}
+		productToken.SubscriptionPlanID = &planID
+	}
+
 	if err := s.DB.WithContext(c.Context()).Create(&productToken).Error; err != nil {
 		return nil, err
 	}
 
 	// Reload the token with the creator information
-	if err := s.DB.WithContext(c.Context()).Preload("CreatedBy").First(&productToken, productToken.ID).Error; err != nil {
-		s.Log.Warnf("Unable to load creator information: %v", err)
+	if err := s.DB.WithContext(c.Context()).Preload("CreatedBy").Preload("SubscriptionPlan").First(&productToken, productToken.ID).Error; err != nil {
+		s.Log.Warnf("Unable to load creator or subscription plan information: %v", err)
 	}
 
 	return &productToken, nil
@@ -166,4 +216,70 @@ func (s *productTokenService) AdminDeleteProductToken(c *fiber.Ctx, tokenID uuid
 	return s.DB.WithContext(c.Context()).
 		Where("id = ?", tokenID).
 		Delete(&model.ProductToken{}).Error
+}
+
+func (s *productTokenService) UpdateProductToken(c *fiber.Ctx, tokenID uuid.UUID, req *validation.UpdateProductToken) (*model.ProductToken, error) {
+	var productToken model.ProductToken
+
+	if err := s.Validate.Struct(req); err != nil {
+		return nil, fiber.NewError(fiber.StatusBadRequest, "Invalid request data: "+err.Error())
+	}
+
+	if err := s.DB.WithContext(c.Context()).First(&productToken, "id = ?", tokenID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fiber.NewError(fiber.StatusNotFound, "Product token not found")
+		}
+		return nil, fiber.ErrInternalServerError
+	}
+
+	// Update token string if provided and different
+	if req.Token != nil && *req.Token != "" && *req.Token != productToken.Token {
+		// Check if the new token already exists for another record
+		var existingTokenCount int64
+		if err := s.DB.WithContext(c.Context()).Model(&model.ProductToken{}).Where("token = ? AND id <> ?", *req.Token, tokenID).Count(&existingTokenCount).Error; err != nil {
+			return nil, fiber.ErrInternalServerError
+		}
+		if existingTokenCount > 0 {
+			return nil, fiber.NewError(fiber.StatusBadRequest, "Token already exists")
+		}
+		productToken.Token = *req.Token
+	}
+
+	// Update IsActive if provided
+	if req.IsActive != nil {
+		productToken.IsActive = *req.IsActive
+	}
+
+	// Update SubscriptionPlanID if provided
+	if req.SubscriptionPlanID != nil {
+		if *req.SubscriptionPlanID == "" { // Admin wants to remove the plan
+			productToken.SubscriptionPlanID = nil
+		} else {
+			planID, err := uuid.Parse(*req.SubscriptionPlanID)
+			if err != nil {
+				return nil, fiber.NewError(fiber.StatusBadRequest, "Invalid SubscriptionPlanID format")
+			}
+			// Verify if the plan ID exists
+			var plan model.SubscriptionPlan
+			if err := s.DB.WithContext(c.Context()).First(&plan, "id = ?", planID).Error; err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return nil, fiber.NewError(fiber.StatusNotFound, "Subscription plan not found")
+				}
+				return nil, fiber.ErrInternalServerError
+			}
+			productToken.SubscriptionPlanID = &planID
+		}
+	}
+
+	if err := s.DB.WithContext(c.Context()).Save(&productToken).Error; err != nil {
+		return nil, fiber.ErrInternalServerError
+	}
+
+	// Reload the token with potentially updated relations
+	if err := s.DB.WithContext(c.Context()).Preload("CreatedBy").Preload("User").Preload("SubscriptionPlan").First(&productToken, productToken.ID).Error; err != nil {
+		s.Log.Warnf("Unable to load full product token information after update: %v", err)
+		// Not returning error here, as the main update succeeded
+	}
+
+	return &productToken, nil
 }

@@ -63,7 +63,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Creates a new custom product token that can be used by users",
+                "description": "Creates a new custom product token that can be used by users. Optionally, a ` + "`" + `subscription_plan_id` + "`" + ` can be provided to grant a subscription when the token is verified.",
                 "consumes": [
                     "application/json"
                 ],
@@ -76,7 +76,7 @@ const docTemplate = `{
                 "summary": "Create new product token",
                 "parameters": [
                     {
-                        "description": "Product token details",
+                        "description": "Product token details (token, is_active, subscription_plan_id)",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -108,6 +108,68 @@ const docTemplate = `{
             }
         },
         "/admin/product-tokens/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates an existing product token. Fields to update (token, is_active, subscription_plan_id) should be provided in the request body. To remove a subscription plan, pass an empty string for ` + "`" + `subscription_plan_id` + "`" + `.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Update product token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product token ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Product token details to update",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/validation.UpdateProductToken"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessWithProductToken"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, token already exists, or invalid SubscriptionPlanID",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Product token or Subscription Plan not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -5445,6 +5507,47 @@ const docTemplate = `{
                 }
             }
         },
+        "model.ProductToken": {
+            "type": "object",
+            "properties": {
+                "activated_at": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "$ref": "#/definitions/model.User"
+                },
+                "created_by_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "subscription_plan": {
+                    "$ref": "#/definitions/model.SubscriptionPlan"
+                },
+                "subscription_plan_id": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/model.User"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "model.PurchaseSubscriptionRequest": {
             "type": "object",
             "properties": {
@@ -5491,6 +5594,41 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "string"
+                }
+            }
+        },
+        "model.SubscriptionPlan": {
+            "type": "object",
+            "properties": {
+                "aiscanLimit": {
+                    "description": "-1 for unlimited",
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "features": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isActive": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "description": "in Rupiah",
+                    "type": "integer"
+                },
+                "validityDays": {
+                    "description": "in days",
+                    "type": "integer"
                 }
             }
         },
@@ -5874,6 +6012,20 @@ const docTemplate = `{
                 }
             }
         },
+        "response.SuccessWithProductToken": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/model.ProductToken"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "response.SuccessWithRecipe": {
             "type": "object",
             "properties": {
@@ -5969,6 +6121,9 @@ const docTemplate = `{
             "properties": {
                 "is_active": {
                     "type": "boolean"
+                },
+                "subscription_plan_id": {
+                    "type": "string"
                 },
                 "token": {
                     "type": "string",
@@ -6144,6 +6299,23 @@ const docTemplate = `{
                         "success",
                         "failed"
                     ]
+                }
+            }
+        },
+        "validation.UpdateProductToken": {
+            "type": "object",
+            "properties": {
+                "is_active": {
+                    "type": "boolean"
+                },
+                "subscription_plan_id": {
+                    "description": "Allow empty string to clear the plan",
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 8
                 }
             }
         },

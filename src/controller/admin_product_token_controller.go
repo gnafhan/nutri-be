@@ -49,10 +49,10 @@ func (c *AdminProductTokenController) GetAllProductTokens(ctx *fiber.Ctx) error 
 
 // @Tags         Admin
 // @Summary      Create new product token
-// @Description  Creates a new custom product token that can be used by users
+// @Description  Creates a new custom product token that can be used by users. Optionally, a `subscription_plan_id` can be provided to grant a subscription when the token is verified.
 // @Accept       json
 // @Produce      json
-// @Param        request   body  validation.CreateCustomToken  true  "Product token details"
+// @Param        request   body  validation.CreateCustomToken  true  "Product token details (token, is_active, subscription_plan_id)"
 // @Security     BearerAuth
 // @Router       /admin/product-tokens [post]
 // @Success      201  {object}  example.CreateProductTokenResponse
@@ -111,5 +111,47 @@ func (c *AdminProductTokenController) DeleteProductToken(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(response.Common{
 		Status:  "success",
 		Message: "Product token deleted successfully",
+	})
+}
+
+// @Tags         Admin
+// @Summary      Update product token
+// @Description  Updates an existing product token. Fields to update (token, is_active, subscription_plan_id) should be provided in the request body. To remove a subscription plan, pass an empty string for `subscription_plan_id`.
+// @Accept       json
+// @Produce      json
+// @Param        id   path  string  true  "Product token ID"
+// @Param        request   body  validation.UpdateProductToken  true  "Product token details to update"
+// @Security     BearerAuth
+// @Router       /admin/product-tokens/{id} [put]
+// @Success      200  {object}  response.SuccessWithProductToken
+// @Failure      400  {object}  response.ErrorResponse "Invalid request, token already exists, or invalid SubscriptionPlanID"
+// @Failure      403  {object}  response.ErrorResponse
+// @Failure      404  {object}  response.ErrorResponse "Product token or Subscription Plan not found"
+func (c *AdminProductTokenController) UpdateProductToken(ctx *fiber.Ctx) error {
+	idParam := ctx.Params("id")
+	if idParam == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "Product token ID is required")
+	}
+
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid product token ID format")
+	}
+
+	req := new(validation.UpdateProductToken)
+	if err := ctx.BodyParser(req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body: "+err.Error())
+	}
+
+	// Call the service to update the product token
+	updatedToken, err := c.ProductTokenService.UpdateProductToken(ctx, id, req)
+	if err != nil {
+		return err // Return the error from the service directly (it should be a fiber.Error)
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response.SuccessWithProductToken{
+		Status:  "success",
+		Message: "Product token updated successfully",
+		Data:    *updatedToken,
 	})
 }

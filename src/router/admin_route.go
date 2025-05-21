@@ -19,6 +19,7 @@ func AdminRoutes(v1 fiber.Router, userService service.UserService, tokenService 
 	productTokens := admin.Group("/product-tokens", m.Auth(userService, productTokenService, "getProductTokens"))
 	productTokens.Get("/", adminProductTokenController.GetAllProductTokens)
 	productTokens.Post("/", m.Auth(userService, productTokenService, "createProductToken"), adminProductTokenController.CreateProductToken)
+	productTokens.Put("/:id", m.Auth(userService, productTokenService, "updateProductToken"), adminProductTokenController.UpdateProductToken)
 	productTokens.Delete("/:id", m.Auth(userService, productTokenService, "deleteProductToken"), adminProductTokenController.DeleteProductToken)
 
 	// User management routes
