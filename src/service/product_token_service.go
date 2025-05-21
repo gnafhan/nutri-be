@@ -90,12 +90,19 @@ func (s *productTokenService) VerifyProductToken(c *fiber.Ctx, query *validation
 	}
 
 	now := time.Now()
-	productToken.UserID = user.ID
-	productToken.ActivatedAt = &now
 
-	if err := s.DB.WithContext(c.Context()).Omit("SubscriptionPlan").Save(&productToken).Error; err != nil {
+	updateData := map[string]interface{}{
+		"user_id":      user.ID,
+		"activated_at": &now,
+	}
+
+	if err := s.DB.WithContext(c.Context()).Model(&model.ProductToken{}).Where("id = ?", productToken.ID).Updates(updateData).Error; err != nil {
+		s.Log.Errorf("Failed to update product token %s with user ID %s: %v", productToken.ID, user.ID, err)
 		return fiber.ErrInternalServerError
 	}
+
+	productToken.UserID = user.ID
+	productToken.ActivatedAt = &now
 
 	// If product token has an associated subscription plan, create it for the user
 	if productToken.SubscriptionPlanID != nil && productToken.SubscriptionPlan != nil {
