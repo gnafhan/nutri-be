@@ -7,7 +7,6 @@ NutriBox API is a comprehensive backend solution for a nutrition and meal tracki
 - **User Management**: Registration, authentication, profile management
 - **Meal Tracking**: Log and track daily meals with nutritional information
 - **Recipe Management**: Store and retrieve recipes
-- **Subscription System**: Manage subscription plans with Midtrans payment integration
 - **Article Management**: Create and manage nutritional articles and categories
 - **Health Metrics**: Track user weight, height, and health targets
 - **Login Streak**: Track user engagement through login streaks
@@ -20,7 +19,6 @@ NutriBox API is a comprehensive backend solution for a nutrition and meal tracki
 - **Database**: PostgreSQL
 - **ORM**: GORM
 - **Authentication**: JWT
-- **Payment Gateway**: Midtrans
 - **Image Recognition**: LogMeal API integration
 - **Documentation**: Swagger
 
@@ -110,11 +108,6 @@ GOOGLE_CLIENT_ID=yourgoogleclientid.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=yourgoogleclientsecret
 REDIRECT_URL=http://localhost:3000/v1/auth/google-callback
 
-# Midtrans configuration
-MIDTRANS_SERVER_KEY=your_midtrans_server_key
-MIDTRANS_STATUS=SANDBOX
-```
-
 ## Running the Application
 
 ### Local Development
@@ -175,24 +168,12 @@ src\
  |--service\        # Business logic (service layer)
  |--utils\          # Utility classes and functions
  |--validation\     # Request data validation schemas
- |--midtrans\       # Midtrans payment integration
  |--main.go         # Application entry point
 ```
-
-## Midtrans Payment Integration
-
-NutriBox API integrates with Midtrans for subscription payments.
-
-### Setup Midtrans
-
-1. Create a Midtrans account at https://midtrans.com
-2. Get your Server Key and Client Key from the Midtrans Dashboard
-3. Add the Midtrans credentials to your `.env` file
 
 ### Payment Endpoints
 
 - `POST /v1/subscriptions/purchase/:planID`: Initiate a subscription purchase
-- `POST /v1/subscriptions/notification`: Webhook endpoint for Midtrans payment notifications
 
 ## License
 
