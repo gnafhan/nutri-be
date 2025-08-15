@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+    "strings"
 
 	"github.com/spf13/viper"
 )
@@ -91,6 +92,12 @@ func init() {
 }
 
 func loadConfig() {
+    // Always allow environment variables to override config values
+    // Example: export DB_HOST=localhost will set viper key "DB_HOST"
+    viper.AutomaticEnv()
+    // Normalize env keys if needed (no dots used here, but keeps future-proof)
+    viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
 	configPaths := []string{
 		"./",     // For app
 		"../../", // For test folder
