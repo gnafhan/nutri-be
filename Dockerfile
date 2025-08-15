@@ -52,8 +52,8 @@ COPY --from=builder /app/.env .
 # Switch to non-root user
 USER appuser
 
-# Expose port
-EXPOSE 9097
+# # Expose port
+# EXPOSE 9097
 
 # Command to run the application
 ENTRYPOINT ["./nutribox-api"]
