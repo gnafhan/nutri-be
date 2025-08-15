@@ -47,7 +47,7 @@ WORKDIR /app
 COPY --from=builder /app/nutribox-api .
 
 # Copy necessary files
-COPY --from=builder /app/.env .
+# COPY --from=builder /app/.env .
 
 # Switch to non-root user
 USER appuser
