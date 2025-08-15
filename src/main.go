@@ -69,7 +69,16 @@ func main() {
 	utils.Log.Info("Setting up API routes...")
 	setupRoutes(app, db)
 
-	address := fmt.Sprintf("%s:%d", config.AppHost, config.AppPort)
+	port := os.Getenv("PORT")
+	if port == "" {
+		// Jika tidak ada (saat development lokal), gunakan dari file config Anda.
+		port = fmt.Sprintf("%d", config.AppPort)
+	}
+
+	// PENTING: Gunakan "0.0.0.0" untuk host agar bisa diakses di dalam container.
+	address := fmt.Sprintf("0.0.0.0:%s", port)
+
+	utils.Log.Infof("Starting server on %s", address)
 	utils.Log.Infof("Starting server on %s", address)
 
 	// Start server and handle graceful shutdown
