@@ -31,6 +31,7 @@ func SubscriptionRoutes(
 			authGroup.Get("/me", subController.GetMySubscription)
 			authGroup.Get("/check-feature", subController.CheckFeatureAccess)
 			authGroup.Post("/purchase/:planID", subController.PurchasePlan)
+
 		}
 	}
 }
