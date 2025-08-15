@@ -1,59 +1,56 @@
-# Build stage
+# Multi-stage Dockerfile for Nutribox API (Go + Fiber)
+# Optimized for Google Cloud Run
+
+# ---------- Build stage ----------
 FROM golang:1.23-alpine AS builder
 
-# Install necessary build tools
-RUN apk add --no-cache git
-
-# Set working directory
 WORKDIR /app
 
-# Copy go mod and sum files
-COPY go.mod go.sum ./
+# Install build deps
+RUN apk add --no-cache git ca-certificates tzdata
 
-# Download dependencies
+# Cache modules first
+COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy source code
+# Copy the rest of the source
 COPY . .
 
-# Ensure .env file exists (copy from example if not)
-RUN if [ ! -f .env ]; then cp .env.example .env || echo "No .env.example found"; fi
+# Build static binary
+ENV CGO_ENABLED=0
+RUN go build -ldflags="-s -w" -o /app/server ./src
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o nutribox-api ./src/main.go
+# ---------- Runtime stage ----------
+# Distroless base includes CA certificates and a minimal userspace
+FROM gcr.io/distroless/base-debian12
 
-# Final stage
-FROM alpine:latest
-
-# Add necessary runtime dependencies
-RUN apk --no-cache add ca-certificates tzdata
-
-# Set timezone
-RUN cp /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
-RUN echo "Asia/Jakarta" > /etc/timezone
-
-# Create non-root user
-RUN adduser -D -g '' appuser
-
-# Create necessary directories
-RUN mkdir -p /app/uploads
-RUN chown -R appuser:appuser /app
-RUN chmod -R 777 /app
-
-# Set working directory
 WORKDIR /app
 
-# Copy binary from builder stage
-COPY --from=builder /app/nutribox-api .
+# Copy timezone data and certs (defensive; base already has certs)
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=builder /etc/ssl/certs /etc/ssl/certs
 
-# Copy necessary files
-# COPY --from=builder /app/.env .
+# Copy built binary
+COPY --from=builder /app/server /app/server
 
-# Switch to non-root user
-USER appuser
+# Static files directory (served at /uploads). Note: Cloud Run FS is read-only
+# except for /tmp. If your app writes uploads, redirect writes to /tmp/uploads
+# or use Cloud Storage. This layer only provides an empty directory for reads.
+COPY uploads /app/uploads
 
-# # Expose port
-# EXPOSE 9097
+# Cloud Run expects the server to listen on $PORT
+ENV PORT=8080 \
+    APP_ENV=prod \
+    APP_HOST=0.0.0.0
 
-# Command to run the application
-ENTRYPOINT ["./nutribox-api"]
+# If you use Viper to read from a .env file, mount it to /app/.env at deploy time
+# using Cloud Run Secret Manager volumes, e.g.:
+#   --mount=type=secret,source=nutribox-env,target=/app/.env,mode=0440
+
+# Use an unprivileged user provided by distroless
+USER 65532:65532
+
+EXPOSE 8080
+
+# Start the server
+ENTRYPOINT ["/app/server"]
