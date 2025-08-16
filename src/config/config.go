@@ -2,7 +2,7 @@ package config
 
 import (
 	"log"
-    "strings"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -46,6 +46,14 @@ func init() {
 	IsProd = viper.GetString("APP_ENV") == "prod"
 	AppHost = viper.GetString("APP_HOST")
 	AppPort = viper.GetInt("APP_PORT")
+	
+	// Set defaults if not provided
+	if AppHost == "" {
+		AppHost = "0.0.0.0"
+	}
+	if AppPort == 0 {
+		AppPort = 8080
+	}
 
 	FrontendURL = viper.GetString("FRONTEND_URL")
 
@@ -55,9 +63,26 @@ func init() {
 	DBPassword = viper.GetString("DB_PASSWORD")
 	DBName = viper.GetString("DB_NAME")
 	DBPort = viper.GetInt("DB_PORT")
+	
+	// Set database defaults to prevent connection failures
+	if DBHost == "" {
+		DBHost = "localhost"
+	}
+	if DBUser == "" {
+		DBUser = "postgres"
+	}
+	if DBName == "" {
+		DBName = "fiberdb"
+	}
+	if DBPort == 0 {
+		DBPort = 5432
+	}
 
 	// product token
 	ProductTokenExpDays = viper.GetString("PRODUCT_TOKEN_EXP_DAYS")
+	if ProductTokenExpDays == "" {
+		ProductTokenExpDays = "30"
+	}
 
 	// log meal
 	LogMealBaseUrl = viper.GetString("LOG_MEAL_BASE_URL")
@@ -69,6 +94,24 @@ func init() {
 	JWTRefreshExp = viper.GetInt("JWT_REFRESH_EXP_DAYS")
 	JWTResetPasswordExp = viper.GetInt("JWT_RESET_PASSWORD_EXP_MINUTES")
 	JWTVerifyEmailExp = viper.GetInt("JWT_VERIFY_EMAIL_EXP_MINUTES")
+	
+	// Set JWT defaults
+	if JWTSecret == "" {
+		JWTSecret = "default-secret-change-in-production"
+		log.Printf("WARNING: Using default JWT secret. Please set JWT_SECRET environment variable.")
+	}
+	if JWTAccessExp == 0 {
+		JWTAccessExp = 30
+	}
+	if JWTRefreshExp == 0 {
+		JWTRefreshExp = 30
+	}
+	if JWTResetPasswordExp == 0 {
+		JWTResetPasswordExp = 10
+	}
+	if JWTVerifyEmailExp == 0 {
+		JWTVerifyEmailExp = 10
+	}
 
 	// SMTP configuration
 	SMTPHost = viper.GetString("SMTP_HOST")
@@ -76,6 +119,11 @@ func init() {
 	SMTPUsername = viper.GetString("SMTP_USERNAME")
 	SMTPPassword = viper.GetString("SMTP_PASSWORD")
 	EmailFrom = viper.GetString("EMAIL_FROM")
+	
+	// SMTP defaults
+	if SMTPPort == 0 {
+		SMTPPort = 587
+	}
 
 	// oauth2 configuration
 	GoogleClientID = viper.GetString("GOOGLE_CLIENT_ID")
@@ -89,6 +137,14 @@ func init() {
 	// gRPC configuration
 	GRPC_HOST = viper.GetString("GRPC_HOST")
 	GRPC_PORT = viper.GetString("GRPC_PORT")
+	
+	// gRPC defaults
+	if GRPC_HOST == "" {
+		GRPC_HOST = "localhost"
+	}
+	if GRPC_PORT == "" {
+		GRPC_PORT = "50051"
+	}
 }
 
 func loadConfig() {

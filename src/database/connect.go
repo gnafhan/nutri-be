@@ -12,11 +12,32 @@ import (
 )
 
 func Connect(dbHost, dbName string) *gorm.DB {
+	// Validate required database parameters
+	if dbHost == "" {
+		utils.Log.Errorf("Database host is empty")
+		panic("Database host cannot be empty")
+	}
+	if config.DBUser == "" {
+		utils.Log.Errorf("Database user is empty")
+		panic("Database user cannot be empty")
+	}
+	if dbName == "" {
+		utils.Log.Errorf("Database name is empty")
+		panic("Database name cannot be empty")
+	}
+	if config.DBPort == 0 {
+		utils.Log.Errorf("Database port is 0 or invalid")
+		panic("Database port must be a valid port number")
+	}
+
 	// hihihi maap
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
 		dbHost, config.DBUser, config.DBPassword, dbName, config.DBPort,
 	)
+	
+	utils.Log.Infof("Attempting to connect to database with DSN: host=%s user=%s dbname=%s port=%d", 
+		dbHost, config.DBUser, dbName, config.DBPort)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger:                 logger.Default.LogMode(logger.Info),
@@ -26,6 +47,7 @@ func Connect(dbHost, dbName string) *gorm.DB {
 	})
 	if err != nil {
 		utils.Log.Errorf("Failed to connect to database: %+v", err)
+		panic(fmt.Sprintf("Failed to connect to database: %v", err))
 	}
 
 	if err := db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";").Error; err != nil {
