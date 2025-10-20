@@ -1,0 +1,49 @@
+---
+globs: *.go
+description: Fiber framework specific patterns and API development standards
+---
+
+# Fiber API Development Standards
+
+## Request/Response Patterns
+- Use structured request/response types defined in [response/](mdc:src/response/) package
+- Follow the established response format: `SuccessWith*` and `ErrorDetails` patterns
+- Use pagination with `SuccessWithPaginate[T]` for list endpoints
+- Always validate request data using validation structs from [validation/](mdc:src/validation/) package
+- Use proper HTTP status codes (200, 201, 400, 401, 403, 404, 500)
+
+## Middleware Usage
+- Apply middleware in the correct order as shown in [main.go](mdc:src/main.go)
+- Use authentication middleware from [middleware/auth.go](mdc:src/middleware/auth.go) for protected routes
+- Implement rate limiting on authentication endpoints
+- Use structured logging middleware for request/response tracking
+- Apply CORS, Helmet, and compression middleware for security and performance
+
+## Controller Patterns
+- Controllers should be thin - delegate business logic to services
+- Use dependency injection with constructor functions (e.g., `NewUserController`)
+- Extract query parameters, path parameters, and request body properly
+- Return appropriate Fiber responses using helper functions
+- Handle file uploads securely with proper validation
+
+## Route Organization
+- Organize routes by domain in separate files under [router/](mdc:src/router/)
+- Use consistent URL patterns: `/v1/{resource}` for API endpoints
+- Group related routes together with appropriate middleware
+- Use route parameters for resource identification
+- Implement proper HTTP methods (GET, POST, PUT, DELETE, PATCH)
+
+## Configuration Management
+- Use Viper for configuration as implemented in [config/config.go](mdc:src/config/config.go)
+- Support environment variable overrides for all configuration values
+- Use proper Fiber configuration with error handlers as in [config/fiber.go](mdc:src/config/fiber.go)
+- Implement graceful shutdown with context cancellation
+- Use structured logging with appropriate log levels
+
+## Security Best Practices
+- Implement JWT-based authentication with proper token validation
+- Use HTTPS in production environments
+- Validate all input data with custom validation rules
+- Implement proper authorization with role-based access control
+- Use secure headers with Helmet middleware
+- Sanitize user inputs to prevent injection attacks

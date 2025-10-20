@@ -35,6 +35,7 @@ type SubscriptionService interface {
 	IncrementScanUsage(ctx *fiber.Ctx, userID uuid.UUID) error
 	GetRemainingScans(ctx *fiber.Ctx, userID uuid.UUID) (int, error)
 	HandlePaymentNotification(ctx *fiber.Ctx, notificationData []byte) error
+	CreateFreemiumSubscription(ctx *fiber.Ctx, userID uuid.UUID) error
 
 	// Admin-related methods
 	GetAllUserSubscriptions(ctx *fiber.Ctx, query *validation.SubscriptionQuery) ([]model.UserSubscriptionResponse, int64, error)
@@ -797,4 +798,45 @@ func (s *subscriptionService) UpdateSubscriptionPlan(ctx *fiber.Ctx, planID uuid
 	}
 
 	return &plan, nil
+}
+
+func (s *subscriptionService) CreateFreemiumSubscription(ctx *fiber.Ctx, userID uuid.UUID) error {
+	// Check if user already has an active subscription
+	existingSubscription, err := s.GetUserActiveSubscription(ctx, userID)
+	if err == nil && existingSubscription != nil {
+		s.Log.Infof("User %s already has an active subscription, skipping freemium creation", userID.String())
+		return nil
+	}
+
+	// Find the Freemium Trial plan
+	var freemiumPlan model.SubscriptionPlan
+	if err := s.DB.WithContext(ctx.Context()).First(&freemiumPlan, "name = ? AND is_active = ?", "Freemium Trial", true).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fiber.NewError(fiber.StatusInternalServerError, "Freemium Trial plan not found")
+		}
+		return err
+	}
+
+	// Create the freemium subscription
+	now := time.Now()
+	endDate := now.AddDate(0, 0, 14) // 14 days from now
+
+	freemiumSubscription := &model.UserSubscription{
+		UserID:        userID,
+		PlanID:        freemiumPlan.ID,
+		StartDate:     now,
+		EndDate:       endDate,
+		IsActive:      true,
+		PaymentMethod: "freemium_trial",
+		PaymentStatus: "completed",
+		AIscansUsed:   0,
+	}
+
+	if err := s.DB.WithContext(ctx.Context()).Create(freemiumSubscription).Error; err != nil {
+		s.Log.Errorf("Failed to create freemium subscription for user %s: %v", userID.String(), err)
+		return err
+	}
+
+	s.Log.Infof("Successfully created freemium subscription for user %s, expires at %s", userID.String(), endDate.Format(time.RFC3339))
+	return nil
 }

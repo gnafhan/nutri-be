@@ -37,11 +37,13 @@ func NewAuthController(
 
 // @Tags         Auth
 // @Summary      Register as user
+// @Description  Register a new user. User will receive verification email to start 2-week free trial after registration.
 // @Accept       json
 // @Produce      json
 // @Param        request  body  validation.Register  true  "Request body"
 // @Router       /auth/register [post]
-// @Success      201  {object}  example.RegisterResponse
+// @Success      201  {object}  example.RegisterResponse  "Registration successful. Check email for verification link to start 2-week free trial."
+// @Failure      400  {string}  string  "Invalid request body"
 // @Failure      409  {object}  example.DuplicateEmail  "Email already taken"
 func (a *AuthController) Register(c *fiber.Ctx) error {
 	req := new(validation.Register)
@@ -255,11 +257,12 @@ func (a *AuthController) SendVerificationEmail(c *fiber.Ctx) error {
 
 // @Tags         Auth
 // @Summary      Verify email
+// @Description  Verify user email and automatically create 2-week free trial with full access to all features.
 // @Produce      json
 // @Param        token   query  string  true  "The verify email token"
 // @Router       /auth/verify-email [post]
-// @Success      200  {object}  example.VerifyEmailResponse
-// @Failure      401  {object}  example.FailedVerifyEmail  "Verify email failed"
+// @Success      200  {object}  example.VerifyEmailResponse  "Email verified successfully. 2-week free trial activated with full access."
+// @Failure      401  {object}  example.FailedVerifyEmail  "Verify email failed - invalid or expired token"
 func (a *AuthController) VerifyEmail(c *fiber.Ctx) error {
 	query := &validation.Token{
 		Token: c.Query("token"),

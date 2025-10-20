@@ -1844,7 +1844,7 @@ definitions:
         type: string
       token:
         maxLength: 32
-        minLength: 8
+        minLength: 5
         type: string
     required:
     - token
@@ -1950,7 +1950,6 @@ definitions:
     - email
     - gender
     - height
-    - medical_history
     - name
     - password
     - weight
@@ -1983,7 +1982,7 @@ definitions:
         type: string
       token:
         maxLength: 32
-        minLength: 8
+        minLength: 5
         type: string
     type: object
   validation.UpdateSubscription:
@@ -2957,6 +2956,8 @@ paths:
     post:
       consumes:
       - application/json
+      description: Register a new user. User will receive verification email to start
+        2-week free trial after registration.
       parameters:
       - description: Request body
         in: body
@@ -2968,9 +2969,14 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Registration successful. Check email for verification link
+            to start 2-week free trial.
           schema:
             $ref: '#/definitions/example.RegisterResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
         "409":
           description: Email already taken
           schema:
@@ -3029,6 +3035,8 @@ paths:
       - Auth
   /auth/verify-email:
     post:
+      description: Verify user email and automatically create 2-week free trial with
+        full access to all features.
       parameters:
       - description: The verify email token
         in: query
@@ -3039,11 +3047,12 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Email verified successfully. 2-week free trial activated with
+            full access.
           schema:
             $ref: '#/definitions/example.VerifyEmailResponse'
         "401":
-          description: Verify email failed
+          description: Verify email failed - invalid or expired token
           schema:
             $ref: '#/definitions/example.FailedVerifyEmail'
       summary: Verify email
