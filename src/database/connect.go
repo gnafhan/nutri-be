@@ -32,11 +32,11 @@ func Connect(dbHost, dbName string) *gorm.DB {
 
 	// hihihi maap
 	dsn := fmt.Sprintf(
-		"host=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
-		dbHost, dbName, config.DBPort,
+		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
+		dbHost, config.DBUser, config.DBPassword, dbName, config.DBPort,
 	)
-	
-	utils.Log.Infof("Attempting to connect to database with DSN: host=%s user=%s dbname=%s port=%d", 
+
+	utils.Log.Infof("Attempting to connect to database with DSN: host=%s user=%s dbname=%s port=%d",
 		dbHost, config.DBUser, dbName, config.DBPort)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
