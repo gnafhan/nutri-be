@@ -1,0 +1,66 @@
+---
+globs: src/middleware/*.go,src/config/*.go,src/service/*auth*.go
+description: Security best practices and authentication patterns
+---
+
+# Security Standards & Best Practices
+
+## Authentication & Authorization
+- Use JWT tokens for authentication as implemented in [middleware/auth.go](mdc:src/middleware/auth.go)
+- Implement proper token validation with configurable expiration times
+- Use role-based access control (RBAC) with rights checking
+- Validate user permissions for resource access
+- Implement product token validation for feature access control
+- Use secure token storage and transmission
+
+## Password Security
+- Hash passwords using bcrypt with appropriate cost factors
+- Never store plain text passwords
+- Implement password complexity requirements
+- Use secure password reset mechanisms with time-limited tokens
+- Implement account lockout mechanisms for failed login attempts
+
+## Input Validation & Sanitization
+- Validate all user inputs using the validation framework in [validation/](mdc:src/validation/)
+- Use custom validation rules for business-specific requirements
+- Sanitize inputs to prevent injection attacks
+- Validate file uploads for type, size, and content
+- Implement proper error messages without exposing sensitive information
+
+## Configuration Security
+- Use environment variables for sensitive configuration
+- Never commit secrets or API keys to version control
+- Use proper configuration management as in [config/config.go](mdc:src/config/config.go)
+- Implement secure defaults for all configuration options
+- Use different configurations for different environments
+
+## API Security
+- Use HTTPS in production environments
+- Implement proper CORS configuration
+- Use security headers with Helmet middleware
+- Implement rate limiting on authentication endpoints
+- Use proper HTTP status codes for different error scenarios
+- Implement request/response logging for security auditing
+
+## Database Security
+- Use parameterized queries to prevent SQL injection
+- Implement proper database user permissions
+- Use connection pooling with appropriate limits
+- Encrypt sensitive data at rest
+- Implement database audit logging
+- Use proper database backup and recovery procedures
+
+## Logging & Monitoring
+- Log security-related events with appropriate detail
+- Use structured logging for better analysis
+- Implement proper log rotation and retention
+- Monitor for suspicious activity patterns
+- Implement alerting for security incidents
+- Use proper log levels (Info, Warn, Error, Fatal)
+
+## Error Handling Security
+- Don't expose internal system information in error messages
+- Use generic error messages for authentication failures
+- Implement proper error logging without sensitive data
+- Use the custom error handler in [utils/error.go](mdc:src/utils/error.go)
+- Handle errors gracefully without system information leakage

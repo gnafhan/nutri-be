@@ -492,7 +492,7 @@ func (s *mealService) GetHomeStatistics(c *fiber.Ctx, userID uuid.UUID) (*model.
 	weightHeightService := NewUsersWeightHeightService(s.DB)
 
 	// Get current user data with weight and height
-	userService := NewUserService(s.DB, nil)
+	userService := NewUserServiceWithoutSubscription(s.DB, nil)
 	user, err := userService.GetUserByID(c, userID.String())
 	if err != nil {
 		s.Log.Errorf("Failed to get user information: %+v", err)

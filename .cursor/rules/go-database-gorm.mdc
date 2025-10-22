@@ -1,0 +1,52 @@
+---
+globs: src/model/*.go,src/database/*.go,src/service/*.go
+description: GORM database patterns and data layer best practices
+---
+
+# GORM Database & Data Layer Standards
+
+## Model Definition
+- Use UUIDs as primary keys with `gorm:"primaryKey;not null"`
+- Include `CreatedAt` and `UpdatedAt` timestamps with proper GORM tags
+- Use appropriate data types and constraints (e.g., `decimal(5,2)` for precise numbers)
+- Implement `BeforeCreate` hooks for UUID generation as shown in [model/user_model.go](mdc:src/model/user_model.go)
+- Use custom types for enums (e.g., `GenderType`, `ActivityLevel`)
+- Include proper JSON tags for API serialization
+- Use `gorm:"-"` to exclude sensitive fields from JSON output
+
+## Database Connection & Configuration
+- Use connection pooling with proper limits as configured in [database/connect.go](mdc:src/database/connect.go)
+- Enable prepared statements and error translation for better performance
+- Use proper timezone configuration (Asia/Shanghai as configured)
+- Implement proper database migrations and seeding
+- Handle database connection errors gracefully with logging
+
+## Service Layer Database Operations
+- Use transactions for multi-step operations that must be atomic
+- Implement proper error handling for database operations
+- Use appropriate query methods (First, Find, Create, Update, Delete)
+- Implement soft deletes when appropriate using GORM's soft delete feature
+- Use preloading for related data to avoid N+1 queries
+- Implement pagination for list operations
+
+## Query Optimization
+- Use indexes for frequently queried fields
+- Implement proper WHERE clauses to limit result sets
+- Use SELECT specific fields instead of SELECT * when possible
+- Implement proper ordering and limiting for pagination
+- Use database-level constraints and validations where appropriate
+- Monitor and optimize slow queries
+
+## Data Validation
+- Use both database constraints and application-level validation
+- Implement custom validation rules in [validation/](mdc:src/validation/) package
+- Validate data before database operations
+- Use proper error handling for constraint violations
+- Implement data sanitization for user inputs
+
+## Migration & Seeding
+- Keep migrations in the [database/migrations/](mdc:src/database/migrations/) directory
+- Use version-controlled migration files
+- Implement proper seeding for development and testing data
+- Use transaction-safe migration operations
+- Test migrations on development environment before production deployment

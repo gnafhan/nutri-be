@@ -1,0 +1,62 @@
+---
+globs: Dockerfile,docker-compose.yml,Makefile,*.sh
+description: Docker and deployment best practices for NutriBox API
+---
+
+# Docker & Deployment Standards
+
+## Docker Configuration
+- Use multi-stage builds for optimized image size as shown in [Dockerfile](mdc:Dockerfile)
+- Use Alpine-based images for smaller attack surface
+- Use distroless runtime images for production security
+- Copy only necessary files to reduce image size
+- Use proper layer caching for faster builds
+- Set appropriate user permissions (non-root user)
+
+## Environment Configuration
+- Use environment variables for all configuration
+- Support different environments (dev, prod) with proper configuration
+- Use proper timezone configuration (Asia/Jakarta as specified)
+- Implement graceful shutdown handling
+- Use proper port configuration for container networking
+- Set appropriate resource limits and requests
+
+## Build Optimization
+- Use Go build flags for optimized binaries (`-ldflags="-s -w"`)
+- Enable CGO only when necessary
+- Use proper Go module caching in Docker builds
+- Implement proper dependency management
+- Use build cache for faster subsequent builds
+- Optimize Docker layer ordering for better caching
+
+## Security Considerations
+- Run containers as non-root user (65532:65532 as configured)
+- Use minimal base images (distroless)
+- Scan images for vulnerabilities
+- Use secrets management for sensitive data
+- Implement proper network security
+- Use read-only filesystems where possible
+
+## Deployment Patterns
+- Use docker-compose for local development as in [docker-compose.yml](mdc:docker-compose.yml)
+- Implement proper health checks
+- Use proper logging configuration for containers
+- Implement proper backup and recovery procedures
+- Use proper monitoring and alerting
+- Implement blue-green or rolling deployments
+
+## Development Workflow
+- Use Makefile targets for common operations as in [Makefile](mdc:Makefile)
+- Implement proper local development setup
+- Use development scripts like [run-docker.sh](mdc:run-docker.sh)
+- Implement proper testing in containerized environments
+- Use proper debugging and troubleshooting procedures
+- Implement proper CI/CD pipeline integration
+
+## Production Considerations
+- Use proper resource allocation and limits
+- Implement proper monitoring and observability
+- Use proper backup and disaster recovery
+- Implement proper scaling strategies
+- Use proper network configuration and security
+- Implement proper logging aggregation and analysis

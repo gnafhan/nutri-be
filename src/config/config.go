@@ -37,6 +37,9 @@ var (
 	MidtransStatus      string
 	GRPC_HOST           string
 	GRPC_PORT           string
+	SentryDSN           string
+	SentryEnvironment   string
+	SentryDebug         bool
 )
 
 func init() {
@@ -46,7 +49,7 @@ func init() {
 	IsProd = viper.GetString("APP_ENV") == "prod"
 	AppHost = viper.GetString("APP_HOST")
 	AppPort = viper.GetInt("APP_PORT")
-	
+
 	// Set defaults if not provided
 	if AppHost == "" {
 		AppHost = "0.0.0.0"
@@ -63,7 +66,7 @@ func init() {
 	DBPassword = viper.GetString("DB_PASSWORD")
 	DBName = viper.GetString("DB_NAME")
 	DBPort = viper.GetInt("DB_PORT")
-	
+
 	// Set database defaults to prevent connection failures
 	if DBHost == "" {
 		DBHost = "localhost"
@@ -94,7 +97,7 @@ func init() {
 	JWTRefreshExp = viper.GetInt("JWT_REFRESH_EXP_DAYS")
 	JWTResetPasswordExp = viper.GetInt("JWT_RESET_PASSWORD_EXP_MINUTES")
 	JWTVerifyEmailExp = viper.GetInt("JWT_VERIFY_EMAIL_EXP_MINUTES")
-	
+
 	// Set JWT defaults
 	if JWTSecret == "" {
 		JWTSecret = "default-secret-change-in-production"
@@ -119,7 +122,7 @@ func init() {
 	SMTPUsername = viper.GetString("SMTP_USERNAME")
 	SMTPPassword = viper.GetString("SMTP_PASSWORD")
 	EmailFrom = viper.GetString("EMAIL_FROM")
-	
+
 	// SMTP defaults
 	if SMTPPort == 0 {
 		SMTPPort = 587
@@ -137,7 +140,7 @@ func init() {
 	// gRPC configuration
 	GRPC_HOST = viper.GetString("GRPC_HOST")
 	GRPC_PORT = viper.GetString("GRPC_PORT")
-	
+
 	// gRPC defaults
 	if GRPC_HOST == "" {
 		GRPC_HOST = "localhost"
@@ -145,14 +148,19 @@ func init() {
 	if GRPC_PORT == "" {
 		GRPC_PORT = "50051"
 	}
+
+	// Sentry configuration
+	SentryDSN = viper.GetString("SENTRY_DSN")
+	SentryEnvironment = viper.GetString("SENTRY_ENVIRONMENT")
+	SentryDebug = viper.GetBool("SENTRY_DEBUG")
 }
 
 func loadConfig() {
-    // Always allow environment variables to override config values
-    // Example: export DB_HOST=localhost will set viper key "DB_HOST"
-    viper.AutomaticEnv()
-    // Normalize env keys if needed (no dots used here, but keeps future-proof)
-    viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	// Always allow environment variables to override config values
+	// Example: export DB_HOST=localhost will set viper key "DB_HOST"
+	viper.AutomaticEnv()
+	// Normalize env keys if needed (no dots used here, but keeps future-proof)
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	configPaths := []string{
 		"./",     // For app

@@ -184,7 +184,7 @@ func (s *usersWeightHeightService) AddWeightHeightTarget(ctx *fiber.Ctx, record 
 
 	record.RecordDate = time.Now()
 
-	userService := NewUserService(s.DB, nil)
+	userService := NewUserServiceWithoutSubscription(s.DB, nil)
 	user, err := userService.GetUserByID(ctx, record.UserID.String())
 	if err != nil {
 		s.Log.Errorf("Failed to get user information: %+v", err)
@@ -232,7 +232,7 @@ func (s *usersWeightHeightService) GetWeightHeightTargetByID(ctx *fiber.Ctx, rec
 
 func (s *usersWeightHeightService) UpdateWeightHeightTarget(ctx *fiber.Ctx, recordID string, record *model.UsersWeightHeightTarget) (*model.UsersWeightHeightTarget, error) {
 	existingRecord := new(model.UsersWeightHeightTarget)
-	userService := NewUserService(s.DB, nil)
+	userService := NewUserServiceWithoutSubscription(s.DB, nil)
 	user, err := userService.GetUserByID(ctx, record.UserID.String())
 	if err != nil {
 		s.Log.Errorf("Failed to get user information: %+v", err)

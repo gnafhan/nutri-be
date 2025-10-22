@@ -4,13 +4,9 @@ import (
 	"app/src/config"
 	"app/src/service"
 	"app/src/utils"
-	"fmt"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"gorm.io/gorm"
 )
 
 func Auth(userService service.UserService, productTokenService service.ProductTokenService, requiredRights ...string) fiber.Handler {
@@ -30,36 +26,6 @@ func Auth(userService service.UserService, productTokenService service.ProductTo
 		user, err := userService.GetUserByID(c, userID)
 		if err != nil || user == nil {
 			return fiber.NewError(fiber.StatusUnauthorized, "Please authenticate")
-		}
-
-		productToken, err := productTokenService.GetProductTokenByUserID(c, user.ID)
-		if err != nil && err != gorm.ErrRecordNotFound {
-			return fiber.ErrInternalServerError
-		}
-
-		if productToken == nil {
-			return fiber.NewError(fiber.StatusForbidden, "Please activate your product token")
-		}
-
-		expDays := config.ProductTokenExpDays
-		if expDays == "" {
-			fmt.Println("Error: PRODUCT_TOKEN_EXP_DAYS not set")
-			return fiber.ErrInternalServerError
-		}
-
-		expDaysInt, err := strconv.Atoi(expDays)
-		if err != nil {
-			fmt.Println("Error parsing PRODUCT_TOKEN_EXP_DAYS:", err)
-			return fiber.ErrInternalServerError
-		}
-
-		expDuration := time.Duration(expDaysInt) * 24 * time.Hour
-		expirationTime := productToken.ActivatedAt.Add(expDuration)
-		if time.Now().After(expirationTime) {
-			if err := productTokenService.DeleteProductToken(c, productToken.ID); err != nil {
-				return fiber.ErrInternalServerError
-			}
-			return fiber.NewError(fiber.StatusForbidden, "Your product token has expired. Please activate a new one.")
 		}
 
 		c.Locals("user", user)

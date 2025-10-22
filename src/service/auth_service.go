@@ -26,22 +26,24 @@ type AuthService interface {
 }
 
 type authService struct {
-	Log          *logrus.Logger
-	DB           *gorm.DB
-	Validate     *validator.Validate
-	UserService  UserService
-	TokenService TokenService
+	Log                 *logrus.Logger
+	DB                  *gorm.DB
+	Validate            *validator.Validate
+	UserService         UserService
+	TokenService        TokenService
+	SubscriptionService SubscriptionService
 }
 
 func NewAuthService(
-	db *gorm.DB, validate *validator.Validate, userService UserService, tokenService TokenService,
+	db *gorm.DB, validate *validator.Validate, userService UserService, tokenService TokenService, subscriptionService SubscriptionService,
 ) AuthService {
 	return &authService{
-		Log:          utils.Log,
-		DB:           db,
-		Validate:     validate,
-		UserService:  userService,
-		TokenService: tokenService,
+		Log:                 utils.Log,
+		DB:                  db,
+		Validate:            validate,
+		UserService:         userService,
+		TokenService:        tokenService,
+		SubscriptionService: subscriptionService,
 	}
 }
 
@@ -206,16 +208,41 @@ func (s *authService) VerifyEmail(c *fiber.Ctx, query *validation.Token) error {
 		return fiber.NewError(fiber.StatusUnauthorized, "Verify email failed")
 	}
 
+	// Start transaction for email verification and freemium subscription creation
+	tx := s.DB.WithContext(c.Context()).Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Delete verification token
 	if errToken := s.TokenService.DeleteToken(c, config.TokenTypeVerifyEmail, user.ID.String()); errToken != nil {
+		tx.Rollback()
 		return errToken
 	}
 
+	// Update user email verification status
 	updateBody := &validation.UpdatePassOrVerify{
 		VerifiedEmail: true,
 	}
 
 	if errUpdate := s.UserService.UpdatePassOrVerify(c, updateBody, user.ID.String()); errUpdate != nil {
+		tx.Rollback()
 		return errUpdate
+	}
+
+	// Commit transaction first
+	if err := tx.Commit().Error; err != nil {
+		s.Log.Errorf("Failed to commit email verification transaction: %v", err)
+		return err
+	}
+
+	// Create freemium subscription for new users (after successful email verification)
+	// This is done outside the transaction to avoid dependency issues
+	if errFreemium := s.SubscriptionService.CreateFreemiumSubscription(c, user.ID); errFreemium != nil {
+		// Log the error but don't fail the email verification
+		s.Log.Errorf("Failed to create freemium subscription for user %s: %v", user.ID.String(), errFreemium)
 	}
 
 	return nil

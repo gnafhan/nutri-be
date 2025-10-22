@@ -1,0 +1,49 @@
+---
+alwaysApply: true
+description: General Go coding standards and best practices for NutriBox API
+---
+
+# Go General Standards & Best Practices
+
+## Code Organization & Structure
+- Follow the established layered architecture: `controller` → `service` → `model` → `database`
+- Keep business logic in the `service` layer, not in controllers
+- Controllers should only handle HTTP concerns (request/response, validation, error handling)
+- Use dependency injection for services and repositories
+- Place utility functions in the `utils` package
+- Keep validation logic in the `validation` package
+
+## Naming Conventions
+- Use PascalCase for exported types, functions, and variables
+- Use camelCase for unexported types, functions, and variables
+- Use descriptive names that clearly indicate purpose
+- Interface names should end with `-er` (e.g., `UserService`, `TokenService`)
+- Struct field names should be descriptive and follow Go conventions
+- Constants should be in SCREAMING_SNAKE_CASE
+
+## Error Handling
+- Always handle errors explicitly - never ignore them with `_`
+- Use `fiber.NewError()` for HTTP-specific errors with appropriate status codes
+- Wrap errors with context using `fmt.Errorf()` when propagating
+- Use the custom `ErrorHandler` in [utils/error.go](mdc:src/utils/error.go) for consistent error responses
+- Log errors with appropriate levels using the structured logger in [utils/logrus.go](mdc:src/utils/logrus.go)
+
+## Imports & Dependencies
+- Group imports in this order: standard library, third-party, local packages
+- Use absolute import paths for local packages (e.g., `app/src/model`)
+- Avoid unused imports - use `goimports` to manage them
+- Keep dependencies minimal and well-justified
+
+## Performance & Best Practices
+- Use `context.Context` for request-scoped values and cancellation
+- Implement graceful shutdown patterns as shown in [main.go](mdc:src/main.go)
+- Use connection pooling for database connections as configured in [database/connect.go](mdc:src/database/connect.go)
+- Prefer composition over inheritance
+- Use interfaces for better testability and loose coupling
+- Implement proper resource cleanup (defer statements for cleanup)
+
+## Documentation
+- Add comprehensive godoc comments for all exported functions and types
+- Use Swagger annotations for API endpoints as shown in controller files
+- Include examples in struct tags where appropriate
+- Document complex business logic and algorithms

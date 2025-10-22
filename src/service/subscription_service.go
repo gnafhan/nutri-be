@@ -35,6 +35,7 @@ type SubscriptionService interface {
 	IncrementScanUsage(ctx *fiber.Ctx, userID uuid.UUID) error
 	GetRemainingScans(ctx *fiber.Ctx, userID uuid.UUID) (int, error)
 	HandlePaymentNotification(ctx *fiber.Ctx, notificationData []byte) error
+	CreateFreemiumSubscription(ctx *fiber.Ctx, userID uuid.UUID) error
 
 	// Admin-related methods
 	GetAllUserSubscriptions(ctx *fiber.Ctx, query *validation.SubscriptionQuery) ([]model.UserSubscriptionResponse, int64, error)
@@ -354,10 +355,14 @@ func (s *subscriptionService) GetUserActiveSubscription(ctx *fiber.Ctx, userID u
 	var subscription model.UserSubscription
 	err := s.DB.WithContext(ctx.Context()).
 		Preload("Plan").
-		Where("user_subscriptions.user_id = ? AND user_subscriptions.end_date > ? AND user_subscriptions.is_active = ? AND user_subscriptions.payment_status = ?", userID, time.Now(), true, "success").
+		Where("user_subscriptions.user_id = ? AND user_subscriptions.end_date > ? AND user_subscriptions.is_active = ? AND user_subscriptions.payment_status IN (?)", userID, time.Now(), true, []string{"success", "completed"}).
 		First(&subscription).Error
 
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// User has no active subscription - this is normal for new users
+			return nil, nil
+		}
 		return nil, err
 	}
 
@@ -402,6 +407,9 @@ func (s *subscriptionService) toSubscriptionResponse(sub *model.UserSubscription
 func (s *subscriptionService) CheckFeatureAccess(ctx *fiber.Ctx, userID uuid.UUID, feature string) (bool, error) {
 	sub, err := s.GetUserActiveSubscription(ctx, userID)
 	if err != nil {
+		return false, err
+	}
+	if sub == nil {
 		return false, nil
 	}
 	return sub.Plan.Features[feature], nil
@@ -419,6 +427,9 @@ func (s *subscriptionService) GetRemainingScans(ctx *fiber.Ctx, userID uuid.UUID
 	sub, err := s.GetUserActiveSubscription(ctx, userID)
 	if err != nil {
 		return 0, err
+	}
+	if sub == nil {
+		return 0, nil
 	}
 	remaining := sub.Plan.AIscanLimit - sub.AIscansUsed
 	if remaining < 0 {
@@ -797,4 +808,63 @@ func (s *subscriptionService) UpdateSubscriptionPlan(ctx *fiber.Ctx, planID uuid
 	}
 
 	return &plan, nil
+}
+
+func (s *subscriptionService) CreateFreemiumSubscription(ctx *fiber.Ctx, userID uuid.UUID) error {
+	// Check if user already has any active subscription (including freemium)
+	existingSubscription, err := s.GetUserActiveSubscription(ctx, userID)
+	if err == nil && existingSubscription != nil {
+		s.Log.Infof("User %s already has an active subscription, skipping freemium creation", userID.String())
+		return nil
+	}
+
+	// Additional check: Look specifically for any freemium subscriptions (active or expired)
+	var existingFreemiumCount int64
+	err = s.DB.WithContext(ctx.Context()).
+		Model(&model.UserSubscription{}).
+		Joins("JOIN subscription_plans ON user_subscriptions.plan_id = subscription_plans.id").
+		Where("user_subscriptions.user_id = ? AND subscription_plans.name = ?", userID, "Freemium Trial").
+		Count(&existingFreemiumCount).Error
+
+	if err != nil {
+		s.Log.Errorf("Error checking for existing freemium subscriptions: %v", err)
+		return err
+	}
+
+	if existingFreemiumCount > 0 {
+		s.Log.Infof("User %s already has %d freemium subscription(s), skipping creation", userID.String(), existingFreemiumCount)
+		return nil
+	}
+
+	// Find the Freemium Trial plan
+	var freemiumPlan model.SubscriptionPlan
+	if err := s.DB.WithContext(ctx.Context()).First(&freemiumPlan, "name = ? AND is_active = ?", "Freemium Trial", true).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fiber.NewError(fiber.StatusInternalServerError, "Freemium Trial plan not found")
+		}
+		return err
+	}
+
+	// Create the freemium subscription
+	now := time.Now()
+	endDate := now.AddDate(0, 0, 14) // 14 days from now
+
+	freemiumSubscription := &model.UserSubscription{
+		UserID:        userID,
+		PlanID:        freemiumPlan.ID,
+		StartDate:     now,
+		EndDate:       endDate,
+		IsActive:      true,
+		PaymentMethod: "freemium_trial",
+		PaymentStatus: "completed",
+		AIscansUsed:   0,
+	}
+
+	if err := s.DB.WithContext(ctx.Context()).Create(freemiumSubscription).Error; err != nil {
+		s.Log.Errorf("Failed to create freemium subscription for user %s: %v", userID.String(), err)
+		return err
+	}
+
+	s.Log.Infof("Successfully created freemium subscription for user %s, expires at %s", userID.String(), endDate.Format(time.RFC3339))
+	return nil
 }

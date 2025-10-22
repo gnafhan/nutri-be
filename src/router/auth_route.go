@@ -10,7 +10,7 @@ import (
 )
 
 func AuthRoutes(
-	v1 fiber.Router, a service.AuthService, u service.UserService, p service.ProductTokenService,
+	v1 fiber.Router, a service.AuthService, u service.UserService,
 	t service.TokenService, e service.EmailService,
 ) {
 	authController := controller.NewAuthController(a, u, t, e)
@@ -24,7 +24,7 @@ func AuthRoutes(
 	auth.Post("/refresh-tokens", authController.RefreshTokens)
 	auth.Post("/forgot-password", authController.ForgotPassword)
 	auth.Post("/reset-password", authController.ResetPassword)
-	auth.Post("/send-verification-email", m.Auth(u, p), authController.SendVerificationEmail)
+	auth.Post("/send-verification-email", m.AuthWithoutTokenCheck(u), authController.SendVerificationEmail)
 	auth.Post("/verify-email", authController.VerifyEmail)
 	auth.Get("/google", authController.Google)
 }

@@ -1,0 +1,62 @@
+---
+globs: src/validation/*.go,src/response/*.go
+description: Validation and response patterns for API consistency
+---
+
+# Validation & Response Standards
+
+## Request Validation
+- Use structured validation types in [validation/](mdc:src/validation/) package
+- Implement comprehensive validation rules with appropriate error messages
+- Use custom validation functions for business logic validation
+- Validate all input fields including optional fields with proper constraints
+- Use proper validation tags: `required`, `email`, `min`, `max`, `oneof`, etc.
+- Implement custom validation rules like password complexity
+
+## Error Response Format
+- Use consistent error response structure as defined in [response/response.go](mdc:src/response/response.go)
+- Return appropriate HTTP status codes for different error types
+- Provide clear, user-friendly error messages
+- Include validation error details in structured format
+- Use the `ErrorDetails` type for consistent error responses
+- Implement proper error logging without exposing sensitive information
+
+## Success Response Format
+- Use consistent success response structure with `Status`, `Message`, and `Data` fields
+- Use typed response structures like `SuccessWithUser`, `SuccessWithPaginate[T]`
+- Include pagination metadata for list endpoints
+- Use appropriate HTTP status codes (200, 201) for successful operations
+- Provide meaningful success messages
+- Include relevant data in response payload
+
+## Validation Error Handling
+- Use custom error messages from [validation/validation.go](mdc:src/validation/validation.go)
+- Implement field-specific error messages with proper formatting
+- Use the `CustomErrorMessages` function for consistent error formatting
+- Provide clear guidance on how to fix validation errors
+- Use proper error aggregation for multiple validation failures
+- Implement proper error message internationalization support
+
+## Response Consistency
+- Use consistent field naming across all API responses
+- Implement proper JSON serialization with appropriate struct tags
+- Use consistent date/time formatting across responses
+- Implement proper null handling for optional fields
+- Use consistent pagination format for list endpoints
+- Implement proper response compression and optimization
+
+## API Documentation
+- Use comprehensive Swagger annotations for all endpoints
+- Include proper request/response examples in Swagger documentation
+- Document validation rules and constraints
+- Use proper OpenAPI 3.0 specifications
+- Include authentication requirements in documentation
+- Provide clear API usage examples and tutorials
+
+## Data Transformation
+- Use proper DTOs (Data Transfer Objects) for API responses
+- Implement proper data mapping between models and responses
+- Use response models that exclude sensitive fields
+- Implement proper data serialization and deserialization
+- Use consistent data types across API responses
+- Implement proper data validation before response serialization

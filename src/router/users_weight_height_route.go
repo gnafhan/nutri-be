@@ -8,20 +8,20 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func UsersWeightHeightRoutes(v1 fiber.Router, u service.UserService, p service.ProductTokenService, uwhService service.UsersWeightHeightService) {
+func UsersWeightHeightRoutes(v1 fiber.Router, u service.UserService, ss service.SubscriptionService, uwhService service.UsersWeightHeightService) {
 	uwhController := controller.NewUsersWeightHeightController(uwhService)
 
 	uwh := v1.Group("/weight-height")
 
-	uwh.Get("/target/", m.Auth(u, p), uwhController.GetWeightHeightsTarget)
-	uwh.Post("/target/", m.Auth(u, p), uwhController.AddWeightHeightTarget)
-	uwh.Get("/target/:uwhId", m.Auth(u, p), uwhController.GetWeightHeightTargetByID)
-	uwh.Put("/target/:uwhId", m.Auth(u, p), uwhController.UpdateWeightHeightTarget)
-	uwh.Delete("/target/:uwhId", m.Auth(u, p), uwhController.DeleteWeightHeightTarget)
+	uwh.Get("/target/", m.FreemiumOrAccess(u, nil, ss), uwhController.GetWeightHeightsTarget)
+	uwh.Post("/target/", m.FreemiumOrAccess(u, nil, ss), uwhController.AddWeightHeightTarget)
+	uwh.Get("/target/:uwhId", m.FreemiumOrAccess(u, nil, ss), uwhController.GetWeightHeightTargetByID)
+	uwh.Put("/target/:uwhId", m.FreemiumOrAccess(u, nil, ss), uwhController.UpdateWeightHeightTarget)
+	uwh.Delete("/target/:uwhId", m.FreemiumOrAccess(u, nil, ss), uwhController.DeleteWeightHeightTarget)
 
-	uwh.Get("/", m.Auth(u, p), uwhController.GetWeightHeights)
-	uwh.Post("/", m.Auth(u, p), uwhController.AddWeightHeight)
-	uwh.Get("/:uwhId", m.Auth(u, p), uwhController.GetWeightHeightByID)
-	uwh.Put("/:uwhId", m.Auth(u, p), uwhController.UpdateWeightHeight)
-	uwh.Delete("/:uwhId", m.Auth(u, p), uwhController.DeleteWeightHeight)
+	uwh.Get("/", m.FreemiumOrAccess(u, nil, ss), uwhController.GetWeightHeights)
+	uwh.Post("/", m.FreemiumOrAccess(u, nil, ss), uwhController.AddWeightHeight)
+	uwh.Get("/:uwhId", m.FreemiumOrAccess(u, nil, ss), uwhController.GetWeightHeightByID)
+	uwh.Put("/:uwhId", m.FreemiumOrAccess(u, nil, ss), uwhController.UpdateWeightHeight)
+	uwh.Delete("/:uwhId", m.FreemiumOrAccess(u, nil, ss), uwhController.DeleteWeightHeight)
 }

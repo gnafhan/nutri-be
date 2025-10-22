@@ -20,6 +20,21 @@ func SeedSubscriptionPlans(db *gorm.DB) {
 
 	plans := []model.SubscriptionPlan{
 		createPlan(
+			"Freemium Trial",
+			0,
+			10,
+			14,
+			map[string]bool{
+				"scan_ai":         true,
+				"scan_calorie":    true,
+				"chatbot":         true,
+				"bmi_check":       true,
+				"weight_tracking": true,
+				"health_info":     true,
+			},
+			"14-day free trial with full features",
+		),
+		createPlan(
 			"Hemat",
 			15000,
 			10,

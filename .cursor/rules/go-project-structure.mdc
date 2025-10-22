@@ -1,0 +1,59 @@
+---
+alwaysApply: true
+description: NutriBox API project structure and architectural patterns
+---
+
+# NutriBox API Project Structure Guide
+
+## Core Architecture
+The NutriBox API follows a clean layered architecture pattern with clear separation of concerns:
+
+### Entry Point
+- **Main Application**: [src/main.go](mdc:src/main.go) - Application entry point with graceful shutdown
+- **Configuration**: [src/config/](mdc:src/config/) - Environment and application configuration
+- **Router Setup**: [src/router/](mdc:src/router/) - API route definitions and middleware setup
+
+### Layered Architecture
+1. **Controller Layer** (`src/controller/`): HTTP request handling and response formatting
+2. **Service Layer** (`src/service/`): Business logic and orchestration
+3. **Model Layer** (`src/model/`): Data models and database entities
+4. **Database Layer** (`src/database/`): Database connection, migrations, and seeders
+
+### Supporting Components
+- **Middleware** (`src/middleware/`): Authentication, logging, rate limiting, security
+- **Validation** (`src/validation/`): Request validation and custom validation rules
+- **Response** (`src/response/`): Standardized API response structures
+- **Utils** (`src/utils/`): Utility functions, logging, error handling
+- **Documentation** (`src/docs/`): Swagger/OpenAPI documentation
+
+## Key Technologies & Patterns
+- **Framework**: Fiber (Fast HTTP framework for Go)
+- **Database**: PostgreSQL with GORM ORM
+- **Authentication**: JWT with role-based access control
+- **Validation**: Go Playground Validator with custom rules
+- **Logging**: Logrus with structured logging
+- **Configuration**: Viper for environment-based configuration
+- **Testing**: Testify for assertions, integration and unit tests
+- **Documentation**: Swagger for API documentation
+
+## Development Tools
+- **Build**: Makefile with common development tasks
+- **Containerization**: Multi-stage Docker builds for production
+- **Testing**: Comprehensive test suite with fixtures and helpers
+- **Code Quality**: Linting and formatting standards
+
+## File Organization Principles
+- Group related functionality in packages
+- Use clear, descriptive naming conventions
+- Implement proper dependency injection
+- Follow Go package naming conventions
+- Maintain consistent code structure across modules
+
+## Integration Points
+- **External APIs**: LogMeal API for food recognition
+- **Payment**: Midtrans for subscription payments
+- **Email**: SMTP for notifications and verification
+- **OAuth**: Google OAuth2 integration
+- **gRPC**: Communication with external services
+
+This structure ensures maintainability, testability, and scalability while following Go best practices and clean architecture principles.

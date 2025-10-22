@@ -1384,6 +1384,7 @@ const docTemplate = `{
         },
         "/auth/register": {
             "post": {
+                "description": "Register a new user. User will receive verification email to start 2-week free trial after registration.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1407,9 +1408,15 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Registration successful. Check email for verification link to start 2-week free trial.",
                         "schema": {
                             "$ref": "#/definitions/example.RegisterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "409": {
@@ -1500,6 +1507,7 @@ const docTemplate = `{
         },
         "/auth/verify-email": {
             "post": {
+                "description": "Verify user email and automatically create 2-week free trial with full access to all features.",
                 "produces": [
                     "application/json"
                 ],
@@ -1518,13 +1526,13 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Email verified successfully. 2-week free trial activated with full access.",
                         "schema": {
                             "$ref": "#/definitions/example.VerifyEmailResponse"
                         }
                     },
                     "401": {
-                        "description": "Verify email failed",
+                        "description": "Verify email failed - invalid or expired token",
                         "schema": {
                             "$ref": "#/definitions/example.FailedVerifyEmail"
                         }
@@ -6128,7 +6136,7 @@ const docTemplate = `{
                 "token": {
                     "type": "string",
                     "maxLength": 32,
-                    "minLength": 8
+                    "minLength": 5
                 }
             }
         },
@@ -6209,7 +6217,6 @@ const docTemplate = `{
                 "email",
                 "gender",
                 "height",
-                "medical_history",
                 "name",
                 "password",
                 "weight"
@@ -6315,7 +6322,7 @@ const docTemplate = `{
                 "token": {
                     "type": "string",
                     "maxLength": 32,
-                    "minLength": 8
+                    "minLength": 5
                 }
             }
         },

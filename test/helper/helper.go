@@ -165,3 +165,86 @@ func GetUserByID(db *gorm.DB, id string) (*model.User, error) {
 
 	return user, result.Error
 }
+
+func CreateFreemiumSubscription(db *gorm.DB, userID uuid.UUID) error {
+	// Find the Freemium Trial plan
+	var freemiumPlan model.SubscriptionPlan
+	if err := db.First(&freemiumPlan, "name = ? AND is_active = ?", "Freemium Trial", true).Error; err != nil {
+		return err
+	}
+
+	// Create the freemium subscription
+	now := time.Now()
+	endDate := now.AddDate(0, 0, 14) // 14 days from now
+
+	freemiumSubscription := &model.UserSubscription{
+		UserID:        userID,
+		PlanID:        freemiumPlan.ID,
+		StartDate:     now,
+		EndDate:       endDate,
+		IsActive:      true,
+		PaymentMethod: "freemium_trial",
+		PaymentStatus: "completed",
+		AIscansUsed:   0,
+	}
+
+	return db.Create(freemiumSubscription).Error
+}
+
+func CreateExpiredFreemiumSubscription(db *gorm.DB, userID uuid.UUID) error {
+	// Find the Freemium Trial plan
+	var freemiumPlan model.SubscriptionPlan
+	if err := db.First(&freemiumPlan, "name = ? AND is_active = ?", "Freemium Trial", true).Error; err != nil {
+		return err
+	}
+
+	// Create an expired freemium subscription
+	now := time.Now()
+	startDate := now.AddDate(0, 0, -15) // Started 15 days ago
+	endDate := now.AddDate(0, 0, -1)    // Expired 1 day ago
+
+	freemiumSubscription := &model.UserSubscription{
+		UserID:        userID,
+		PlanID:        freemiumPlan.ID,
+		StartDate:     startDate,
+		EndDate:       endDate,
+		IsActive:      false,
+		PaymentMethod: "freemium_trial",
+		PaymentStatus: "completed",
+		AIscansUsed:   10,
+	}
+
+	return db.Create(freemiumSubscription).Error
+}
+
+func GetUserSubscription(db *gorm.DB, userID uuid.UUID) (*model.UserSubscription, error) {
+	var subscription model.UserSubscription
+
+	result := db.Preload("Plan").
+		Where("user_id = ?", userID).
+		First(&subscription)
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, result.Error
+	}
+
+	if result.Error != nil {
+		logrus.Errorf("Failed to get user subscription: %+v", result.Error)
+	}
+
+	return &subscription, result.Error
+}
+
+func ClearSubscriptions(db *gorm.DB) {
+	err := db.Where("id is not null").Delete(&model.UserSubscription{}).Error
+	if err != nil {
+		logrus.Fatalf("Failed to clear subscription data: %+v", err)
+	}
+}
+
+func ClearSubscriptionPlans(db *gorm.DB) {
+	err := db.Where("id is not null").Delete(&model.SubscriptionPlan{}).Error
+	if err != nil {
+		logrus.Fatalf("Failed to clear subscription plan data: %+v", err)
+	}
+}

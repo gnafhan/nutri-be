@@ -47,9 +47,15 @@ func NewTokenService(db *gorm.DB, validate *validator.Validate, userService User
 
 // ✅ Generate JWT dengan `userData`
 func (s *tokenService) GenerateToken(c *fiber.Ctx, user *model.User, isProductTokenVerified bool, expires time.Time, tokenType string) (string, error) {
-	// Get user's subscription features
+	// Get user's subscription features and type
 	var subscriptionFeatures map[string]bool
+	var subscriptionType string
+	var subscriptionStatus string
+	var subscriptionStartDate *time.Time
+	var subscriptionEndDate *time.Time
 	subscriptionFeatures = make(map[string]bool) // Initialize with empty map as default
+	subscriptionType = "none"
+	subscriptionStatus = "inactive"
 
 	// Only try to get subscription if we have a context
 	if c != nil {
@@ -57,6 +63,17 @@ func (s *tokenService) GenerateToken(c *fiber.Ctx, user *model.User, isProductTo
 		if err == nil && subscription != nil {
 			// User has an active subscription
 			subscriptionFeatures = subscription.Plan.Features
+			subscriptionStatus = "active"
+			subscriptionStartDate = &subscription.StartDate
+			subscriptionEndDate = &subscription.EndDate
+
+			// Set subscription type based on plan name
+			if subscription.Plan.Name == "Freemium Trial" {
+				subscriptionType = "freemium"
+			} else {
+				// All other paid plans (Hemat, Early Bird, Sehat, Sultan) are "subscription"
+				subscriptionType = "subscription"
+			}
 		}
 	}
 
@@ -79,7 +96,11 @@ func (s *tokenService) GenerateToken(c *fiber.Ctx, user *model.User, isProductTo
 			"medical_history":        user.MedicalHistory,
 			"profile_picture":        user.ProfilePicture,
 			"isProductTokenVerified": isProductTokenVerified,
+			"subscriptionType":       subscriptionType,
+			"subscriptionStatus":     subscriptionStatus,
 			"subscriptionFeatures":   subscriptionFeatures,
+			"subscriptionStartDate":  subscriptionStartDate,
+			"subscriptionEndDate":    subscriptionEndDate,
 		},
 	}
 

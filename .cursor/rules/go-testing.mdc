@@ -1,0 +1,62 @@
+---
+globs: test/**/*.go
+description: Testing standards and patterns for Go unit and integration tests
+---
+
+# Testing Standards & Patterns
+
+## Test Organization
+- Place unit tests in `test/unit/` directory
+- Place integration tests in `test/integration/` directory
+- Use test fixtures in `test/fixture/` for reusable test data
+- Use helper functions in `test/helper/` for common test operations
+- Follow the naming convention: `*_test.go` for test files
+
+## Test Structure
+- Use table-driven tests for multiple test cases with similar logic
+- Group related tests using `t.Run()` for better organization
+- Use descriptive test names that explain the expected behavior
+- Follow the pattern: `TestFunctionName_Scenario_ExpectedResult`
+- Use proper test setup and teardown with `helper.ClearAll()` for database tests
+
+## Test Data & Fixtures
+- Use fixtures from [test/fixture/](mdc:test/fixture/) for consistent test data
+- Create reusable test data structures for common scenarios
+- Use factory functions for creating test objects
+- Implement proper cleanup between tests to avoid test interference
+- Use realistic test data that represents actual usage patterns
+
+## Assertions & Validation
+- Use `testify/assert` for assertions as shown in existing tests
+- Assert on specific values, not just that no error occurred
+- Test both success and failure scenarios
+- Validate response structure and content
+- Test edge cases and boundary conditions
+
+## Integration Testing
+- Use the test application instance from [test/init.go](mdc:test/init.go)
+- Test complete request/response cycles
+- Test authentication and authorization flows
+- Test database operations end-to-end
+- Use proper HTTP test utilities (`httptest.NewRequest`, etc.)
+
+## Mocking & Dependencies
+- Mock external dependencies when appropriate
+- Use dependency injection to make services testable
+- Test service layer independently of HTTP layer
+- Use interfaces to enable easy mocking
+- Mock external API calls and database operations when needed
+
+## Test Execution
+- Use `make tests` for running all tests as configured in [Makefile](mdc:Makefile)
+- Use `make testsum` for formatted test output with gotestsum
+- Run tests with verbose output for debugging
+- Ensure tests run in parallel when possible
+- Maintain good test coverage for critical business logic
+
+## Performance Testing
+- Test database query performance
+- Test API response times under load
+- Monitor memory usage in tests
+- Test concurrent access patterns
+- Validate that tests complete within reasonable time limits
