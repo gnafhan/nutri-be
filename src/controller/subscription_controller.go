@@ -91,6 +91,10 @@ func (c *SubscriptionController) GetMySubscription(ctx *fiber.Ctx) error {
 	user := ctx.Locals("user").(*model.User)
 	subscription, err := c.Service.GetUserActiveSubscription(ctx, user.ID)
 	if err != nil {
+		return utils.APIError(ctx, fiber.StatusInternalServerError, "subscription_error", "Error retrieving subscription")
+	}
+
+	if subscription == nil {
 		return utils.APIError(ctx, fiber.StatusNotFound, "no_subscription", "No active subscription found")
 	}
 

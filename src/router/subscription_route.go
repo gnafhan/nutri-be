@@ -11,7 +11,6 @@ import (
 func SubscriptionRoutes(
 	v1 fiber.Router,
 	u service.UserService,
-	p service.ProductTokenService,
 	subService service.SubscriptionService,
 ) {
 	subController := controller.NewSubscriptionController(subService)
@@ -26,7 +25,7 @@ func SubscriptionRoutes(
 		subGroup.Post("/notification/", subController.HandlePaymentNotification)
 
 		// Authenticated endpoints
-		authGroup := subGroup.Group("", m.Auth(u, p))
+		authGroup := subGroup.Group("", m.Auth(u, nil))
 		{
 			authGroup.Get("/me", subController.GetMySubscription)
 			authGroup.Get("/check-feature", subController.CheckFeatureAccess)

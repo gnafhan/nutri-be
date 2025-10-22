@@ -2,7 +2,7 @@ package config
 
 import (
 	"log"
-    "strings"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -37,6 +37,9 @@ var (
 	MidtransStatus      string
 	GRPC_HOST           string
 	GRPC_PORT           string
+	SentryDSN           string
+	SentryEnvironment   string
+	SentryDebug         bool
 )
 
 func init() {
@@ -89,14 +92,19 @@ func init() {
 	// gRPC configuration
 	GRPC_HOST = viper.GetString("GRPC_HOST")
 	GRPC_PORT = viper.GetString("GRPC_PORT")
+
+	// Sentry configuration
+	SentryDSN = viper.GetString("SENTRY_DSN")
+	SentryEnvironment = viper.GetString("SENTRY_ENVIRONMENT")
+	SentryDebug = viper.GetBool("SENTRY_DEBUG")
 }
 
 func loadConfig() {
-    // Always allow environment variables to override config values
-    // Example: export DB_HOST=localhost will set viper key "DB_HOST"
-    viper.AutomaticEnv()
-    // Normalize env keys if needed (no dots used here, but keeps future-proof)
-    viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	// Always allow environment variables to override config values
+	// Example: export DB_HOST=localhost will set viper key "DB_HOST"
+	viper.AutomaticEnv()
+	// Normalize env keys if needed (no dots used here, but keeps future-proof)
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	configPaths := []string{
 		"./",     // For app

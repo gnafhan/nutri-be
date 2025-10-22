@@ -31,16 +31,28 @@ type UserService interface {
 }
 
 type userService struct {
-	Log      *logrus.Logger
-	DB       *gorm.DB
-	Validate *validator.Validate
+	Log                 *logrus.Logger
+	DB                  *gorm.DB
+	Validate            *validator.Validate
+	SubscriptionService SubscriptionService
 }
 
-func NewUserService(db *gorm.DB, validate *validator.Validate) UserService {
+func NewUserService(db *gorm.DB, validate *validator.Validate, subscriptionService SubscriptionService) UserService {
 	return &userService{
-		Log:      utils.Log,
-		DB:       db,
-		Validate: validate,
+		Log:                 utils.Log,
+		DB:                  db,
+		Validate:            validate,
+		SubscriptionService: subscriptionService,
+	}
+}
+
+// NewUserServiceWithoutSubscription creates a user service without subscription service for internal use
+func NewUserServiceWithoutSubscription(db *gorm.DB, validate *validator.Validate) UserService {
+	return &userService{
+		Log:                 utils.Log,
+		DB:                  db,
+		Validate:            validate,
+		SubscriptionService: nil,
 	}
 }
 
@@ -324,6 +336,14 @@ func (s *userService) CreateGoogleUser(c *fiber.Ctx, req *validation.GoogleLogin
 			if createErr := s.DB.WithContext(c.Context()).Create(user).Error; createErr != nil {
 				s.Log.Errorf("Failed to create user: %+v", createErr)
 				return nil, createErr
+			}
+
+			// Create freemium subscription for new Google users
+			if s.SubscriptionService != nil {
+				if errFreemium := s.SubscriptionService.CreateFreemiumSubscription(c, user.ID); errFreemium != nil {
+					// Log the error but don't fail the user creation
+					s.Log.Errorf("Failed to create freemium subscription for Google user %s: %v", user.ID.String(), errFreemium)
+				}
 			}
 
 			return user, nil

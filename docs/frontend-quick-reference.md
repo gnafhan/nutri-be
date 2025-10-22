@@ -16,8 +16,18 @@ const response = await api.post('/v1/auth/register', userData);
 
 ### Access Control Check
 ```javascript
-const hasAccess = user.subscriptionFeatures?.scan_ai === true;
+// Check subscription type
+const isFreemium = user.subscriptionType === 'freemium';
+const isActive = user.subscriptionStatus === 'active';
+
+// Check specific features
+const hasScanAccess = user.subscriptionFeatures?.scan_ai === true;
+const hasCalorieAccess = user.subscriptionFeatures?.scan_calorie === true;
+
 // Freemium users have full features for 14 days
+if (isFreemium && isActive) {
+  // User has full access to all features
+}
 ```
 
 ### Error Handling
@@ -39,6 +49,7 @@ if (error.response?.data?.message === 'freemium_expired') {
 | `/v1/auth/verify-product-token` | POST | Activate product token | JWT |
 | `/v1/meals` | GET | Get user meals | JWT + Access |
 | `/v1/meals/scan` | POST | AI meal scanning | JWT + Access |
+| `/v1/product-token/verify` | POST | Verify product token (coupon) | JWT |
 
 ## 🔐 Access Levels
 
@@ -54,16 +65,133 @@ if (error.response?.data?.message === 'freemium_expired') {
 - ⏰ **Until expiry** date
 - 💳 **Paid** subscription
 
-### Product Token
+### Product Token (Coupon)
 - ✅ **Full access** to all features
 - ✅ **All API endpoints** available
 - ⏰ **Until expiry** date
 - 🎫 **Token-based** access
+- 🔄 **Upgrades freemium** to paid subscription
 
 ### No Access
 - ❌ **403 Forbidden** responses
 - 📝 **Upgrade prompts** required
 - 💳 **Must subscribe** or activate token
+
+## 🔑 JWT Payload Structure
+
+The JWT token now includes subscription information directly in the payload:
+
+```javascript
+{
+  "sub": "user-uuid",
+  "iat": 1234567890,
+  "exp": 1234567890,
+  "type": "access",
+  "userData": {
+    "id": "user-uuid",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "user",
+    "verified_email": true,
+    "subscriptionType": "freemium",        // "freemium", "subscription", or "none"
+    "subscriptionStatus": "active",        // "active" or "inactive"
+    "subscriptionFeatures": {
+      "scan_ai": true,
+      "scan_calorie": true,
+      "chatbot": true,
+      "bmi_check": true,
+      "weight_tracking": true,
+      "health_info": true
+    },
+    "subscriptionStartDate": "2025-10-20T22:12:40+07:00",  // ISO 8601 format or null
+    "subscriptionEndDate": "2025-11-03T22:12:40+07:00",    // ISO 8601 format or null
+    "isProductTokenVerified": false
+  }
+}
+```
+
+### Subscription Types
+- `"freemium"` - 14-day free trial with full features
+- `"subscription"` - Any paid plan (Hemat, Early Bird, Sehat, Sultan)
+- `"none"` - No active subscription
+
+### Subscription Date Fields
+- `subscriptionStartDate` - When the subscription started (ISO 8601 format or null)
+- `subscriptionEndDate` - When the subscription expires (ISO 8601 format or null)
+
+## 🎫 Product Token (Coupon) System
+
+Product tokens allow users to claim subscription plans using coupon codes. This is useful for:
+- **Promotional campaigns**
+- **Gift subscriptions**
+- **Special offers**
+- **Upgrading freemium users**
+
+### How Product Tokens Work
+
+1. **Admin creates product tokens** with associated subscription plans
+2. **Users verify tokens** via `POST /v1/product-token/verify?token=COUPON_CODE`
+3. **System automatically**:
+   - Deactivates any active freemium subscription
+   - Creates new subscription based on token's plan
+   - Sets payment status to "success"
+   - Links subscription to the product token
+
+### Frontend Implementation
+
+```javascript
+// Verify product token
+const verifyProductToken = async (token) => {
+  try {
+    const response = await fetch('/v1/product-token/verify?token=' + token, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      // Token verified successfully
+      // User's subscription will be updated
+      // Refresh user data to get new subscription info
+      await refreshUserData();
+      showSuccessMessage('Coupon applied successfully!');
+    } else {
+      const error = await response.json();
+      showErrorMessage(error.message);
+    }
+  } catch (error) {
+    showErrorMessage('Failed to verify coupon');
+  }
+};
+
+// Usage example
+const handleCouponSubmit = (couponCode) => {
+  verifyProductToken(couponCode);
+};
+```
+
+### Product Token Response
+
+```javascript
+// Success Response
+{
+  "status": "success",
+  "message": "Verify product token successfully"
+}
+
+// Error Responses
+{
+  "status": "error",
+  "message": "Invalid or already used product token"  // 404
+}
+
+{
+  "status": "error", 
+  "message": "Can only be connected with 1 product token."  // 403
+}
+```
 
 ## 🚨 Error Codes
 
@@ -74,6 +202,73 @@ if (error.response?.data?.message === 'freemium_expired') {
 | `403` | `access_required` | No subscription/token | Show upgrade modal |
 
 ## 💡 Frontend Implementation Examples
+
+### React/JavaScript Example
+```javascript
+// Decode JWT token (you'll need a JWT library like jwt-decode)
+import jwtDecode from 'jwt-decode';
+
+const token = localStorage.getItem('access_token');
+const decoded = jwtDecode(token);
+const user = decoded.userData;
+
+// Check subscription status
+const isFreemium = user.subscriptionType === 'freemium';
+const isPaidSubscription = user.subscriptionType === 'subscription';
+const isActive = user.subscriptionStatus === 'active';
+const hasFullAccess = (isFreemium || isPaidSubscription) && isActive;
+
+// Check specific features
+const canScanAI = user.subscriptionFeatures?.scan_ai === true;
+const canUseChatbot = user.subscriptionFeatures?.chatbot === true;
+
+// Check subscription dates
+const startDate = user.subscriptionStartDate ? new Date(user.subscriptionStartDate) : null;
+const endDate = user.subscriptionEndDate ? new Date(user.subscriptionEndDate) : null;
+const daysRemaining = endDate ? Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24)) : 0;
+
+// Show/hide features based on subscription
+if (canScanAI) {
+  // Show AI scanning feature
+  showAIScanButton();
+} else {
+  // Show upgrade prompt
+  showUpgradeModal();
+}
+
+// Display subscription info
+if (isFreemium) {
+  showTrialBanner(`You're on a 14-day free trial (${daysRemaining} days remaining)`);
+} else if (isPaidSubscription) {
+  showSubscriptionInfo(`Active subscription (${daysRemaining} days remaining)`);
+} else {
+  showUpgradePrompt();
+}
+```
+
+### Vue.js Example
+```javascript
+// In your Vue component
+computed: {
+  userSubscription() {
+    const token = this.$store.getters['auth/accessToken'];
+    if (!token) return null;
+    
+    const decoded = jwtDecode(token);
+    return decoded.userData;
+  },
+  
+  isFreemium() {
+    return this.userSubscription?.subscriptionType === 'freemium';
+  },
+  
+  hasFeatureAccess() {
+    return (feature) => {
+      return this.userSubscription?.subscriptionFeatures?.[feature] === true;
+    };
+  }
+}
+```
 
 ### User Status Component
 ```javascript

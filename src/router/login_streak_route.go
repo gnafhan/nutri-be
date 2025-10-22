@@ -11,7 +11,6 @@ import (
 func LoginStreakRoutes(
 	router fiber.Router,
 	userService service.UserService,
-	productTokenService service.ProductTokenService,
 	subscriptionService service.SubscriptionService,
 	loginStreakService service.LoginStreakService,
 ) {
@@ -20,7 +19,7 @@ func LoginStreakRoutes(
 	loginStreakRouter := router.Group("/login-streak")
 
 	// Middleware to verify user token
-	loginStreakRouter.Use(m.FreemiumOrAccess(userService, productTokenService, subscriptionService))
+	loginStreakRouter.Use(m.FreemiumOrAccess(userService, nil, subscriptionService))
 
 	// Record login streak (increments streak when user opens app)
 	loginStreakRouter.Post("/record", loginStreakController.RecordLoginStreak)

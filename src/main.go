@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -35,6 +36,10 @@ import (
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	// Initialize Sentry first
+	initSentry()
+	defer sentry.Flush(2 * time.Second)
 
 	// Log environment variables for debugging
 	fmt.Printf("Environment variables:\n")
@@ -92,6 +97,8 @@ func setupFiberApp() *fiber.App {
 	app := fiber.New(config.FiberConfig())
 
 	// Middleware setup
+	app.Use(middleware.SentryConfig())      // Sentry error monitoring
+	app.Use(middleware.SentryEnhancement()) // Sentry context enhancement
 	app.Use("/v1/auth", middleware.LimiterConfig())
 	app.Use(middleware.LoggerConfig())
 	app.Use(middleware.APILoggerConfig())
@@ -165,4 +172,57 @@ func handleGracefulShutdown(ctx context.Context, app *fiber.App, serverErrors <-
 	}
 
 	utils.Log.Info("Server exited")
+}
+
+// initSentry initializes Sentry with configuration
+func initSentry() {
+	// Use DSN from configuration
+	dsn := config.SentryDSN
+	if dsn == "" {
+		utils.Log.Warn("SENTRY_DSN not configured, Sentry will not capture errors")
+		return
+	}
+
+	// Set default environment if not provided
+	environment := config.SentryEnvironment
+	if environment == "" {
+		if config.IsProd {
+			environment = "production"
+		} else {
+			environment = "development"
+		}
+	}
+
+	// Initialize Sentry
+	err := sentry.Init(sentry.ClientOptions{
+		Dsn:         dsn,
+		Environment: environment,
+		Debug:       config.SentryDebug,
+		// Set sample rate for performance monitoring
+		TracesSampleRate: 0.1,
+		// Set sample rate for profiling (removed as it's not available in this version)
+		// Set release version
+		Release: "nutribox-api@1.0.0",
+		// Set server name
+		ServerName: "nutribox-api",
+		// Set before send hook to filter sensitive data
+		BeforeSend: func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
+			// Filter out sensitive data
+			if event.Request != nil {
+				// Remove sensitive headers
+				if event.Request.Headers != nil {
+					delete(event.Request.Headers, "Authorization")
+					delete(event.Request.Headers, "Cookie")
+					delete(event.Request.Headers, "X-API-Key")
+				}
+			}
+			return event
+		},
+	})
+
+	if err != nil {
+		utils.Log.Errorf("Sentry initialization failed: %v", err)
+	} else {
+		utils.Log.Info("Sentry initialized successfully")
+	}
 }

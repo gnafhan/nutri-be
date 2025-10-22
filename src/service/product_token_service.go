@@ -115,7 +115,24 @@ func (s *productTokenService) VerifyProductToken(c *fiber.Ctx, query *validation
 		if err == nil {
 			s.Log.Infof("User %s already has an active subscription to plan %s. Skipping creation.", user.ID, *productToken.SubscriptionPlanID)
 		} else if errors.Is(err, gorm.ErrRecordNotFound) {
-			// User does not have this specific active subscription, proceed to create
+			// Check if user has a freemium subscription that needs to be upgraded
+			var freemiumSubscription model.UserSubscription
+			freemiumErr := s.DB.WithContext(c.Context()).
+				Joins("JOIN subscription_plans ON user_subscriptions.plan_id = subscription_plans.id").
+				Where("user_subscriptions.user_id = ? AND subscription_plans.name = ? AND user_subscriptions.is_active = ?", user.ID, "Freemium Trial", true).
+				First(&freemiumSubscription).Error
+
+			if freemiumErr == nil {
+				// User has an active freemium subscription, deactivate it
+				s.Log.Infof("Deactivating freemium subscription for user %s to upgrade to product token plan", user.ID)
+				if err := s.DB.WithContext(c.Context()).
+					Model(&freemiumSubscription).
+					Update("is_active", false).Error; err != nil {
+					s.Log.Errorf("Failed to deactivate freemium subscription for user %s: %v", user.ID, err)
+				}
+			}
+
+			// Create the new subscription from product token
 			userSubscription := model.UserSubscription{
 				UserID:        user.ID,
 				PlanID:        *productToken.SubscriptionPlanID,
@@ -129,6 +146,8 @@ func (s *productTokenService) VerifyProductToken(c *fiber.Ctx, query *validation
 			if err := s.DB.WithContext(c.Context()).Create(&userSubscription).Error; err != nil {
 				s.Log.Errorf("Failed to create subscription for user %s with plan %s: %v", user.ID, *productToken.SubscriptionPlanID, err)
 				// Decide if this should be a hard error or just a warning. For now, log and continue.
+			} else {
+				s.Log.Infof("Successfully created product token subscription for user %s with plan %s", user.ID, *productToken.SubscriptionPlanID)
 			}
 		} else {
 			// Some other DB error occurred when checking for existing subscription
